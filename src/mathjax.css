@@ -1,11 +1,12 @@
 @import "katex/dist/katex.min.css";
 
 .prose .katex-display {
-.prose .katex-display {
+  display: block;
   text-align: center !important;
+  overflow-x: auto;   /* enable horizontal scroll */
+  overflow-y: hidden;
+  white-space: nowrap; /* prevent line breaks */
+  -webkit-overflow-scrolling: touch; /* smooth scroll on mobile */
+  padding: 0.5rem 0;  /* optional spacing */
 }
-  text-align: center !important;
-}
-
-
 
