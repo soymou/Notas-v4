@@ -1,0 +1,100 @@
+---
+title: Funciones dependientes
+sidebar: 
+  order: 3
+---
+
+Consideremos una sección $b$ sobre $A$ en un contexto $\Gamma$,es decir, consideremos
+$$
+  \Gamma, x: A \vdash b(x): B(x).
+$$
+Vemos que $b$ es una elección de un elemento de cada $B(x)$, el tipo de la salida 
+depende de $x: A$. La asignación $x \mapsto b(x)$ es, en este sentido, una 
+*función dependiente*. El tipo de todas estas funciones es llamado
+**tipo función dependiente**, y lo escribimos como 
+$$
+  \Pi_{(x: A)} B(x).
+$$
+Hay cuatro reglas principales para los $\Pi$-tipos:
+
+1. La *regla de formación*, que nos dice como formar tipos función dependiente.
+2. La *regla de introducción*, que nos dice como introducir términos del tipo función 
+  dependiente.
+3. La *regla de eliminación*, que nos dice como usar términos arbitrarios del tipo función
+  dependiente.
+4. Las *reglas de computación*, que nos dicen como interactúan las reglas de introducción 
+  y de eliminación. 
+
+En los casos de las reglas de formación, introducción y eliminación, también necesitamos 
+reglas que afirmen que estas construcciones preservar la igualdad juiciosa. Estas reglas
+son llamadas **reglas de congruencia**.
+
+## La regla de $\Pi$-formación
+La regla de $\Pi$-formación nos dice cómos e construyen los $\Pi$-tipos. La idea es que
+$\Pi_{(x: A)} B(x)$ es un tipo **función dependiente**, para cada familia de tipos $B$
+sobre $A$, de modo que la regla de $Pi$-formación dice:
+$$
+  \frac{\Gamma, x: A \vdash B(x) ~~~ \text{type}}{\Gamma \vdash \Pi_{(x: A)} B(x) ~~~ \text{type}} \Pi.
+$$
+Esta regla simplemente dice que para formar el tipo $\Pi_{(x: A)} B(x)$ en el contexto 
+$\Gamma$, debemos tener una familia de tipos $B$ sobre $A$ en el contexto $\Gamma$.
+
+También requerimos que la regla de formación de tipos función dependiente preserva la 
+igualdad juiciosa. Es decir, tenemos la **regla de congruencia** para $\Pi$-tipos:
+$$
+  \frac
+  {\Gamma \vdash A \stackrel{\cdot}{=} A' ~~~ \text{type} ~~~ ~~~ \Gamma,x: A \vdash B(x) \stackrel{\cdot}{=} B'(x) ~~~ \text{type}}
+  {\Gamma \vdash \Pi_{(x: A)} B(x) B(x) \stackrel{\cdot}{=} \Pi_{(x: A')} B'(x) ~~~ \text{type}} \Pi-eq
+$$
+
+## La regla de $\Pi$-introducción
+La regla de introducción para funciones dependientes nos dice cómo podemos construir
+funciones dependientes del tipo $\Pi_{(x: A)} B(x)$. La idea es que una función 
+dependiente $f: \Pi_{(x: A)} B(x)$ es una operación que lleva a  $x: A$ en 
+$f(x): B(x)$. Así, la regla de introducción de tipos dependientes postula que para 
+construir una función dependiente debemos construir un término $b(x): B(x)$ indizado 
+por $x: A$ en un contexto $\Gamma$: 
+
+$$
+  \dfrac{\Gamma, x: A \vdash b(x): B(x)}{\Gamma \vdash \lambda x. b(x) : \Pi_{(x: A)} B(x)}\lambda.
+$$
+
+Esta regla de introducción para funciones dependientes también es llamada la 
+**regla de $\lambda$-abstracción** y decimos que la $\lambda$-abstracción 
+$\lambda x. b(x)$ **liga** la variable $x$ en $b$. 
+También requerimos que la $\lambda$-abstracción preserve la igualdad juiciosa. Así que 
+postulamos la **regla de congruencia** para la $\lambda$-abstracción, que dice
+
+$$
+  \dfrac{\Gamma, x: A  \vdash b(x) \stackrel{\cdot}{=} b'(x): B(x)}{\Gamma \vdash \lambda x. b(x) \stackrel{\cdot}{=} \lambda x. b'(x): \Pi_{(x: A)} B(x)}\lambda-eq.
+$$
+
+
+### La regla de $\Pi$-eliminación
+
+La regla de eliminación para tipos función dependiente nos da una manera de *usar* 
+funciones dependientes. La forma de usar funciones dependientes es evaluarlas en un 
+argumento del tipo del dominio. La regla de $\Pi$-eliminación es también llamada la 
+**regla de evaluación**:
+
+$$
+  \dfrac{\Gamma \vdash f: \Pi_{(x: A)} B(x)}{\Gamma, x: A \vdash f(x): B(x)}ev.  
+$$
+
+Esta regla afirma que, dada una función dependiente $f: \Pi_{(x: A)} B(x)$ en un contexto
+$\Gamma$ obtenemos un término $f(x)$ de tipo $B(x)$ indizado por $x: A$ en un 
+contexto $\Gamma$. De nuevo, pedimos que la evaluación preserve la igualdad juiciosa:
+
+$$
+  \dfrac{\Gamma \vdash f \stackrel{\cdot}{=} f': \Pi_{(x: A)} B(x)}{\Gamma, x: A \vdash f(x) \stackrel{\cdot}{=} f'(x): B(x)}ev-eq.
+$$
+
+### Las reglas de $\Pi$-computación
+
+Ahora postulamos las reglas que especifican el comportamiento de las funciones. Primero,
+tenemos una regla que afirma que una función de la forma $\lambda x. b(x)$ se comporta
+como esperamos: cuando la evaluamos en $x: A$, obtenemos un valor $b(x): B(x)$. Esta
+regla es llamada la *regla-$\beta$*.
+
+
+
