@@ -17,7 +17,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			plugins: [starlightSiteGraph(), starlightThemeGalaxy()],
-			customCss: ['./src/mathjax.css'],
+			customCss: ['./src/style.css'],
 			title: 'Junoy',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/soymou' }],
 			sidebar: [

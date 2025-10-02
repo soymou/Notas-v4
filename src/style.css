@@ -1,0 +1,27 @@
+
+@import "katex/dist/katex.min.css";
+
+/* Deja KaTeX tal cual (centrado) */
+.prose .katex-display {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+}
+
+.katex-display > .katex {
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: inline-block;
+  text-align: left;
+  max-width: 100%;
+}
+
+/* Alternative approach - wrapper for display math */
+.katex-display {
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  max-width: 100% !important;
+}
