@@ -12,6 +12,9 @@ interface Props {
 
 const { language, code, output: manualOutput, showOutput = true, id, session } = Astro.props;
 
+// Strip leading and trailing newlines from code
+const cleanCode = code.replace(/^\n+|\n+$/g, '').trim();
+
 // Load outputs from JSON if id is provided
 let autoOutput = null;
 if (id && !manualOutput) {
@@ -24,13 +27,14 @@ if (id && !manualOutput) {
 }
 
 const finalOutput = manualOutput || autoOutput;
+const cleanOutput = finalOutput ? finalOutput.replace(/^\n+|\n+$/g, '').trim() : null;
 
-const highlightedCode = await codeToHtml(code, {
+const highlightedCode = await codeToHtml(cleanCode, {
   lang: language,
   theme: 'github-dark'
 });
 
-const highlightedOutput = finalOutput ? await codeToHtml(finalOutput, {
+const highlightedOutput = cleanOutput ? await codeToHtml(cleanOutput, {
   lang: 'text',
   theme: 'github-dark'
 }) : null;
@@ -69,7 +73,7 @@ const highlightedOutput = finalOutput ? await codeToHtml(finalOutput, {
   }
 
   .output-section {
-    margin-top: 1.5rem;
+    margin-top: 1.5rem !important;
   }
 
   .code-header,
@@ -104,6 +108,11 @@ const highlightedOutput = finalOutput ? await codeToHtml(finalOutput, {
     font-size: 0.8125rem;
   }
 
+  .code-section :global(div),
+  .output-section :global(div) {
+    margin: 0 !important;
+  }
+
   .executable-code-block :global(pre) {
     margin: 0 !important;
     padding: var(--ec-codePadBlk) var(--ec-codePadInl) !important;
@@ -112,6 +121,14 @@ const highlightedOutput = finalOutput ? await codeToHtml(finalOutput, {
     tab-size: 2;
     border: none !important;
     border-radius: 0 !important;
+  }
+
+  .executable-code-block :global(pre code) {
+    display: block;
+  }
+
+  .executable-code-block :global(pre code > span:first-child:empty) {
+    display: none;
   }
 
   .executable-code-block :global(code) {
