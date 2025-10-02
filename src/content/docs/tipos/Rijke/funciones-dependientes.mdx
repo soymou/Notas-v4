@@ -2,7 +2,8 @@
 title: Funciones dependientes
 sidebar: 
   order: 4
----
+--
+import { Aside } from '@astrojs/starlight/components';
 
 Consideremos una sección $b$ sobre $A$ en un contexto $\Gamma$,es decir, consideremos
 $$
@@ -113,5 +114,121 @@ mutuamente inversas.
 
 ## Tipos función ordinarios
 
+Un caso especial de los $\Pi$-tipos es cuando $A$ y $B$ son tipos en un contexto $\Gamma$.
+En este caso podemos primero debilitar a $B$ por $A$ y luego aplicar la $\Pi$-regla de
+formación para obtener el tipo $A \to B$ de funciones *ordinarias* de $A$ a $B$, como lo 
+muestra la siguiente derivación:
+$$
+  \dfrac{
+    \dfrac{
+      \Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}
+    }
+    {
+      \Gamma, x: A \vdash B ~~~ \text{type} 
+    }W
+  }
+  {
+    \Gamma \vdash \Pi_{(x: A)} B ~~~ \text{type}
+  }\Pi
+$$
 
+Un término $f: \Pi_{(x: A)} B$ es una función que toma un argumento $x: A$ y regresa 
+$f(x): B$. Así, definimos el tipo $A \to B$ de **funciones (ordinarias)** de $A$ a $B$ por
+$$
+  A \to B := \Pi_{(x: A)} B.
+$$
+Si $f: A \to B$ es una función, entonces el tipo $A$ es llamado el **dominio** de $f$ y 
+el tipo $B$ es llamado el **co-dominio** de $f$.
 
+A veces también escribiremos $B^A$ para el tipo $A \to B$ (haciendo alusión a las 
+categorías). Formalmente, hacemos estas definiciones añadiendo una línea extra a la 
+derivación de antes:
+
+$$
+  \dfrac{
+    \dfrac{
+      \dfrac{
+        \Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}
+      }{
+        \Gamma, x: A \vdash B ~~~ \text{type}
+      }W
+    }{
+     \Gamma \vdash \Pi_{(x: A)} B ~~~ \text{type} 
+    }\Pi
+  }{
+    \Gamma \vdash A \to B := \Pi_{(x: A)} B ~~~ \text{type}
+  }.
+$$
+
+<div id="observacion-2-2-1">
+<Aside type="tip" title="Observación 2.2.1">
+Podemos hacer definiciones al final de una derivación si la conclusión es un cierto tipo 
+en un contexto o si la conclusión es un cierto término de un tipo en un contexto. 
+Supongamos, por ejemplo, que tenemos la derivación 
+$$
+  \dfrac{
+    \mathcal{D}
+  }{
+    \Gamma \vdash a: A
+  }.
+$$
+en la que la derivación $\mathcal{D}$ hace uso de las premisas $\mathcal{H_1}, \ldots, 
+\mathcal{H}_n$. Si queremos hacer una definición $c := a$, entonces podemos extender el 
+árbol de derivación con:
+$$
+  \dfrac{
+    \dfrac{
+      \mathcal{D} 
+    }{
+      \Gamma \vdash a: A
+    }  
+  }{
+    \Gamma \vdash c := a: A
+  }.
+$$
+
+El efecto de una definición de este tipo es que hemos extendido la teoría de tipos con
+una nueva constante $c$, para la cual las siguientes reglas de inferencia son válidas 
+$$
+  \begin{array}{cc}
+    \dfrac{\mathcal{H}_1 ~~~ \mathcal{H}_2 \ldots \mathcal{H}_n}{\Gamma \vdash c: A} &
+    \dfrac{\mathcal{H}_1 ~~~ \mathcal{H}_2 \ldots \mathcal{H}_n}{\Gamma \vdash c \stackrel{\cdot}{=} a: A}
+  \end{array}.
+$$
+
+En nuestro ejemplo de la definición del tipo función ordinario $A \to B$, tenemos, por 
+definición, las siguientes reglas de inferencia válidas
+$$
+  \begin{array}{cc}
+    \dfrac{\Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}}{\Gamma \vdash A \to B ~~~ \text{type}} &
+    \dfrac{\Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}}{\Gamma \vdash A \to B \stackrel{\cdot}{=} \Pi_{(x: A)}B ~~~ \text{type}}
+  \end{array}.
+$$
+</Aside>
+</div>
+
+<div id="observacion-2-2-2">
+<Aside type="tip" title="Observación 2.2.2">
+Ahora podemos dar reglas para el tipo $A \to B$:
+$$
+  \begin{array}{cc}
+  \dfrac{\Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}}{\Gamma \vdash A \to B ~~~ \text{type}}\rightarrow & \dfrac{\Gamma \vdash B ~~~ \text{type} ~~~ ~~~ \Gamma, x: A \vdash b(x): B}{\Gamma \vdash \lambda x. b(x): A \to B}\lambda \\ \\ \dfrac{\Gamma \vdash f: A \to B}{\Gamma, x: A \vdash f(x): B}ev & \dfrac{\Gamma \vdash B ~~~ \text{type} ~~~ ~~~ \Gamma, x: A \vdash b(x): B}{\Gamma, x: A \vdash (\lambda y. b(y))(x) \stackrel{\cdot}{=} b(x)}\beta \\ \\
+  \dfrac{\Gamma \vdash f: A \to B}{\Gamma \vdash \lambda x. f(x) \stackrel{\cdot}{=} f: A \to B}\eta &
+  \end{array}.
+$$
+</Aside>
+</div>
+
+Ahora podemos usar estas reglas para construir algunas funciones que nos son familiares
+como la función identidad $id: A \to A$ sobre un tipo arbitrario $A$ y la composición 
+$g \circ f: A \to C$ para cualesquiera dos funciones $f$ y $g$ con dominios y co-dominios
+adecuados.
+
+<div id="definicion-2-2-3">
+<Aside type="tip" tilte="Definición 2.2.3">
+Para cualquier tipo $A$ en un contexto $\Gamma$, definimos la **función identidad** 
+$id_A: A \to A$ usando el término genérico:
+$$
+$$
+</Aside>
+</div>
