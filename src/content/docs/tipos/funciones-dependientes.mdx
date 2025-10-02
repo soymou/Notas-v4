@@ -96,5 +96,22 @@ tenemos una regla que afirma que una función de la forma $\lambda x. b(x)$ se c
 como esperamos: cuando la evaluamos en $x: A$, obtenemos un valor $b(x): B(x)$. Esta
 regla es llamada la *regla-$\beta$*.
 
+$$
+\dfrac{\Gamma, x: A \vdash b(x): B(x)}{\Gamma, x: A \vdash (\lambda y.b(y))(x) \stackrel{\cdot}{=} b(x): B(x)} \beta.
+$$
+
+También postulamos una regla que afirma que todos los elementos de un $\Pi$-tipo son 
+funciones dependientes. Esta es llamada la **$\eta$-regla**
+
+$$
+\dfrac{\Gamma \vdash f: \Pi_{(x: A)} B(x)}{\Gamma \vdash \lambda x.f(x) \stackrel{\cdot}{=} f: \Pi_{(x: A)} B(x)} \eta.
+$$
+
+En otras palabras, las reglas de computación ($\beta$ y $\eta$) para tipos función 
+dependiente postulan que la regla de $\lambda$-abstracción y la regla de evaluación son 
+mutuamente inversas.
+
+## Tipos función ordinarios
+
 
 

@@ -44,11 +44,11 @@ Hay cuatro tipos de **juicios** en la teoría de tipos de Marrtin-Löf:
 
 1. $A$ es un **tipo** (bien formado) en un contexto $\Gamma$. Expresamos este juicio 
   como $$ \Gamma \vdash A ~~~ \text{type}. $$
-2. $A$ y $B$ son **tipos juiciosamente iguales** en un contexto $1\Gamma$. Expresamos 
+2. $A$ y $B$ son **tipos juiciosamente iguales** en un contexto $\Gamma$. Expresamos 
   este juicio como $$\Gamma \vdash A \stackrel{\cdot}{=} B ~~~ \text{type}$$
-3. $a$ es un **elemento** de tipo $A$ en un contexto $1\Gamma$. Expresamos este juicio
+3. $a$ es un **elemento** de tipo $A$ en un contexto $\Gamma$. Expresamos este juicio
   como $$ \Gamma \vdash a: A. $$
-4. $a$ y $b$ son **elementos juiciosamente iguales** de tipo $1A$ en un contexto 
+4. $a$ y $b$ son **elementos juiciosamente iguales** de tipo $A$ en un contexto 
   $\Gamma$. Expresamos este juicio como $$ \Gamma \vdash a \stackrel{\cdot}{=} b: A. $$
 </Aside>
 </div>
@@ -80,10 +80,10 @@ tipo asignado, se verifica recursivamente.
 <div id="def-1-2-1">
 <Aside type="tip" title="Definición 1.2.1">
 Consideremos un tipo $A$ en un contexto $\Gamma$. Una **famlia**
-de tipos sobre $A$ en el contexto $\Gamma$ es un tipo $1B(x)$ en el contexto 
+de tipos sobre $A$ en el contexto $\Gamma$ es un tipo $B(x)$ en el contexto 
 $\Gamma, x: A$. En otras palabras, en la situación en la que 
 $\Gamma, x: A \vdash B(x) ~~~ \text{type}$, decimos que $B$ es una familia de tipos 
-sobre $A$ en el contexto $\Gamma$. Alternativamente, decimos que $1B(x)$ es un tipo
+sobre $A$ en el contexto $\Gamma$. Alternativamente, decimos que $B(x)$ es un tipo
 indizado por $x: A$ en el contexto $\Gamma$.
 </Aside>
 </div>
@@ -94,17 +94,17 @@ $$
   \frac{\Gamma \vdash a: A}{\Gamma, x: A \vdash a = x ~~~ \text{type}}.
 $$
 Esta regla asegura que dado un elemento $a: A$ en un contexto $\Gamma$, podemos formar
-el tipo $a = x$ en el contexto $\Gamma, x: A$. El tipo $1a = x$ en el contexto 
+el tipo $a = x$ en el contexto $\Gamma, x: A$. El tipo $a = x$ en el contexto 
 $\Gamma, x: A$ es un ejemplo de una familia de tipos sobre $A$ en el contexto 
 $\Gamma$. 
 
 <div id="def-1-2-2">
 <Aside type="tip" title="Definición 1.2.2">
-Consideremos una familia de tipos $B$ sobre $A$ en un contexto $1\Gamma$. Una **sección** de la familia \(B\) sobre \(A\) en el contexto \(\Gamma\) es un elemento de tipo \(B(x)\) en el contexto \(\Gamma, x: A\), es decir, en el juicio 
+Consideremos una familia de tipos $B$ sobre $A$ en un contexto $\Gamma$. Una **sección** de la familia $B$ sobre $A$ en el contexto $\Gamma$ es un elemento de tipo $B(x)$ en el contexto $\Gamma, x: A$, es decir, en el juicio 
 $$
   \Gamma, x: A \vdash b(x): B(x).
 $$
-Decimos que $b$ es una sección de la familia $B$ sobre $1A$ en el contexto \(\Gamma\).
+Decimos que $b$ es una sección de la familia $B$ sobre $A$ en el contexto $\Gamma$.
 Alternativamente, decimos que $b(x)$ es un elemento de tipo $B(x)$ indizado por 
 $x: A$ en el contexto $\Gamma$.
 </Aside>
@@ -186,7 +186,7 @@ $$
   \Gamma, y_1: B_1[a/x], \ldots, y_n: B_n[a/x] \vdash C[a/x] ~~~ \text{type}. 
 $$
 
-Similarmente, podemos substituir $a$ por $x$ en un elemento $1c: C$ para obtener un 
+Similarmente, podemos substituir $a$ por $x$ en un elemento $c: C$ para obtener un 
 elemento $c[a/x]: C[a/x]$. Así, la **regla de substitución** se enuncia para una 
 tesis de juicio genérica $\mathcal{J}$:
 
@@ -207,10 +207,10 @@ $$
 <div id="def-1-3-1">
 <Aside type="tip" title="Definición 1.3.1">
 Cuando $B$ es una familia de tipos osbre $A$ en un contexto 
-$\Gamma$ y si tenemos $a: A$, entonces también decimos que $1B[a/x]$ es la **fibra**
-de $B$ en $a$ y escribimos $1B(a)$ para referirnos a esta fibra.
-Cuando $b$ es una sección de la familia $B$ sobre $1A$ en el contexto \(\Gamma\), 
-llamamos al elemento $b[a/x]$ el **valor** de $b$ en $1a$ y escribimos \(b(a)\).
+$\Gamma$ y si tenemos $a: A$, entonces también decimos que $B[a/x]$ es la **fibra**
+de $B$ en $a$ y escribimos $B(a)$ para referirnos a esta fibra.
+Cuando $b$ es una sección de la familia $B$ sobre $A$ en el contexto $\Gamma$, 
+llamamos al elemento $b[a/x]$ el **valor** de $b$ en $a$ y escribimos $b(a)$.
 </Aside>
 </div>
 
@@ -228,20 +228,20 @@ $$
 Este proceso de expandir el contexto por una variable de tipo $A$ se llama 
 **debilitamiento** por $A$.
 
-En la situación más simple, tenemos dos tipos $A$ y $B$ en un contexto $1\Gamma$.
+En la situación más simple, tenemos dos tipos $A$ y $B$ en un contexto $\Gamma$.
 Entonces podemos debilitar a $B$ por $A$ como sigue:
 
 $$
   \dfrac{\Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}}{\Gamma, x: A \vdash B ~~~  \text{type}}
 $$
-El tipo $B$ en el contexto $\Gamma, x: A$ es llamado la **familia constante** $1B$ o 
+El tipo $B$ en el contexto $\Gamma, x: A$ es llamado la **familia constante** $B$ o 
 la **familia trivial** $B$.
 
 ### Los elementos genéricos
-Si tenemos un tipo $A$ en un contexto $\Gamma$, podemos debilitar a $1A$ por sí mismo 
+Si tenemos un tipo $A$ en un contexto $\Gamma$, podemos debilitar a $A$ por sí mismo 
 para obtener que $A$ es un tipo en el contexto $\Gamma, x: A$. La regla del 
 **elemento genérico** afirma que cualquier elemento hipotético $x: A$ en el contexto 
-$\Gamma, x: A$ es también un elemento de tipo $A$ en el contexto $1\Gamma, x: A$.
+$\Gamma, x: A$ es también un elemento de tipo $A$ en el contexto $\Gamma, x: A$.
 
 $$
   \dfrac{\Gamma \vdash A ~~~ \text{type}}{\Gamma, x: A \vdash x: A}\delta.
