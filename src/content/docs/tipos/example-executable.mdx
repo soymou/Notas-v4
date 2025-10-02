@@ -1,0 +1,57 @@
+---
+title: Executable Code Example
+description: How to use the ExecutableCode component
+---
+
+import ExecutableCode from '../../../components/ExecutableCode.astro';
+
+# Using Executable Code Blocks
+
+## Python Example
+
+<ExecutableCode
+  language="python"
+  code={`def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+print(factorial(5))`}
+  output="120"
+/>
+
+## Lean4 Example
+
+<ExecutableCode
+  language="lean4"
+  code={`def double (x : Nat) : Nat := x + x
+
+#eval double 21`}
+  output="42"
+/>
+
+## Without Output
+
+You can hide the output section by setting `showOutput={false}`:
+
+<ExecutableCode
+  language="python"
+  code={`x = 10
+y = 20
+print(x + y)`}
+  showOutput={false}
+/>
+
+## Usage
+
+In your `.mdx` files, import and use the component:
+
+```mdx
+import ExecutableCode from '../../../components/ExecutableCode.astro';
+
+<ExecutableCode
+  language="python"
+  code={`print("Hello, World!")`}
+  output="Hello, World!"
+/>
+```

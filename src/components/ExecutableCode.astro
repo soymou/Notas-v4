@@ -1,0 +1,107 @@
+---
+import { codeToHtml } from 'shiki';
+
+interface Props {
+  language: string;
+  code: string;
+  output?: string;
+  showOutput?: boolean;
+}
+
+const { language, code, output, showOutput = true } = Astro.props;
+
+const highlightedCode = await codeToHtml(code, {
+  lang: language,
+  theme: 'github-dark'
+});
+
+const highlightedOutput = output ? await codeToHtml(output, {
+  lang: 'text',
+  theme: 'github-dark'
+}) : null;
+---
+
+<div class="executable-code-block">
+  <div class="code-section">
+    <div class="code-header">
+      <span class="language-label">{language}</span>
+    </div>
+    <div set:html={highlightedCode} />
+  </div>
+
+  {showOutput && output && (
+    <div class="output-section">
+      <div class="output-header">
+        <span class="output-label">Output</span>
+      </div>
+      <div set:html={highlightedOutput} />
+    </div>
+  )}
+</div>
+
+<style>
+  .executable-code-block {
+    margin: 1.5rem 0;
+    background: transparent;
+  }
+
+  .code-section,
+  .output-section {
+    position: relative;
+    border-radius: var(--sl-border-radius);
+    overflow: hidden;
+    background: var(--ec-brdCol);
+  }
+
+  .output-section {
+    margin-top: 1.5rem;
+  }
+
+  .code-header,
+  .output-header {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: var(--sl-font);
+    border-bottom: 2px solid var(--sl-color-gray-5);
+  }
+
+  .code-header {
+    background: var(--ec-frm-editorTabBarBg);
+    color: var(--ec-frm-editorTabBarActiveFg);
+  }
+
+  .output-header {
+    background: var(--ec-frm-editorTabBarBg);
+    color: var(--ec-frm-editorTabBarInactiveFg);
+  }
+
+  .code-section {
+    border: 1px solid var(--sl-color-gray-6);
+  }
+
+  .output-section {
+    border: 1px solid var(--sl-color-gray-6);
+  }
+
+  .language-label,
+  .output-label {
+    font-size: 0.8125rem;
+  }
+
+  .executable-code-block :global(pre) {
+    margin: 0 !important;
+    padding: var(--ec-codePadBlk) var(--ec-codePadInl) !important;
+    overflow-x: auto;
+    background: var(--ec-brdCol) !important;
+    tab-size: 2;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+
+  .executable-code-block :global(code) {
+    font-family: var(--__ec-codeFontFam);
+    font-size: var(--ec-codeFontSize);
+    line-height: var(--ec-lineHgt);
+  }
+</style>

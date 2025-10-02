@@ -5,6 +5,7 @@ import starlightSiteGraph from 'starlight-site-graph'
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import starlightThemeGalaxy from 'starlight-theme-galaxy';
+import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
@@ -27,6 +28,7 @@ export default defineConfig({
 				},
 			],
 		}),
+		mdx(),
 	],
 	vite: {
 		define: {
