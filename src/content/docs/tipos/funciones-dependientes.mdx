@@ -29,7 +29,7 @@ En los casos de las reglas de formación, introducción y eliminación, también
 reglas que afirmen que estas construcciones preservar la igualdad juiciosa. Estas reglas
 son llamadas **reglas de congruencia**.
 
-## La regla de $\Pi$-formación
+## La regla de Π-formación
 La regla de $\Pi$-formación nos dice cómos e construyen los $\Pi$-tipos. La idea es que
 $\Pi_{(x: A)} B(x)$ es un tipo **función dependiente**, para cada familia de tipos $B$
 sobre $A$, de modo que la regla de $Pi$-formación dice:
@@ -47,7 +47,7 @@ $$
   {\Gamma \vdash \Pi_{(x: A)} B(x) B(x) \stackrel{\cdot}{=} \Pi_{(x: A')} B'(x) ~~~ \text{type}} \Pi-eq
 $$
 
-## La regla de $\Pi$-introducción
+## La regla de Π-introducción
 La regla de introducción para funciones dependientes nos dice cómo podemos construir
 funciones dependientes del tipo $\Pi_{(x: A)} B(x)$. La idea es que una función 
 dependiente $f: \Pi_{(x: A)} B(x)$ es una operación que lleva a  $x: A$ en 
@@ -70,7 +70,7 @@ $$
 $$
 
 
-### La regla de $\Pi$-eliminación
+### La regla de Π-eliminación
 
 La regla de eliminación para tipos función dependiente nos da una manera de *usar* 
 funciones dependientes. La forma de usar funciones dependientes es evaluarlas en un 
@@ -89,7 +89,7 @@ $$
   \dfrac{\Gamma \vdash f \stackrel{\cdot}{=} f': \Pi_{(x: A)} B(x)}{\Gamma, x: A \vdash f(x) \stackrel{\cdot}{=} f'(x): B(x)}ev-eq.
 $$
 
-### Las reglas de $\Pi$-computación
+### Las reglas de Π-computación
 
 Ahora postulamos las reglas que especifican el comportamiento de las funciones. Primero,
 tenemos una regla que afirma que una función de la forma $\lambda x. b(x)$ se comporta
