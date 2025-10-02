@@ -1,7 +1,7 @@
 ---
 title: Teoría de tipos dependiente
 sidebar: 
-  order: 2
+  order: 3
 ---
 import { Aside } from '@astrojs/starlight/components';
 
@@ -42,13 +42,25 @@ son ejemplos de juicios.
 Hay cuatro tipos de **juicios** en la teoría de tipos de Marrtin-Löf:
 
 1. $A$ es un **tipo** (bien formado) en un contexto $\Gamma$. Expresamos este juicio 
-  como $$ \Gamma \vdash A ~~~ \text{type}. $$
+  como 
+  $$ 
+    \Gamma \vdash A ~~~ \text{type}. 
+  $$
 2. $A$ y $B$ son **tipos juiciosamente iguales** en un contexto $\Gamma$. Expresamos 
-  este juicio como $$\Gamma \vdash A \stackrel{\cdot}{=} B ~~~ \text{type}$$
+  este juicio como 
+  $$
+    \Gamma \vdash A \stackrel{\cdot}{=} B ~~~ \text{type}
+  $$
 3. $a$ es un **elemento** de tipo $A$ en un contexto $\Gamma$. Expresamos este juicio
-  como $$ \Gamma \vdash a: A. $$
+  como 
+  $$ 
+    \Gamma \vdash a: A. 
+  $$
 4. $a$ y $b$ son **elementos juiciosamente iguales** de tipo $A$ en un contexto 
-  $\Gamma$. Expresamos este juicio como $$ \Gamma \vdash a \stackrel{\cdot}{=} b: A. $$
+  $\Gamma$. Expresamos este juicio como 
+  $$ 
+    \Gamma \vdash a \stackrel{\cdot}{=} b: A. 
+  $$
 </Aside>
 </div>
 
