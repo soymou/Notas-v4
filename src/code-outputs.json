@@ -1,0 +1,10 @@
+{
+  "auto-hello": "Hello from auto-execution!\n4",
+  "auto-lean": "20\n2 : Nat",
+  "session-1": "",
+  "session-2": "x + y = 30",
+  "session-3": "x + y = 30\nx * y = 200",
+  "unique-id": "Hello",
+  "block-1": "",
+  "block-2": "10"
+}

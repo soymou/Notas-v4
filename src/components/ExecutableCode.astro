@@ -6,16 +6,31 @@ interface Props {
   code: string;
   output?: string;
   showOutput?: boolean;
+  id?: string;
+  session?: string;
 }
 
-const { language, code, output, showOutput = true } = Astro.props;
+const { language, code, output: manualOutput, showOutput = true, id, session } = Astro.props;
+
+// Load outputs from JSON if id is provided
+let autoOutput = null;
+if (id && !manualOutput) {
+  try {
+    const outputs = await import('../code-outputs.json');
+    autoOutput = outputs.default[id];
+  } catch (e) {
+    // File doesn't exist yet, that's okay
+  }
+}
+
+const finalOutput = manualOutput || autoOutput;
 
 const highlightedCode = await codeToHtml(code, {
   lang: language,
   theme: 'github-dark'
 });
 
-const highlightedOutput = output ? await codeToHtml(output, {
+const highlightedOutput = finalOutput ? await codeToHtml(finalOutput, {
   lang: 'text',
   theme: 'github-dark'
 }) : null;
@@ -29,7 +44,7 @@ const highlightedOutput = output ? await codeToHtml(output, {
     <div set:html={highlightedCode} />
   </div>
 
-  {showOutput && output && (
+  {showOutput && finalOutput && (
     <div class="output-section">
       <div class="output-header">
         <span class="output-label">Output</span>

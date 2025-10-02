@@ -42,16 +42,88 @@ print(x + y)`}
   showOutput={false}
 />
 
-## Usage
+## Auto-execution Example
 
-In your `.mdx` files, import and use the component:
-
-```mdx
-import ExecutableCode from '../../../components/ExecutableCode.astro';
+Add an `id` prop and the output will be automatically generated:
 
 <ExecutableCode
+  id="auto-hello"
   language="python"
-  code={`print("Hello, World!")`}
-  output="Hello, World!"
+  code={`print("Hello from auto-execution!")
+print(2 + 2)`}
+/>
+
+<ExecutableCode
+  id="auto-lean"
+  language="lean4"
+  code={`def double (x : Nat) : Nat := x + x
+  #eval double 10
+  #check 2
+`}
+/>
+
+## Session Handling
+
+Use `session` prop to persist variables between blocks:
+
+<ExecutableCode
+  id="session-1"
+  language="python"
+  session="my-session"
+  code={`x = 10
+y = 20`}
+/>
+
+<ExecutableCode
+  id="session-2"
+  language="python"
+  session="my-session"
+  code={`print(f"x + y = {x + y}")`}
+/>
+
+<ExecutableCode
+  id="session-3"
+  language="python"
+  session="my-session"
+  code={`result = x * y
+print(f"x * y = {result}")`}
+/>
+
+## Usage
+
+**Manual output:**
+```mdx
+<ExecutableCode
+  language="python"
+  code={`print("Hello")`}
+  output="Hello"
 />
 ```
+
+**Auto-execution:**
+```mdx
+<ExecutableCode
+  id="unique-id"
+  language="python"
+  code={`print("Hello")`}
+/>
+```
+
+**With sessions:**
+```mdx
+<ExecutableCode
+  id="block-1"
+  session="shared"
+  language="python"
+  code={`x = 5`}
+/>
+
+<ExecutableCode
+  id="block-2"
+  session="shared"
+  language="python"
+  code={`print(x * 2)`}
+/>
+```
+
+Then run: `npm run execute-code` before building.
