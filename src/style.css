@@ -25,3 +25,82 @@
   overflow-y: hidden !important;
   max-width: 100% !important;
 }
+
+/* ExecutableCode component styles */
+.executable-code-block {
+  margin: 1.5rem 0;
+  background: transparent;
+}
+
+.code-section,
+.output-section {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #24292e;
+}
+
+.output-section {
+  margin-top: 1.5rem !important;
+}
+
+.code-header,
+.output-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: var(--sl-font, system-ui, sans-serif);
+  border-bottom: 2px solid var(--sl-color-gray-5, #4a5568);
+}
+
+.code-header {
+  background: #1e2227;
+  color: #e1e4e8;
+}
+
+.output-header {
+  background: #1e2227;
+  color: #8b949e;
+}
+
+.code-section {
+  border: 1px solid var(--sl-color-gray-6, #2d3748);
+}
+
+.output-section {
+  border: 1px solid var(--sl-color-gray-6, #2d3748);
+}
+
+.language-label,
+.output-label {
+  font-size: 0.8125rem;
+}
+
+.code-section div,
+.output-section div {
+  margin: 0 !important;
+}
+
+.executable-code-block pre {
+  margin: 0 !important;
+  padding: 1rem 1.25rem !important;
+  overflow-x: auto;
+  background: #24292e !important;
+  tab-size: 2;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.executable-code-block pre code {
+  display: block;
+}
+
+.executable-code-block pre code > span:first-child:empty {
+  display: none;
+}
+
+.executable-code-block code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}

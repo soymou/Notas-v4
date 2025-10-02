@@ -117,6 +117,19 @@ async function executeLean4(code) {
   }
 }
 
+// Execute Rust code
+async function executeRust(code) {
+  try {
+    // Create temporary file
+    const tmpFile = `/tmp/temp_${Date.now()}.rs`;
+    await writeFile(tmpFile, code);
+    const { stdout, stderr } = await execAsync(`rustc ${tmpFile} -o /tmp/rust_out_${Date.now()} && /tmp/rust_out_${Date.now()}`);
+    return stdout || stderr;
+  } catch (error) {
+    return `Error: ${error.stderr || error.message}`;
+  }
+}
+
 // Execute code based on language
 async function executeCode(language, code) {
   switch (language.toLowerCase()) {
@@ -126,6 +139,9 @@ async function executeCode(language, code) {
     case 'lean4':
     case 'lean':
       return await executeLean4(code);
+    case 'rust':
+    case 'rs':
+      return await executeRust(code);
     default:
       return `Unsupported language: ${language}`;
   }
@@ -153,11 +169,17 @@ async function main() {
 
     console.log(`  Found ${blocks.length} code block(s)`);
 
+    // Get filename without extension for prefixing
+    const filename = file.split('/').pop().replace('.mdx', '');
+
     // Clear sessions for this file
     const fileSessions = {};
 
     for (const block of blocks) {
-      console.log(`  ⚙️  Executing block: ${block.id} (${block.language})${block.session ? ` [session: ${block.session}]` : ''}`);
+      // Create prefixed ID with filename
+      const prefixedId = `${filename}::${block.id}`;
+
+      console.log(`  ⚙️  Executing block: ${block.id} → ${prefixedId} (${block.language})${block.session ? ` [session: ${block.session}]` : ''}`);
 
       let codeToExecute = block.code;
 
@@ -175,7 +197,7 @@ async function main() {
       }
 
       const output = await executeCode(block.language, codeToExecute);
-      outputs[block.id] = output.trim();
+      outputs[prefixedId] = output.trim();
       console.log(`  ✅ Output: ${output.trim().substring(0, 50)}...`);
     }
   }

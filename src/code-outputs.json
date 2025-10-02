@@ -1,15 +1,14 @@
 {
-  "example1": "Hello, World!\n4",
-  "session-a": "",
-  "session-b": "x + y = 30",
-  "session-c": "x + y = 30\nx * y = 200",
-  "lean-example": "21",
-  "auto-hello": "Hello from auto-execution!\n4",
-  "auto-lean": "20\n2 : Nat",
-  "session-1": "",
-  "session-2": "x + y = 30",
-  "session-3": "x + y = 30\nx * y = 200",
-  "unique-id": "Hello",
-  "block-1": "",
-  "block-2": "10"
+  "how-to-use::my-block": "Hello, World!",
+  "how-to-use::block-1": "x + y = 30",
+  "how-to-use::block-2": "x + y = 30\nx + y = 30",
+  "how-to-use::python-example": "120",
+  "how-to-use::lean-example": "42",
+  "how-to-use::setup": "",
+  "how-to-use::showcase-fibonacci": "0 1 1 2 3 5 8 13 21 34",
+  "how-to-use::showcase-lean": "30",
+  "how-to-use::showcase-rust": "Sum: 15\nDoubled: [2, 4, 6, 8, 10]",
+  "how-to-use::showcase-data-1": "Original data: [23, 45, 12, 67, 34, 89, 56]",
+  "how-to-use::showcase-data-2": "Original data: [23, 45, 12, 67, 34, 89, 56]\nMean: 46.57\nMedian: 45",
+  "how-to-use::showcase-data-3": "Original data: [23, 45, 12, 67, 34, 89, 56]\nMean: 46.57\nMedian: 45\nSorted: [12, 23, 34, 45, 56, 67, 89]\nMin: 12, Max: 89"
 }

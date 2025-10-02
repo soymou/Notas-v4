@@ -6,14 +6,12 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import starlightThemeGalaxy from 'starlight-theme-galaxy';
 import mdx from '@astrojs/mdx';
-import { remarkExecutableCode } from './src/plugins/remark-executable-code.js';
 
 // https://astro.build/config
 export default defineConfig({
 	markdown: {
 		remarkPlugins: [
-			remarkMath,
-			remarkExecutableCode
+			remarkMath
 		],
 		rehypePlugins: [rehypeKatex],
 	},

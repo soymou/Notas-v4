@@ -9,7 +9,9 @@
     "preview": "astro preview",
     "astro": "astro",
     "execute-code": "node scripts/execute-code.js",
-    "latex-to-unicode": "node scripts/latex-to-unicode.js"
+    "latex-to-unicode": "node scripts/latex-to-unicode.js",
+    "convert-code-syntax": "node scripts/convert-code-syntax.js",
+    "process-all": "npm run latex-to-unicode && npm run convert-code-syntax && npm run execute-code"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.36.0",

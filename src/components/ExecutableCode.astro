@@ -19,8 +19,12 @@ const cleanCode = code.replace(/^\n+|\n+$/g, '').trim();
 let autoOutput = null;
 if (id && !manualOutput) {
   try {
+    // Get filename from Astro.url
+    const filename = Astro.url.pathname.split('/').filter(Boolean).pop() || 'index';
+    const prefixedId = `${filename}::${id}`;
+
     const outputs = await import('../code-outputs.json');
-    autoOutput = outputs.default[id];
+    autoOutput = outputs.default[prefixedId];
   } catch (e) {
     // File doesn't exist yet, that's okay
   }
@@ -57,83 +61,3 @@ const highlightedOutput = cleanOutput ? await codeToHtml(cleanOutput, {
     </div>
   )}
 </div>
-
-<style>
-  .executable-code-block {
-    margin: 1.5rem 0;
-    background: transparent;
-  }
-
-  .code-section,
-  .output-section {
-    position: relative;
-    border-radius: var(--sl-border-radius);
-    overflow: hidden;
-    background: var(--ec-brdCol);
-  }
-
-  .output-section {
-    margin-top: 1.5rem !important;
-  }
-
-  .code-header,
-  .output-header {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    font-family: var(--sl-font);
-    border-bottom: 2px solid var(--sl-color-gray-5);
-  }
-
-  .code-header {
-    background: var(--ec-frm-editorTabBarBg);
-    color: var(--ec-frm-editorTabBarActiveFg);
-  }
-
-  .output-header {
-    background: var(--ec-frm-editorTabBarBg);
-    color: var(--ec-frm-editorTabBarInactiveFg);
-  }
-
-  .code-section {
-    border: 1px solid var(--sl-color-gray-6);
-  }
-
-  .output-section {
-    border: 1px solid var(--sl-color-gray-6);
-  }
-
-  .language-label,
-  .output-label {
-    font-size: 0.8125rem;
-  }
-
-  .code-section :global(div),
-  .output-section :global(div) {
-    margin: 0 !important;
-  }
-
-  .executable-code-block :global(pre) {
-    margin: 0 !important;
-    padding: var(--ec-codePadBlk) var(--ec-codePadInl) !important;
-    overflow-x: auto;
-    background: var(--ec-brdCol) !important;
-    tab-size: 2;
-    border: none !important;
-    border-radius: 0 !important;
-  }
-
-  .executable-code-block :global(pre code) {
-    display: block;
-  }
-
-  .executable-code-block :global(pre code > span:first-child:empty) {
-    display: none;
-  }
-
-  .executable-code-block :global(code) {
-    font-family: var(--__ec-codeFontFam);
-    font-size: var(--ec-codeFontSize);
-    line-height: var(--ec-lineHgt);
-  }
-</style>
