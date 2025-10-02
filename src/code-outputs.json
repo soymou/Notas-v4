@@ -1,4 +1,9 @@
 {
+  "example1": "Hello, World!\n4",
+  "session-a": "",
+  "session-b": "x + y = 30",
+  "session-c": "x + y = 30\nx * y = 200",
+  "lean-example": "21",
   "auto-hello": "Hello from auto-execution!\n4",
   "auto-lean": "20\n2 : Nat",
   "session-1": "",

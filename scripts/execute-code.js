@@ -27,11 +27,12 @@ async function findMdxFiles(dir) {
 // Extract ExecutableCode blocks from MDX content
 function extractCodeBlocks(content) {
   const blocks = [];
-  // Match ExecutableCode components including attributes across multiple lines
-  const regex = /<ExecutableCode[\s\S]*?\/>/g;
 
+  // Method 1: Match ExecutableCode components including attributes across multiple lines
+  const componentRegex = /<ExecutableCode[\s\S]*?\/>/g;
   let match;
-  while ((match = regex.exec(content)) !== null) {
+
+  while ((match = componentRegex.exec(content)) !== null) {
     const component = match[0];
 
     // Extract attributes
@@ -46,6 +47,39 @@ function extractCodeBlocks(content) {
         language: langMatch[1],
         code: codeMatch[1].trim(),
         session: sessionMatch ? sessionMatch[1] : null,
+        position: match.index
+      });
+    }
+  }
+
+  // Method 2: Match ```code blocks with :language :id :session syntax
+  const codeBlockRegex = /```code\s+([^\n]+)\n([\s\S]*?)```/g;
+
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    const meta = match[1];
+    const code = match[2].trim();
+
+    // Extract :key value or :key "value" pairs
+    const attributes = {};
+    const attrRegex = /:(\w+)\s+"([^"]+)"|:(\w+)\s+(\S+)/g;
+    let attrMatch;
+
+    while ((attrMatch = attrRegex.exec(meta)) !== null) {
+      const key = attrMatch[1] || attrMatch[3];
+      const value = attrMatch[2] || attrMatch[4];
+      attributes[key] = value;
+    }
+
+    const language = attributes.language || 'python';
+    const id = attributes.id || null;
+    const session = attributes.session || null;
+
+    if (id) {
+      blocks.push({
+        id,
+        language,
+        code,
+        session,
         position: match.index
       });
     }
