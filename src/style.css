@@ -184,3 +184,87 @@ summary:hover svg.caret {
   fill: currentColor !important;
   opacity: 1 !important;
 }
+
+/* Multi-sidebar dropdown styling to match Galaxy theme link buttons */
+label.astro-oojz3yon {
+  position: relative;
+  display: block !important;
+  margin-bottom: 1.5rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  gap: 0 !important;
+}
+
+select.astro-oojz3yon {
+  width: 100% !important;
+  padding: 0.875rem 2.75rem 0.875rem 1.125rem !important;
+  font-size: var(--sl-text-base) !important;
+  font-weight: 600 !important;
+  color: var(--sl-color-white) !important;
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.12) 0%, rgba(88, 101, 242, 0.06) 100%) !important;
+  border: 1px solid rgba(88, 101, 242, 0.35) !important;
+  border-radius: 0.625rem !important;
+  cursor: pointer !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 10px rgba(88, 101, 242, 0.15), 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+select.astro-oojz3yon:hover {
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.18) 0%, rgba(88, 101, 242, 0.1) 100%) !important;
+  border-color: rgba(88, 101, 242, 0.55) !important;
+  box-shadow: 0 4px 16px rgba(88, 101, 242, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-2px) !important;
+}
+
+select.astro-oojz3yon:focus {
+  outline: none !important;
+  border-color: rgba(88, 101, 242, 0.7) !important;
+  box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2), 0 4px 16px rgba(88, 101, 242, 0.3) !important;
+}
+
+select.astro-oojz3yon:active {
+  transform: translateY(0) !important;
+}
+
+option.astro-oojz3yon {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.95) 0%, rgba(31, 41, 55, 0.95) 100%) !important;
+  color: var(--sl-color-white) !important;
+  padding: 0.875rem 1.25rem !important;
+  font-weight: 500 !important;
+  border-bottom: 1px solid rgba(88, 101, 242, 0.1) !important;
+  transition: all 0.2s ease !important;
+}
+
+option.astro-oojz3yon:hover,
+option.astro-oojz3yon:focus,
+option.astro-oojz3yon:checked {
+  background: linear-gradient(135deg, rgba(88, 101, 242, 0.3) 0%, rgba(88, 101, 242, 0.2) 100%) !important;
+  color: var(--sl-color-white) !important;
+  font-weight: 600 !important;
+}
+
+option.astro-oojz3yon:last-child {
+  border-bottom: none !important;
+}
+
+/* Style the dropdown icon with flip animation */
+label.astro-oojz3yon svg.icon {
+  position: absolute !important;
+  right: 1rem !important;
+  top: 50% !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  pointer-events: none !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+  transform: translateY(-50%) rotate(0deg) !important;
+  will-change: transform !important;
+}
+
+/* Rotated state - more specific selector to override */
+label.astro-oojz3yon svg.icon.rotated {
+  transform: translateY(-50%) rotate(90deg) !important;
+}

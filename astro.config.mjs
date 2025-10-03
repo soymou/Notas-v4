@@ -23,11 +23,19 @@ export default defineConfig({
 				starlightThemeGalaxy(),
 				starlightUtils({
 					multiSidebar: {
-						switcherStyle: "horizontalList"
+						switcherStyle: "dropdown"
 					}
 				})
 			],
 			customCss: ['./src/style.css'],
+			head: [
+				{
+					tag: 'script',
+					attrs: {
+						src: '/scripts/dropdown-arrow.js',
+					},
+				},
+			],
 			title: 'Junoy',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/soymou' }],
 			sidebar: [
