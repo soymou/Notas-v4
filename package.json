@@ -27,6 +27,7 @@
     "starlight-site-graph": "^0.5.0",
     "starlight-theme-flexoki": "^0.2.0",
     "starlight-theme-galaxy": "^0.5.1",
+    "starlight-theme-obsidian": "^0.4.1",
     "unist-util-visit": "^5.0.0"
   }
 }

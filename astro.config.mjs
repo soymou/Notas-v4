@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 import starlightSiteGraph from 'starlight-site-graph'
 import remarkTypst from "./plugins/remark-typst.js";
 import rehypeTypst from "./plugins/rehype-typst.js";
-import catppuccin from '@catppuccin/starlight';
+import starlightThemeObsidian from 'starlight-theme-obsidian'
 import starlightUtils from '@lorenzo_lewis/starlight-utils';
 import mdx from '@astrojs/mdx';
 
@@ -19,8 +19,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			plugins: [
-				starlightSiteGraph(),
-				catppuccin(),
+				starlightThemeObsidian(),
 				starlightUtils({
 					multiSidebar: {
 						switcherStyle: "dropdown"
