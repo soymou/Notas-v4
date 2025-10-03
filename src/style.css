@@ -18,7 +18,14 @@ a svg {
   opacity: 1 !important;
   visibility: visible !important;
   fill: currentColor !important;
-  color: inherit !important;
+}
+
+/* Ensure mobile menu button is always visible */
+starlight-menu-button svg {
+  opacity: 1 !important;
+  visibility: visible !important;
+  fill: currentColor !important;
+  color: currentColor !important;
 }
 
 /* Typst math rendering */
