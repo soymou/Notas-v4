@@ -84,6 +84,7 @@ function convertTypstInHeadings(content) {
     }
 
     let newHeading = heading;
+    let headingModified = false;
 
     // Replace $...$ with Unicode equivalents
     newHeading = newHeading.replace(/\$([^$]+)\$/g, (mathMatch, mathContent) => {
@@ -91,23 +92,32 @@ function convertTypstInHeadings(content) {
 
       // Try direct replacement from our mapping
       if (typstToUnicode[unicode]) {
-        modified = true;
+        headingModified = true;
         return typstToUnicode[unicode];
       }
 
-      // Try to replace parts of the content
+      // Try to replace parts of the content (only for math symbols, not general words)
+      let tempUnicode = unicode;
       for (const [typst, uni] of Object.entries(typstToUnicode)) {
-        // Match whole words or with common separators
-        const regex = new RegExp(`\\b${typst.replace(/\./g, '\\.')}\\b`, 'g');
-        if (regex.test(unicode)) {
-          unicode = unicode.replace(regex, uni);
-          modified = true;
+        // Only replace if it's a complete match or followed by space/punctuation
+        // This prevents replacing "arrow" in "right-arrow"
+        const regex = new RegExp(`(?:^|\\s)${typst.replace(/\./g, '\\.')}(?=\\s|$|[^a-zA-Z])`, 'g');
+        if (regex.test(tempUnicode)) {
+          tempUnicode = tempUnicode.replace(regex, (m) => {
+            const leadingSpace = m.match(/^\s/) ? ' ' : '';
+            return leadingSpace + uni;
+          });
+          headingModified = true;
         }
       }
 
       // If we modified it, return the unicode version, otherwise keep the $...$
-      return modified ? unicode : mathMatch;
+      return headingModified ? tempUnicode : mathMatch;
     });
+
+    if (headingModified) {
+      modified = true;
+    }
 
     return `${hashes} ${newHeading}`;
   });
