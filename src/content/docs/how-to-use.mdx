@@ -1,11 +1,16 @@
 ---
-title: How to Use Executable Code Blocks
-description: Guide for using executable code blocks in your notes
+title: How to Use
+description: Guide for using executable code blocks and commutative diagrams
 ---
 
-# How to Use Executable Code Blocks
+import ExecutableCode from '../../components/ExecutableCode.astro';
+import TypstDiagram from '../../components/TypstDiagram.astro';
 
-This guide explains how to write and execute code blocks in your MDX notes.
+# How to Use
+
+This guide explains how to use executable code blocks and commutative diagrams in your MDX notes.
+
+# Executable Code Blocks
 
 ## Basic Syntax
 
@@ -231,14 +236,13 @@ To show only the code without output:
 
 ## Scripts Reference
 
-- **`npm run latex-to-unicode`** - Convert LaTeX in headings to Unicode
-- **`npm run convert-code-syntax`** - Convert ````code` blocks to components
+- **`npm run convert-code-syntax`** - Convert code blocks to ExecutableCode components
+- **`npm run convert-diagram-syntax`** - Convert diagram blocks to TypstDiagram components
+- **`npm run typst-to-unicode`** - Convert Typst math in headings to Unicode (e.g., `$NN$` → ℕ)
 - **`npm run execute-code`** - Execute all code blocks
-- **`npm run process-all`** - Run all scripts in sequence
+- **`npm run process-all`** - Run all scripts in sequence (code, diagrams, unicode, execution)
 
 ## Showcase Examples
-
-import ExecutableCode from '../../components/ExecutableCode.astro';
 
 ### Python: Fibonacci Sequence
 
@@ -322,3 +326,66 @@ print(f"Min: {min(data)}, Max: {max(data)}")`}
 3. Sessions are scoped per file and language
 4. Use descriptive IDs to make it easier to debug
 5. Supported languages: Python, Lean4, and Rust
+
+---
+
+# Commutative Diagrams with Typst
+
+Create beautiful commutative diagrams using Typst.
+
+## Simple Example
+
+<TypstDiagram scale={1.5} code={`#commutative-diagram(
+  node((0, 0), $A$),
+  node((0, 1), $B$),
+  arr((0, 0), (0, 1), $f$)
+)`} />
+
+**Code:**
+```jsx
+<TypstDiagram scale={1.5} code={`#commutative-diagram(
+  node((0, 0), $A$),
+  node((0, 1), $B$),
+  arr((0, 0), (0, 1), $f$)
+)`} />
+```
+
+## Available Parameters
+
+- `scale` - Scale factor (e.g., `1.5`, `2`)
+- `nodePadding` - Node spacing (e.g., `"(80pt, 60pt)"`)
+- `width`, `height` - Custom dimensions
+- `arrClearance` - Arrow spacing from nodes
+- `padding` - Outer padding
+
+## Arrow Styles
+
+<TypstDiagram scale={1.5} nodePadding="(80pt, 60pt)" code={`#commutative-diagram(
+  node((0, 0), $A$),
+  node((0, 1), $B$),
+  node((0, 2), $C$),
+  arr((0, 0), (0, 1), $f$, "inj"),
+  arr((0, 1), (0, 2), $g$, "surj")
+)`} />
+
+**Special arrows:**
+- `"inj"` - Injective (hook)
+- `"surj"` - Surjective (double tip)
+- `"dashed"` - Dashed line
+- `curve: 20deg` - Curved arrow
+- `label-pos: left/right` - Label position
+
+See `/categorias/` for more examples!
+
+## Testing Fenced Diagram Syntax
+
+This diagram uses the fenced syntax and will be converted when you run `npm run convert-diagram-syntax`:
+
+<TypstDiagram scale={1.5} nodePadding="(70pt, 60pt)" code={`#commutative-diagram(
+  node((0, 0), $X$),
+  node((0, 1), $Y$),
+  node((1, 0), $Z$),
+  arr((0, 0), (0, 1), $f$, label-pos: left),
+  arr((0, 0), (1, 0), $g$, label-pos: right),
+  arr((0, 1), (1, 0), $h$)
+)`} />

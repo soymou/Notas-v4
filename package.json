@@ -10,10 +10,13 @@
     "astro": "astro",
     "execute-code": "node scripts/execute-code.js",
     "convert-code-syntax": "node scripts/convert-code-syntax.js",
-    "process-all": "npm run convert-code-syntax && npm run execute-code"
+    "convert-diagram-syntax": "node scripts/convert-diagram-syntax.js",
+    "typst-to-unicode": "node scripts/typst-to-unicode.js",
+    "process-all": "npm run convert-code-syntax && npm run convert-diagram-syntax && npm run typst-to-unicode && npm run execute-code"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.36.0",
+    "@lorenzo_lewis/starlight-utils": "^0.3.2",
     "@myriaddreamin/rehype-typst": "^0.6.1-rc3",
     "astro": "^5.6.1",
     "codemirror": "^6.0.2",

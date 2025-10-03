@@ -66,11 +66,22 @@ function processTextNode(text) {
  * Remark plugin to detect Typst math syntax and mark it for processing
  * - $math$ (no spaces) → inline
  * - $ math $ (with spaces) → display
+ * - ```typst code ``` → typst code block
  * Handles multi-line by processing at paragraph level
  */
 export default function remarkTypstMath() {
   return (tree) => {
-    // First pass: process text nodes inside strong/emphasis
+    // First pass: process code blocks with language 'typst'
+    visit(tree, 'code', (node) => {
+      if (node.lang === 'typst') {
+        // Mark the code block for Typst processing
+        node.data = node.data || {};
+        node.data.hProperties = node.data.hProperties || {};
+        node.data.hProperties.className = ['language-typst'];
+      }
+    });
+
+    // Second pass: process text nodes inside strong/emphasis
     visit(tree, ['strong', 'emphasis'], (node) => {
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
@@ -84,7 +95,7 @@ export default function remarkTypstMath() {
       }
     });
 
-    // Second pass: process paragraphs to concatenate text across line breaks
+    // Third pass: process paragraphs to concatenate text across line breaks
     visit(tree, 'paragraph', (node, index, parent) => {
       if (!parent || index === null) return;
 

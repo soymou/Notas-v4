@@ -1,0 +1,83 @@
+---
+import { NodeCompiler } from '@myriaddreamin/typst-ts-node-compiler';
+
+const {
+  code,
+  scale = 1,
+  width,
+  height,
+  nodePadding,  // e.g., "(70pt, 70pt)" or "50pt"
+  arrClearance, // e.g., "0.7em"
+  padding,      // e.g., "1.5em"
+  debug = false
+} = Astro.props;
+
+let compilerInstance;
+
+async function renderTypstToSVG(typstCode) {
+  const compiler = compilerInstance || (compilerInstance = NodeCompiler.create());
+
+  // Build diagram parameters
+  let diagramParams = [];
+  if (nodePadding) diagramParams.push(`node-padding: ${nodePadding}`);
+  if (arrClearance) diagramParams.push(`arr-clearance: ${arrClearance}`);
+  if (padding) diagramParams.push(`padding: ${padding}`);
+  if (debug) diagramParams.push(`debug: ${debug}`);
+
+  // Wrap code in commutative-diagram if it doesn't already start with #
+  const wrappedCode = typstCode.trim().startsWith('#commutative-diagram')
+    ? typstCode
+    : `#commutative-diagram(${diagramParams.length > 0 ? '\n  ' + diagramParams.join(',\n  ') + ',' : ''}\n${typstCode}\n)`;
+
+  const finalCode = typstCode.trim().startsWith('#commutative-diagram') && diagramParams.length > 0
+    ? typstCode.replace(/^#commutative-diagram\(/, `#commutative-diagram(${diagramParams.join(', ')}, `)
+    : wrappedCode;
+
+  const template = `#import "@preview/commute:0.3.0": node, arr, commutative-diagram
+#set page(height: auto, width: auto, margin: 0pt)
+${finalCode}`;
+
+  const docRes = compiler.compile({ mainFileContent: template });
+
+  if (!docRes.result) {
+    const diags = compiler.fetchDiagnostics(docRes.takeDiagnostics());
+    throw new Error(`Typst compilation failed: ${JSON.stringify(diags)}`);
+  }
+
+  const svg = compiler.svg(docRes.result);
+  compiler.evictCache(10);
+
+  return svg;
+}
+
+let svgContent = '';
+let customStyle = '';
+
+try {
+  svgContent = await renderTypstToSVG(code);
+
+  // Apply custom sizing via CSS if specified
+  if (scale !== 1 || width || height) {
+    const styles = [];
+
+    if (width) {
+      styles.push(`width: ${width}`);
+    } else if (scale !== 1) {
+      styles.push(`transform: scale(${scale})`);
+      styles.push(`transform-origin: center`);
+    }
+
+    if (height) {
+      styles.push(`height: ${height}`);
+    }
+
+    if (styles.length > 0) {
+      customStyle = styles.join('; ');
+    }
+  }
+} catch (error) {
+  svgContent = `<div>[Typst Error: ${error.message}]</div>`;
+}
+---
+
+<div class="typst-display" style={customStyle ? `${customStyle}; margin: 2em 0;` : 'margin: 2em 0;'} set:html={svgContent} />
