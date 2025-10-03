@@ -164,3 +164,23 @@ starlight-multi-sidebar-tabs [role="tab"][aria-selected="true"] {
   color: var(--sl-color-white);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+/* Fix sidebar caret icons visibility */
+svg.caret {
+  color: var(--sl-color-gray-3) !important;
+  fill: currentColor !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+}
+
+summary:hover svg.caret {
+  color: var(--sl-color-white) !important;
+}
+
+/* Also fix the mobile TOC caret */
+.toggle svg.caret {
+  color: var(--sl-color-gray-3) !important;
+  fill: currentColor !important;
+  opacity: 1 !important;
+}
