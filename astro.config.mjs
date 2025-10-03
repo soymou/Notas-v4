@@ -2,8 +2,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightSiteGraph from 'starlight-site-graph'
-import remarkMath from "remark-math";
-import rehypeKatex from "rehype-katex";
+import remarkTypst from "./plugins/remark-typst.js";
+import rehypeTypst from "./plugins/rehype-typst.js";
 import starlightThemeGalaxy from 'starlight-theme-galaxy';
 import mdx from '@astrojs/mdx';
 
@@ -11,9 +11,9 @@ import mdx from '@astrojs/mdx';
 export default defineConfig({
 	markdown: {
 		remarkPlugins: [
-			remarkMath
+			remarkTypst
 		],
-		rehypePlugins: [rehypeKatex],
+		rehypePlugins: [rehypeTypst],
 	},
 	integrations: [
 		starlight({

@@ -1,30 +1,53 @@
+/* Force Aside icons to be visible */
+.starlight-aside__icon {
+  display: inline-block !important;
+  fill: currentColor !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
 
-@import "katex/dist/katex.min.css";
+/* Typst math rendering */
+.typst-inline {
+  display: inline-block !important;
+  vertical-align: middle;
+  font-size: inherit;
+}
 
-/* Deja KaTeX tal cual (centrado) */
-.prose .katex-display {
-  display: block;
+.typst-inline svg {
+  display: inline-block !important;
+  font-size: 1.2em;
+  width: auto !important;
+}
+
+.typst-display {
+  display: block !important;
   text-align: center;
   margin: 1em 0;
   overflow-x: auto;
   overflow-y: hidden;
-  max-width: 100%;
 }
 
-.katex-display > .katex {
-  overflow-x: auto;
-  overflow-y: hidden;
+.typst-display svg {
+  font-size: 1.5em;
+  width: auto !important;
+  max-width: none;
+  min-width: 0;
   display: inline-block;
-  text-align: left;
-  max-width: 100%;
+  margin: 0 auto;
 }
 
-/* Alternative approach - wrapper for display math */
-.katex-display {
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  max-width: 100% !important;
+
+/* Dark mode support - invert SVG colors (only Typst math SVGs) */
+.typst-display > svg,
+.typst-inline > svg {
+  filter: invert(0);
 }
+
+:root[data-theme='dark'] .typst-display > svg,
+:root[data-theme='dark'] .typst-inline > svg {
+  filter: invert(1);
+}
+
 
 /* ExecutableCode component styles */
 .executable-code-block {

@@ -1,234 +1,149 @@
 ---
 title: Funciones dependientes
-sidebar: 
+sidebar:
   order: 4
---
+---
 import { Aside } from '@astrojs/starlight/components';
 
-Consideremos una sección $b$ sobre $A$ en un contexto $\Gamma$,es decir, consideremos
-$$
-  \Gamma, x: A \vdash b(x): B(x).
-$$
-Vemos que $b$ es una elección de un elemento de cada $B(x)$, el tipo de la salida 
-depende de $x: A$. La asignación $x \mapsto b(x)$ es, en este sentido, una 
+Consideremos una sección $b$ sobre $A$ en un contexto $Gamma$, es decir, consideremos
+$ Gamma, x: A tack.r b(x): B(x). $
+Vemos que $b$ es una elección de un elemento de cada $B(x)$, el tipo de la salida
+depende de $x: A$. La asignación $x arrow.r.bar b(x)$ es, en este sentido, una
 *función dependiente*. El tipo de todas estas funciones es llamado
-**tipo función dependiente**, y lo escribimos como 
-$$
-  \Pi_{(x: A)} B(x).
-$$
-Hay cuatro reglas principales para los $\Pi$-tipos:
+**tipo función dependiente**, y lo escribimos como
+$ Pi_((x: A)) B(x). $
+Hay cuatro reglas principales para los $Pi$-tipos:
 
 1. La *regla de formación*, que nos dice como formar tipos función dependiente.
-2. La *regla de introducción*, que nos dice como introducir términos del tipo función 
+2. La *regla de introducción*, que nos dice como introducir términos del tipo función
   dependiente.
 3. La *regla de eliminación*, que nos dice como usar términos arbitrarios del tipo función
   dependiente.
-4. Las *reglas de computación*, que nos dicen como interactúan las reglas de introducción 
-  y de eliminación. 
+4. Las *reglas de computación*, que nos dicen como interactúan las reglas de introducción
+  y de eliminación.
 
-En los casos de las reglas de formación, introducción y eliminación, también necesitamos 
+En los casos de las reglas de formación, introducción y eliminación, también necesitamos
 reglas que afirmen que estas construcciones preservar la igualdad juiciosa. Estas reglas
 son llamadas **reglas de congruencia**.
 
 ## La regla de Π-formación
-La regla de $\Pi$-formación nos dice cómos e construyen los $\Pi$-tipos. La idea es que
-$\Pi_{(x: A)} B(x)$ es un tipo **función dependiente**, para cada familia de tipos $B$
+La regla de $Pi$-formación nos dice cómo se construyen los $Pi$-tipos. La idea es que
+$Pi_((x: A)) B(x)$ es un tipo **función dependiente**, para cada familia de tipos $B$
 sobre $A$, de modo que la regla de $Pi$-formación dice:
-$$
-  \frac{\Gamma, x: A \vdash B(x) ~~~ \text{type}}{\Gamma \vdash \Pi_{(x: A)} B(x) ~~~ \text{type}} \Pi.
-$$
-Esta regla simplemente dice que para formar el tipo $\Pi_{(x: A)} B(x)$ en el contexto 
-$\Gamma$, debemos tener una familia de tipos $B$ sobre $A$ en el contexto $\Gamma$.
+$ (Gamma\, x: A tack.r B(x) "type")/(Gamma tack.r Pi_((x: A)) B(x) "type") Pi. $
+Esta regla simplemente dice que para formar el tipo $Pi_((x: A)) B(x)$ en el contexto
+$Gamma$, debemos tener una familia de tipos $B$ sobre $A$ en el contexto $Gamma$.
 
-También requerimos que la regla de formación de tipos función dependiente preserva la 
-igualdad juiciosa. Es decir, tenemos la **regla de congruencia** para $\Pi$-tipos:
-$$
-  \frac
-  {\Gamma \vdash A \stackrel{\cdot}{=} A' ~~~ \text{type} ~~~ ~~~ \Gamma,x: A \vdash B(x) \stackrel{\cdot}{=} B'(x) ~~~ \text{type}}
-  {\Gamma \vdash \Pi_{(x: A)} B(x) B(x) \stackrel{\cdot}{=} \Pi_{(x: A')} B'(x) ~~~ \text{type}} \Pi-eq
-$$
+También requerimos que la regla de formación de tipos función dependiente preserva la
+igualdad juiciosa. Es decir, tenemos la **regla de congruencia** para $Pi$-tipos:
+$ (Gamma tack.r A equiv A' "type" quad Gamma, x: A tack.r B(x) equiv B'(x) "type")/(Gamma tack.r Pi_((x: A)) B(x) equiv Pi_((x: A')) B'(x) "type") Pi"-eq" $
 
 ## La regla de Π-introducción
 La regla de introducción para funciones dependientes nos dice cómo podemos construir
-funciones dependientes del tipo $\Pi_{(x: A)} B(x)$. La idea es que una función 
-dependiente $f: \Pi_{(x: A)} B(x)$ es una operación que lleva a  $x: A$ en 
-$f(x): B(x)$. Así, la regla de introducción de tipos dependientes postula que para 
-construir una función dependiente debemos construir un término $b(x): B(x)$ indizado 
-por $x: A$ en un contexto $\Gamma$: 
+funciones dependientes del tipo $Pi_((x: A)) B(x)$. La idea es que una función
+dependiente $f: Pi_((x: A)) B(x)$ es una operación que lleva a  $x: A$ en
+$f(x): B(x)$. Así, la regla de introducción de tipos dependientes postula que para
+construir una función dependiente debemos construir un término $b(x): B(x)$ indizado
+por $x: A$ en un contexto $Gamma$:
 
-$$
-  \dfrac{\Gamma, x: A \vdash b(x): B(x)}{\Gamma \vdash \lambda x. b(x) : \Pi_{(x: A)} B(x)}\lambda.
-$$
+$ (Gamma\, x: A tack.r b(x): B(x))/(Gamma tack.r lambda x. b(x) : Pi_((x: A)) B(x)) lambda. $
 
-Esta regla de introducción para funciones dependientes también es llamada la 
-**regla de $\lambda$-abstracción** y decimos que la $\lambda$-abstracción 
-$\lambda x. b(x)$ **liga** la variable $x$ en $b$. 
-También requerimos que la $\lambda$-abstracción preserve la igualdad juiciosa. Así que 
-postulamos la **regla de congruencia** para la $\lambda$-abstracción, que dice
-
-$$
-  \dfrac{\Gamma, x: A  \vdash b(x) \stackrel{\cdot}{=} b'(x): B(x)}{\Gamma \vdash \lambda x. b(x) \stackrel{\cdot}{=} \lambda x. b'(x): \Pi_{(x: A)} B(x)}\lambda-eq.
-$$
+Esta regla de introducción para funciones dependientes también es llamada la
+**regla de $lambda$-abstracción** y decimos que la $lambda$-abstracción
+$lambda x. b(x)$ **liga** la variable $x$ en $b$.
+También requerimos que la $lambda$-abstracción preserve la igualdad juiciosa. Así que
+postulamos la **regla de congruencia** para la $lambda$-abstracción, que dice
+$ (Gamma\, x: A tack.r b(x) equiv b'(x): B(x))/(Gamma tack.r lambda x. b(x) equiv lambda x. b'(x): Pi_((x: A)) B(x)) lambda"-eq". $
 
 
 ### La regla de Π-eliminación
 
-La regla de eliminación para tipos función dependiente nos da una manera de *usar* 
-funciones dependientes. La forma de usar funciones dependientes es evaluarlas en un 
-argumento del tipo del dominio. La regla de $\Pi$-eliminación es también llamada la 
+La regla de eliminación para tipos función dependiente nos da una manera de *usar*
+funciones dependientes. La forma de usar funciones dependientes es evaluarlas en un
+argumento del tipo del dominio. La regla de $Pi$-eliminación es también llamada la
 **regla de evaluación**:
 
-$$
-  \dfrac{\Gamma \vdash f: \Pi_{(x: A)} B(x)}{\Gamma, x: A \vdash f(x): B(x)}ev.  
-$$
+$ (Gamma tack.r f: Pi_((x: A)) B(x))/(Gamma, x: A tack.r f(x): B(x)) "ev". $
 
-Esta regla afirma que, dada una función dependiente $f: \Pi_{(x: A)} B(x)$ en un contexto
-$\Gamma$ obtenemos un término $f(x)$ de tipo $B(x)$ indizado por $x: A$ en un 
-contexto $\Gamma$. De nuevo, pedimos que la evaluación preserve la igualdad juiciosa:
+Esta regla afirma que, dada una función dependiente $f: Pi_((x: A)) B(x)$ en un contexto
+$Gamma$ obtenemos un término $f(x)$ de tipo $B(x)$ indizado por $x: A$ en un
+contexto $Gamma$. De nuevo, pedimos que la evaluación preserve la igualdad juiciosa:
 
-$$
-  \dfrac{\Gamma \vdash f \stackrel{\cdot}{=} f': \Pi_{(x: A)} B(x)}{\Gamma, x: A \vdash f(x) \stackrel{\cdot}{=} f'(x): B(x)}ev-eq.
-$$
+$ (Gamma tack.r f equiv f': Pi_((x: A)) B(x))/(Gamma, x: A tack.r f(x) equiv f'(x): B(x)) "ev-eq". $
 
 ### Las reglas de Π-computación
 
 Ahora postulamos las reglas que especifican el comportamiento de las funciones. Primero,
-tenemos una regla que afirma que una función de la forma $\lambda x. b(x)$ se comporta
+tenemos una regla que afirma que una función de la forma $lambda x. b(x)$ se comporta
 como esperamos: cuando la evaluamos en $x: A$, obtenemos un valor $b(x): B(x)$. Esta
-regla es llamada la *regla-$\beta$*.
+regla es llamada la *regla-$beta$*.
 
-$$
-\dfrac{\Gamma, x: A \vdash b(x): B(x)}{\Gamma, x: A \vdash (\lambda y.b(y))(x) \stackrel{\cdot}{=} b(x): B(x)} \beta.
-$$
+$ (Gamma, x: A tack.r b(x): B(x))/(Gamma, x: A tack.r (lambda y.b(y))(x) equiv b(x): B(x)) beta. $
 
-También postulamos una regla que afirma que todos los elementos de un $\Pi$-tipo son 
-funciones dependientes. Esta es llamada la **$\eta$-regla**
+También postulamos una regla que afirma que todos los elementos de un $Pi$-tipo son
+funciones dependientes. Esta es llamada la **$eta$-regla**
 
-$$
-\dfrac{\Gamma \vdash f: \Pi_{(x: A)} B(x)}{\Gamma \vdash \lambda x.f(x) \stackrel{\cdot}{=} f: \Pi_{(x: A)} B(x)} \eta.
-$$
+$ (Gamma tack.r f: Pi_(x: A) B(x))/(Gamma tack.r lambda x.f(x) equiv f: Pi_((x: A)) B(x)) eta. $
 
-En otras palabras, las reglas de computación ($\beta$ y $\eta$) para tipos función 
-dependiente postulan que la regla de $\lambda$-abstracción y la regla de evaluación son 
+En otras palabras, las reglas de computación ($beta$ y $eta$) para tipos función
+dependiente postulan que la regla de $lambda$-abstracción y la regla de evaluación son
 mutuamente inversas.
 
 ## Tipos función ordinarios
 
-Un caso especial de los $\Pi$-tipos es cuando $A$ y $B$ son tipos en un contexto $\Gamma$.
-En este caso podemos primero debilitar a $B$ por $A$ y luego aplicar la $\Pi$-regla de
-formación para obtener el tipo $A \to B$ de funciones *ordinarias* de $A$ a $B$, como lo 
+Un caso especial de los $Pi$-tipos es cuando $A$ y $B$ son tipos en un contexto $Gamma$.
+En este caso podemos primero debilitar a $B$ por $A$ y luego aplicar la $Pi$-regla de
+formación para obtener el tipo $A arrow.r B$ de funciones *ordinarias* de $A$ a $B$, como lo
 muestra la siguiente derivación:
-$$
-  \dfrac{
-    \dfrac{
-      \Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}
-    }
-    {
-      \Gamma, x: A \vdash B ~~~ \text{type} 
-    }W
-  }
-  {
-    \Gamma \vdash \Pi_{(x: A)} B ~~~ \text{type}
-  }\Pi
-$$
+$ ((Gamma tack.r A "type" quad Gamma tack.r B "type")/(Gamma, x: A tack.r B "type") W)/(Gamma tack.r Pi_((x: A)) B "type") Pi $
 
-Un término $f: \Pi_{(x: A)} B$ es una función que toma un argumento $x: A$ y regresa 
-$f(x): B$. Así, definimos el tipo $A \to B$ de **funciones (ordinarias)** de $A$ a $B$ por
-$$
-  A \to B := \Pi_{(x: A)} B.
-$$
-Si $f: A \to B$ es una función, entonces el tipo $A$ es llamado el **dominio** de $f$ y 
+Un término $f: Pi_(x: A) B$ es una función que toma un argumento $x: A$ y regresa
+$f(x): B$. Así, definimos el tipo $A arrow.r B$ de **funciones (ordinarias)** de $A$ a $B$ por
+$ A arrow.r B := Pi_(x: A) B. $
+Si $f: A arrow.r B$ es una función, entonces el tipo $A$ es llamado el **dominio** de $f$ y
 el tipo $B$ es llamado el **co-dominio** de $f$.
 
-A veces también escribiremos $B^A$ para el tipo $A \to B$ (haciendo alusión a las 
-categorías). Formalmente, hacemos estas definiciones añadiendo una línea extra a la 
+A veces también escribiremos $B^A$ para el tipo $A arrow.r B$ (haciendo alusión a las
+categorías). Formalmente, hacemos estas definiciones añadiendo una línea extra a la
 derivación de antes:
 
-$$
-  \dfrac{
-    \dfrac{
-      \dfrac{
-        \Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}
-      }{
-        \Gamma, x: A \vdash B ~~~ \text{type}
-      }W
-    }{
-     \Gamma \vdash \Pi_{(x: A)} B ~~~ \text{type} 
-    }\Pi
-  }{
-    \Gamma \vdash A \to B := \Pi_{(x: A)} B ~~~ \text{type}
-  }.
-$$
+$ frac(frac(frac(Gamma tack.r A "type" quad Gamma tack.r B "type", Gamma"," x":" A tack.r B "type") W, Gamma tack.r Pi_((x":" A)) B "type") Pi, Gamma tack.r A arrow.r B := Pi_((x":" A)) B "type"). $
 
 <div id="observacion-2-2-1">
 <Aside type="tip" title="Observación 2.2.1">
-Podemos hacer definiciones al final de una derivación si la conclusión es un cierto tipo 
-en un contexto o si la conclusión es un cierto término de un tipo en un contexto. 
-Supongamos, por ejemplo, que tenemos la derivación 
-$$
-  \dfrac{
-    \mathcal{D}
-  }{
-    \Gamma \vdash a: A
-  }.
-$$
-en la que la derivación $\mathcal{D}$ hace uso de las premisas $\mathcal{H_1}, \ldots, 
-\mathcal{H}_n$. Si queremos hacer una definición $c := a$, entonces podemos extender el 
+Podemos hacer definiciones al final de una derivación si la conclusión es un cierto tipo
+en un contexto o si la conclusión es un cierto término de un tipo en un contexto.
+Supongamos, por ejemplo, que tenemos la derivación
+$ frac(cal(D), Gamma tack.r a: A). $
+en la que la derivación $cal(D)$ hace uso de las premisas $cal(H)_1, dots, cal(H)_n$. Si queremos hacer una definición $c := a$, entonces podemos extender el
 árbol de derivación con:
-$$
-  \dfrac{
-    \dfrac{
-      \mathcal{D} 
-    }{
-      \Gamma \vdash a: A
-    }  
-  }{
-    \Gamma \vdash c := a: A
-  }.
-$$
+$ frac(frac(cal(D), Gamma tack.r a: A), Gamma tack.r c := a: A). $
 
 El efecto de una definición de este tipo es que hemos extendido la teoría de tipos con
-una nueva constante $c$, para la cual las siguientes reglas de inferencia son válidas 
-$$
-  \begin{array}{cc}
-    \dfrac{\mathcal{H}_1 ~~~ \mathcal{H}_2 \ldots \mathcal{H}_n}{\Gamma \vdash c: A} &
-    \dfrac{\mathcal{H}_1 ~~~ \mathcal{H}_2 \ldots \mathcal{H}_n}{\Gamma \vdash c \stackrel{\cdot}{=} a: A}
-  \end{array}.
-$$
+una nueva constante $c$, para la cual las siguientes reglas de inferencia son válidas
+$ frac(cal(H)_1 quad cal(H)_2 quad dots quad cal(H)_n, Gamma tack.r c: A) quad quad frac(cal(H)_1 quad cal(H)_2 quad dots quad cal(H)_n, Gamma tack.r c equiv a: A) $
 
-En nuestro ejemplo de la definición del tipo función ordinario $A \to B$, tenemos, por 
+En nuestro ejemplo de la definición del tipo función ordinario $A arrow.r B$, tenemos, por
 definición, las siguientes reglas de inferencia válidas
-$$
-  \begin{array}{cc}
-    \dfrac{\Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}}{\Gamma \vdash A \to B ~~~ \text{type}} &
-    \dfrac{\Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}}{\Gamma \vdash A \to B \stackrel{\cdot}{=} \Pi_{(x: A)}B ~~~ \text{type}}
-  \end{array}.
-$$
+$ frac(Gamma tack.r A "type" quad Gamma tack.r B "type", Gamma tack.r A arrow.r B "type") quad quad frac(Gamma tack.r A "type" quad Gamma tack.r B "type", Gamma tack.r A arrow.r B equiv Pi_(x: A)B "type") $
 </Aside>
 </div>
 
 <div id="observacion-2-2-2">
 <Aside type="tip" title="Observación 2.2.2">
-Ahora podemos dar reglas para el tipo $A \to B$:
-$$
-  \begin{array}{cc}
-  \dfrac{\Gamma \vdash A ~~~ \text{type} ~~~ ~~~ \Gamma \vdash B ~~~ \text{type}}{\Gamma \vdash A \to B ~~~ \text{type}}\rightarrow & \dfrac{\Gamma \vdash B ~~~ \text{type} ~~~ ~~~ \Gamma, x: A \vdash b(x): B}{\Gamma \vdash \lambda x. b(x): A \to B}\lambda \\ \\ \dfrac{\Gamma \vdash f: A \to B}{\Gamma, x: A \vdash f(x): B}ev & \dfrac{\Gamma \vdash B ~~~ \text{type} ~~~ ~~~ \Gamma, x: A \vdash b(x): B}{\Gamma, x: A \vdash (\lambda y. b(y))(x) \stackrel{\cdot}{=} b(x)}\beta \\ \\
-  \dfrac{\Gamma \vdash f: A \to B}{\Gamma \vdash \lambda x. f(x) \stackrel{\cdot}{=} f: A \to B}\eta &
-  \end{array}.
-$$
+Ahora podemos dar reglas para el tipo $A arrow.r B$:
+$ mat(delim: #none, row-gap: #1em, frac(Gamma tack.r A "type" quad Gamma tack.r B "type", Gamma tack.r A arrow.r B "type") arrow.r, quad frac(Gamma tack.r B "type" quad Gamma"," x":" A tack.r b(x): B, Gamma tack.r lambda x. b(x): A arrow.r B) lambda; frac(Gamma tack.r f: A arrow.r B, Gamma"," x":" A tack.r f(x): B) "ev", frac(Gamma tack.r B "type" quad Gamma"," x":" A tack.r b(x): B, Gamma"," x":" A tack.r (lambda y. b(y))(x) equiv b(x)) beta; frac(Gamma tack.r f: A arrow.r B, Gamma tack.r lambda x. f(x) equiv f: A arrow.r B) eta) $
 </Aside>
 </div>
 
 Ahora podemos usar estas reglas para construir algunas funciones que nos son familiares
-como la función identidad $id: A \to A$ sobre un tipo arbitrario $A$ y la composición 
-$g \circ f: A \to C$ para cualesquiera dos funciones $f$ y $g$ con dominios y co-dominios
+como la función identidad $"id": A arrow.r A$ sobre un tipo arbitrario $A$ y la composición
+$g compose f: A arrow.r C$ para cualesquiera dos funciones $f$ y $g$ con dominios y co-dominios
 adecuados.
 
 <div id="definicion-2-2-3">
 <Aside type="tip" tilte="Definición 2.2.3">
-Para cualquier tipo $A$ en un contexto $\Gamma$, definimos la **función identidad** 
-$id_A: A \to A$ usando el término genérico:
-$$
-$$
+Para cualquier tipo $A$ en un contexto $Gamma$, definimos la **función identidad**
+$"id"_A: A arrow.r A$ usando el término genérico:
 </Aside>
 </div>

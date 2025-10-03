@@ -9,21 +9,15 @@
     "preview": "astro preview",
     "astro": "astro",
     "execute-code": "node scripts/execute-code.js",
-    "latex-to-unicode": "node scripts/latex-to-unicode.js",
     "convert-code-syntax": "node scripts/convert-code-syntax.js",
-    "process-all": "npm run latex-to-unicode && npm run convert-code-syntax && npm run execute-code"
+    "process-all": "npm run convert-code-syntax && npm run execute-code"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.36.0",
     "@myriaddreamin/rehype-typst": "^0.6.1-rc3",
     "astro": "^5.6.1",
     "codemirror": "^6.0.2",
-    "katex": "^0.16.22",
     "lean-client-js-browser": "^3.5.1",
-    "mathjax": "^4.0.0",
-    "rehype-katex": "^7.0.1",
-    "rehype-mathjax": "^7.1.0",
-    "remark-math": "^6.0.0",
     "sharp": "^0.34.2",
     "shiki": "^3.13.0",
     "starlight-site-graph": "^0.5.0",
