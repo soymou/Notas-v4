@@ -6,6 +6,21 @@
   visibility: visible !important;
 }
 
+/* Force all SVG icons to be visible */
+svg[aria-hidden="true"] {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-block !important;
+}
+
+/* Ensure navigation link icons are visible */
+a svg {
+  opacity: 1 !important;
+  visibility: visible !important;
+  fill: currentColor !important;
+  color: inherit !important;
+}
+
 /* Typst math rendering */
 .typst-inline {
   display: inline-block !important;
