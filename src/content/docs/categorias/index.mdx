@@ -1,81 +1,20 @@
 ---
 title: Teoría de categorías
 ---
+```typst
+  #import "@preview/commute:0.3.0": node, arr, commutative-diagram
 
-import TypstDiagram from '../../../components/TypstDiagram.astro';
+  #commutative-diagram(
+    node((0, 0), $A$),
+    node((1, 0), $B$),
+    arr((0, 0), (1, 0), $f$),
+  )
+```
+```typst
+#set text(font: "New Computer Modern")
 
-## Diagramas básicos
-
-### Primer teorema de isomorfía
-
-<TypstDiagram scale={1.5} code={`#commutative-diagram(
-  node((0, 0), $X$),
-  node((0, 1), $Y$),
-  node((1, 0), $X / "ker"(f)$),
-  arr((0, 0), (0, 1), $f$),
-  arr((0, 0), (1, 0), $pi$),
-  arr((1, 0), (0, 1), $tilde(f)$, label-pos: right, "inj")
-)`} />
-
-### Funtores
-
-<TypstDiagram scale={1.5} nodePadding="(80pt, 60pt)" code={`#commutative-diagram(
-  node((0, 0), $cal(C)$),
-  node((0, 1), $cal(D)$),
-  node((1, 0), $cal(E)$),
-  arr((0, 0), (0, 1), $F$),
-  arr((0, 0), (1, 0), $G$),
-  arr((0, 1), (1, 0), $H$)
-)`} />
-
-### Producto fibrado (pullback)
-
-<TypstDiagram scale={1.5} nodePadding="(70pt, 60pt)" code={`#commutative-diagram(
-  node((0, 0), $X times_Z Y$),
-  node((0, 1), $Y$),
-  node((1, 0), $X$),
-  node((1, 1), $Z$),
-  arr((0, 0), (0, 1), $p_2$),
-  arr((0, 0), (1, 0), $p_1$),
-  arr((0, 1), (1, 1), $g$),
-  arr((1, 0), (1, 1), $f$)
-)`} />
-
-### Transformación natural
-
-<TypstDiagram scale={1.5} nodePadding="(80pt, 60pt)" code={`#commutative-diagram(
-  node((0, 0), $F(X)$),
-  node((0, 1), $G(X)$),
-  node((1, 0), $F(Y)$),
-  node((1, 1), $G(Y)$),
-  arr((0, 0), (0, 1), $eta_X$),
-  arr((0, 0), (1, 0), $F(f)$),
-  arr((0, 1), (1, 1), $G(f)$),
-  arr((1, 0), (1, 1), $eta_Y$)
-)`} />
-
-### Monomorfismo y epimorfismo
-
-<TypstDiagram scale={1.5} nodePadding="(70pt, 50pt)" code={`#commutative-diagram(
-  node((0, 0), $A$),
-  node((0, 1), $B$),
-  node((0, 2), $C$),
-  arr((0, 0), (0, 1), $f$, "inj"),
-  arr((0, 1), (0, 2), $g$, "surj")
-)`} />
-
-### Diagrama con flechas curvas
-
-<TypstDiagram scale={1.5} nodePadding="(80pt, 60pt)" code={`#commutative-diagram(
-  node((0, 0), $X$),
-  node((0, 1), $Y$),
-  node((1, 0), $Z$),
-  arr((0, 0), (0, 1), $f$),
-  arr((0, 0), (1, 0), $g$),
-  arr((0, 1), (1, 0), $h$),
-  arr((0, 0), (1, 0), $k$, curve: 30deg, label-pos: left, "dashed")
-)`} />
-
-
+= Hello from typst
+This is something very *bold* $x + y$
+```
 
 

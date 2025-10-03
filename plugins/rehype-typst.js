@@ -9,12 +9,12 @@ async function renderTypstToSVG(code, displayMode = false, isCodeBlock = false) 
 
   let template;
   if (isCodeBlock) {
-    // For code blocks, don't wrap in $ $, user provides complete Typst code
-    template = `#import "@preview/commute:0.3.0": node, arr, commutative-diagram\n#set page(height: auto, width: auto, margin: 0pt)\n${code}`;
+    // For code blocks, user provides complete Typst code
+    template = `#set page(height: auto, width: auto, margin: 0pt)\n${code}`;
   } else if (displayMode) {
-    template = `#import "@preview/commute:0.3.0": node, arr, commutative-diagram\n#set page(height: auto, width: auto, margin: 0pt)\n$ ${code} $`;
+    template = `#set page(height: auto, width: auto, margin: 0pt)\n$ ${code} $`;
   } else {
-    template = `#import "@preview/commute:0.3.0": node, arr, commutative-diagram\n#set page(height: auto, width: auto, margin: 0pt)\n$${code}$`;
+    template = `#set page(height: auto, width: auto, margin: 0pt)\n$${code}$`;
   }
 
   const docRes = compiler.compile({ mainFileContent: template });
