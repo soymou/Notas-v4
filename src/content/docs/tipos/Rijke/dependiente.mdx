@@ -2,6 +2,8 @@
 title: Teoría de tipos dependiente
 sidebar:
   order: 2
+typstImports: 
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
 ---
 import { Aside } from '@astrojs/starlight/components';
 
@@ -23,7 +25,16 @@ debajo, un sólo juicio llamado la **conclusión**. El sistema de la teoría de 
 está descrito por una serie de reglas de inferencias.
 
 Un ejemplo de regla de inferencia lo obtenemos con los tipos función:
-$ (Gamma tack.r a: A  space space   Gamma tack.r f: A arrow.r B)/(Gamma tack.r f(a): B). $ 
+
+```typst
+#prooftree(
+  rule(
+    $Gamma tack.r f(a): B$,
+    $Gamma tack.r a: A$,
+    $Gamma tack.r f: A arrow.r B$
+  )
+) 
+  ```
 Esta regla afirma que en un contexto $Gamma$ podemos usar un elemento $a: A$ y una 
 función $f: A arrow.r B$ para obtener un elemento $f(a): B$. Cada una de las expresiones 
 
@@ -81,7 +92,16 @@ indizado por $x: A$ en el contexto $Gamma$.
 
 Un ejemplo básico de familia de tipos ocurrirá cuando introduzcamos los *tipos identidad*.
 Se introducen como sigue:
-$ (Gamma tack.r a: A)/(Gamma, x: A tack.r a = x "type"). $ 
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma, x: A tack.r a = x "type"$,
+    $Gamma tack.r a: A$
+  )
+)
+```
 Esta regla asegura que dado un elemento $a: A$ en un contexto $Gamma$, podemos formar
 el tipo $a = x$ en el contexto $Gamma, x: A$. El tipo $a = x$ en el contexto 
 $Gamma, x: A$ es un ejemplo de una familia de tipos sobre $A$ en el contexto 
@@ -113,33 +133,117 @@ tipos. Hay seis conjuntos de reglas de inferencia:
 Las siguientes reglas se siguen de las suposiciones sobre contextos, tipos y sus elementos
 y pueden usarse libremente en las derivaciones:
 
-$ text(#1.3em, mat( delim: #none , column-gap: #2em, row-gap: #1em,
-    (Gamma, x: A tack.r B(x) "type")/(Gamma tack.r A "type"),
-    (Gamma tack.r A equiv B "type")/(Gamma tack.r A "type");
-    (Gamma tack.r A equiv B "type")/(Gamma tack.r B "type"), 
-    (Gamma tack.r a: A)/(Gamma tack.r A "type");
-    (Gamma tack.r a equiv b)/(Gamma tack.r a: A),
-    (Gamma tack.r a equiv b)/(Gamma tack.r b: A)
-)) $ 
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  align: center,
+  prooftree(
+    rule(
+      $Gamma tack.r A "type"$,
+      $Gamma, x: A tack.r B(x) "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r A equiv B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r B "type"$,
+      $Gamma tack.r A equiv B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r a: A$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r a: A$,
+      $Gamma tack.r a equiv b$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r b: A$,
+      $Gamma tack.r a equiv b$
+    )
+  )
+)
+```
+
 
 ### La igualdad juiciosa es una regla de equivalencia
 Las reglas que postulan que la igualdad juiciosa en tipos y elementos es una relación 
 de equivalencia son las siguientes:
 
-$ text(#1.3em, mat(delim: #none, column-gap: #1em, row-gap: #1em,
-    (Gamma tack.r A "type")/(Gamma tack.r A equiv A "type") ,
-    (Gamma tack.r A equiv B "type")/(Gamma tack.r B equiv A "type") , 
-    (Gamma tack.r A equiv B "type" quad Gamma tack.r B equiv C "type")/(Gamma tack.r A equiv C "type") ;
-    (Gamma tack.r a: A)/(Gamma tack.r a equiv a: A),
-    (Gamma tack.r a equiv b: A)/(Gamma tack.r b equiv a: A) ,
-    (Gamma tack.r a equiv b: A quad Gamma tack.r b equiv c: A)/(Gamma tack.r a equiv c: A).
-  )) $ 
+
+```typst
+
+#table(
+  stroke: none,
+  columns: 3,
+  align: center,
+  prooftree(
+    rule(
+      $Gamma tack.r A equiv A "type"$,
+      $Gamma tack.r A "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r B equiv A "type"$,
+      $Gamma tack.r A equiv B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r A equiv C "type"$,
+      $Gamma tack.r A equiv B "type"$,
+      $Gamma tack.r B equiv C "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r a equiv a: A$,
+      $Gamma tack.r a: A$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r b equiv a: A$,
+      $Gamma tack.r a equiv b: A$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r a equiv c: A$,
+      $Gamma tack.r a equiv b: A$,
+      $Gamma tack.r b equiv c: A$
+    )
+  )
+)
+```
 
 ### Reglas de conversión de variables
 Las **reglas de conversión de variables** son reglas que postulan que podemos convertir
 el tipo de una variable por un tipo juiciosamente igual.
-$ (Gamma tack.r A equiv A'     "type"         Gamma, x: A, Delta tack.r B(x)     "type")/(Gamma, x: A', Delta tack.r B(x)     "type"). $ 
 
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma, x: A', Delta tack.r B(x) "type"$,
+    $Gamma tack.r A equiv A' "type"$,
+    $Gamma, x: A, Delta tack.r B(x) "type"$
+  )
+)
+```
 En esta regla de conversión, el contexto $Gamma, x: A, Delta$ es cualquier extensión 
 del contexto $Gamma, x: A$.
 
@@ -148,7 +252,18 @@ para elementos y para igualdad juiciosa de elementos. Podemos enunciar todas en 
 usando una **tesis de juicio genérica** $cal(J)$, que pueden ser cualquiera de las 
 definidas en la definición [1.1.1](#def-1-1-1):
 
-$ (Gamma tack.r A equiv A' quad Gamma, x: A, Delta tack.r cal(J))/(Gamma, x: A', Delta tack.r cal(J)). $ 
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma, x: A', Delta tack.r cal(J)$,
+    $Gamma tack.r A equiv A' "type"$,
+    $Gamma, x: A, Delta tack.r cal(J)$
+  )
+)
+```
+
 Una regla análoga de **conversión de elementos** convierte el tipo de un elemento a un tipo
 juiciosamente igual.
 
@@ -169,10 +284,28 @@ $ (Gamma tack.r a: A quad Gamma, x: A, Delta tack.r cal(J))/(Gamma, Delta[a slas
 Añadimos dos "reglas de congruencia" para la substitución, postulando que la substitución 
 por elementos juiciosamente iguales resulta en tipos y elementos juiciosamente iguales:
 
-$ text(#1.3em,mat(delim: #none, column-gap: #1em, row-gap: #1em,
-    (Gamma tack.r a equiv a': A quad Gamma, x: A, Delta tack.r B "type")/(Gamma, Delta[a slash x] tack.r B[a slash x] equiv B[a' slash x] "type") ; 
-      (Gamma tack.r a equiv a': A quad Gamma, x: A, Delta tack.r b: B)/(Gamma, Delta[a slash x] tack.r b[a slash x] equiv b[a' slash x]: B[a slash x])
-  )) $ 
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  row-gutter: 1em,
+  prooftree(
+    rule(
+      $Gamma, Delta[a slash x] tack.r B[a slash x] equiv B[a' slash x] "type"$,
+      $Gamma tack.r a equiv a': A$,
+      $Gamma, x: A, Delta tack.r B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma, Delta[a slash x] tack.r b[a slash x] equiv b'[a slash x]: B[a slash x]$,
+      $Gamma tack.r a equiv a': A$, 
+      $Gamma, x: A, Delta tack.r b: B$
+    )
+  )
+)
+
+```
 
 <div id="def-1-3-1">
 <Aside type="tip" title="Definición 1.3.1">
@@ -191,15 +324,33 @@ $Gamma, x: A, Delta$ para una nueva variable $x$. La **regla de debilitamiento**
 afirma que el debilitamiento por un tipo $A$ en un contexto preserva la buena formación 
 y la igualdad juiciosa de tipos y elementos.
 
-$ (Gamma tack.r A "type" quad Gamma, Delta tack.r cal(J))/(Gamma, x: A, Delta tack.r cal(J))W. $ 
 
+```typst
+#prooftree(
+  rule(
+    name: $W.$,
+    $Gamma, x: A, Delta tack.r cal(J)$,
+    $Gamma tack.r A "type"$,
+    $Gamma, Delta tack.r cal(J)$
+  )
+)
+```
 Este proceso de expandir el contexto por una variable de tipo $A$ se llama 
 **debilitamiento** por $A$.
 
 En la situación más simple, tenemos dos tipos $A$ y $B$ en un contexto $Gamma$.
 Entonces podemos debilitar a $B$ por $A$ como sigue:
 
-$ (Gamma tack.r A "type" quad Gamma tack.r B     "type")/(Gamma, x: A tack.r B      "type") $ 
+```typst
+#prooftree(
+  rule(
+    $Gamma, x: A tack.r B "type"$,
+    $Gamma tack.r A "type"$,
+    $Gamma tack.r B "type"$
+  )
+)
+
+```
 El tipo $B$ en el contexto $Gamma, x: A$ es llamado la **familia constante** $B$ o 
 la **familia trivial** $B$.
 
@@ -209,7 +360,15 @@ para obtener que $A$ es un tipo en el contexto $Gamma, x: A$. La regla del
 **elemento genérico** afirma que cualquier elemento hipotético $x: A$ en el contexto 
 $Gamma, x: A$ es también un elemento de tipo $A$ en el contexto $Gamma, x: A$.
 
-$ (Gamma tack.r A "type")/(Gamma, x: A tack.r x: A) delta. $ 
+```typst
+#prooftree(
+  rule(
+    name: $delta.$,
+    $Gamma, x: A tack.r x: A$,
+    $Gamma tack.r A "type"$
+  )
+)
+```
 
 Esta regla también es conocida como la **regla de la variable**, nos da una 
 *función identidad* sobre el tipo $A$ en el contexto $Gamma.$

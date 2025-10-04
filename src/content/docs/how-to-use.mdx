@@ -1,14 +1,13 @@
 ---
 title: How to Use
-description: Guide for using executable code blocks and commutative diagrams
+description: Guide for using executable code blocks and Typst rendering
 ---
 
 import ExecutableCode from '../../components/ExecutableCode.astro';
-import TypstDiagram from '../../components/TypstDiagram.astro';
 
 # How to Use
 
-This guide explains how to use executable code blocks and commutative diagrams in your MDX notes.
+This guide explains how to use executable code blocks and Typst rendering in your MDX notes.
 
 # Executable Code Blocks
 
@@ -237,10 +236,9 @@ To show only the code without output:
 ## Scripts Reference
 
 - **`npm run convert-code-syntax`** - Convert code blocks to ExecutableCode components
-- **`npm run convert-diagram-syntax`** - Convert diagram blocks to TypstDiagram components
 - **`npm run typst-to-unicode`** - Convert Typst math in headings to Unicode (e.g., `$NN$` → ℕ)
 - **`npm run execute-code`** - Execute all code blocks
-- **`npm run process-all`** - Run all scripts in sequence (code, diagrams, unicode, execution)
+- **`npm run process-all`** - Run all scripts in sequence (code, unicode, execution)
 
 ## Showcase Examples
 
@@ -329,63 +327,118 @@ print(f"Min: {min(data)}, Max: {max(data)}")`}
 
 ---
 
-# Commutative Diagrams with Typst
+# Typst Rendering
 
-Create beautiful commutative diagrams using Typst.
+Render Typst code blocks and inline math expressions with automatic SVG conversion.
 
-## Simple Example
+## Inline Math
 
-<TypstDiagram scale={1.5} code={`#commutative-diagram(
-  node((0, 0), $A$),
-  node((0, 1), $B$),
-  arr((0, 0), (0, 1), $f$)
-)`} />
+Use `$...$` for inline math and `$ ... $` (with spaces) for display math:
 
-**Code:**
-```jsx
-<TypstDiagram scale={1.5} code={`#commutative-diagram(
-  node((0, 0), $A$),
-  node((0, 1), $B$),
-  arr((0, 0), (0, 1), $f$)
-)`} />
+**Inline math:** The natural numbers are denoted $NN$ and the integers $ZZ$.
+
+**Display math:** The quadratic formula is $ x = (-b plus.minus sqrt(b^2 - 4a c))/(2a) $
+
+## Code Blocks
+
+Use ` ```typst ` fenced code blocks to write full Typst code:
+
+```typst
+#import "@preview/cetz:0.2.2": canvas, draw
+
+#canvas({
+  draw.line((0, 0), (1, 1))
+  draw.circle((0.5, 0.5), radius: 0.3)
+})
 ```
 
-## Available Parameters
+### Disable Execution
 
-- `scale` - Scale factor (e.g., `1.5`, `2`)
-- `nodePadding` - Node spacing (e.g., `"(80pt, 60pt)"`)
-- `width`, `height` - Custom dimensions
-- `arrClearance` - Arrow spacing from nodes
-- `padding` - Outer padding
+To show Typst code without executing it, use `eval=false`:
 
-## Arrow Styles
+```typst eval=false
+#import "@preview/curryst:0.5.1": rule, prooftree
 
-<TypstDiagram scale={1.5} nodePadding="(80pt, 60pt)" code={`#commutative-diagram(
+#prooftree(
+  rule(
+    $Gamma tack.r f(a): B$,
+    $Gamma tack.r a: A$,
+    $Gamma tack.r f: A arrow.r B$
+  )
+)
+```
+
+This will display the code with syntax highlighting but won't render it as SVG.
+
+### Frontmatter Imports
+
+To avoid repeating imports in every code block, add them to your page frontmatter:
+
+```yaml
+---
+title: My Page
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+  - '#import "@preview/cetz:0.2.2": canvas, draw'
+---
+```
+
+Now all Typst code blocks on that page will automatically have these imports available.
+
+**Note:** Frontmatter imports only apply to code blocks (` ```typst `), not to inline math expressions.
+
+## Examples
+
+### Commutative Diagram
+
+```typst
+#import "@preview/commute:0.3.0": node, arr, commutative-diagram
+
+#commutative-diagram(
   node((0, 0), $A$),
   node((0, 1), $B$),
-  node((0, 2), $C$),
-  arr((0, 0), (0, 1), $f$, "inj"),
-  arr((0, 1), (0, 2), $g$, "surj")
-)`} />
-
-**Special arrows:**
-- `"inj"` - Injective (hook)
-- `"surj"` - Surjective (double tip)
-- `"dashed"` - Dashed line
-- `curve: 20deg` - Curved arrow
-- `label-pos: left/right` - Label position
-
-See `/categorias/` for more examples!
-
-## Testing Fenced Diagram Syntax
-
-This diagram uses the fenced syntax and will be converted when you run `npm run convert-diagram-syntax`:
-
-<TypstDiagram scale={1.5} nodePadding="(70pt, 60pt)" code={`#commutative-diagram(
-  node((0, 0), $X$),
-  node((0, 1), $Y$),
-  node((1, 0), $Z$),
-  arr((0, 0), (0, 1), $f$, label-pos: left),
-  arr((0, 0), (1, 0), $g$, label-pos: right),
+  node((1, 0), $C$),
+  arr((0, 0), (0, 1), $f$),
+  arr((0, 0), (1, 0), $g$),
   arr((0, 1), (1, 0), $h$)
-)`} />
+)
+```
+
+### Proof Tree
+
+```typst
+#import "@preview/curryst:0.5.1": rule, prooftree
+
+#prooftree(
+  rule(
+    $Gamma tack.r f(a): B$,
+    $Gamma tack.r a: A$,
+    $Gamma tack.r f: A arrow.r B$
+  )
+)
+```
+
+### Chemical Formulas
+
+Chemical formula with subscripts: $H_2 O$ is water.
+
+Complex molecule: $C_6 H_(12) O_6$ is glucose.
+
+## Plugin Architecture
+
+The Typst integration uses two custom plugins:
+
+1. **`remark-typst.js`** - Processes markdown and identifies Typst code
+2. **`rehype-typst.js`** - Compiles Typst to SVG using `@myriaddreamin/typst-ts-node-compiler`
+
+These plugins are configured in `astro.config.mjs`:
+
+```js
+markdown: {
+  remarkPlugins: [remarkTypst],
+  rehypePlugins: [rehypeTypst],
+}
+```
+
+
+

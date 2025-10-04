@@ -4,13 +4,16 @@ import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic';
 
 let compilerInstance;
 
-async function renderTypstToSVG(code, displayMode = false, isCodeBlock = false) {
+async function renderTypstToSVG(code, displayMode = false, isCodeBlock = false, importsString = '') {
   const compiler = compilerInstance || (compilerInstance = NodeCompiler.create());
 
   let template;
+  // Only add imports to code blocks, not to math expressions (inline/display)
+  const imports = (isCodeBlock && importsString) ? `${importsString}\n` : '';
+
   if (isCodeBlock) {
     // For code blocks, user provides complete Typst code
-    template = `#set page(height: auto, width: auto, margin: 0pt)\n${code}`;
+    template = `${imports}#set page(height: auto, width: auto, margin: 0pt)\n${code}`;
   } else if (displayMode) {
     template = `#set page(height: auto, width: auto, margin: 0pt)\n$ ${code} $`;
   } else {
@@ -31,8 +34,12 @@ async function renderTypstToSVG(code, displayMode = false, isCodeBlock = false) 
 }
 
 export default function rehypeTypstCustom() {
-  return async (tree) => {
+  return async (tree, file) => {
     const promises = [];
+
+    // Get Typst imports from frontmatter
+    const typstImports = file.data?.astro?.frontmatter?.typstImports || [];
+    const importsString = Array.isArray(typstImports) ? typstImports.join('\n') : typstImports;
 
     visit(tree, 'element', (node, index, parent) => {
       // Look for custom typst block divs
@@ -57,7 +64,7 @@ export default function rehypeTypstCustom() {
           }
 
           try {
-            const svg = await renderTypstToSVG(code, false, true);
+            const svg = await renderTypstToSVG(code, false, true, importsString);
             const root = fromHtmlIsomorphic(svg, { fragment: true });
             const svgNode = root.children[0];
 
@@ -96,6 +103,11 @@ export default function rehypeTypstCustom() {
         if (codeNode) {
           const classes = codeNode.properties?.className || [];
           if (classes.includes('language-typst')) {
+            // Check if eval is disabled
+            if (classes.includes('typst-no-eval')) {
+              return; // Skip processing, just show the code
+            }
+
             // Process the typst code block
             const processNode = async () => {
               let code = codeNode.children[0]?.value || '';
@@ -114,7 +126,7 @@ export default function rehypeTypstCustom() {
               code = code.replace(/[\u2018\u2019]/g, "'");
 
               try {
-                const svg = await renderTypstToSVG(code, false, true);
+                const svg = await renderTypstToSVG(code, false, true, importsString);
                 const root = fromHtmlIsomorphic(svg, { fragment: true });
                 const svgNode = root.children[0];
 
@@ -175,7 +187,7 @@ export default function rehypeTypstCustom() {
             const isDisplayMode = isMathDisplay;
 
             try {
-              const svg = await renderTypstToSVG(code, isDisplayMode, false);
+              const svg = await renderTypstToSVG(code, isDisplayMode, false, importsString);
               const root = fromHtmlIsomorphic(svg, { fragment: true });
               const svgNode = root.children[0];
 

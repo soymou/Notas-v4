@@ -73,11 +73,15 @@ export default function remarkTypstMath() {
   return (tree) => {
     // First pass: process code blocks with language 'typst'
     visit(tree, 'code', (node) => {
-      if (node.lang === 'typst') {
+      if (node.lang === 'typst' || node.lang?.startsWith('typst')) {
+        // Check for eval parameter in meta (e.g., ```typst eval=false)
+        const evalParam = node.meta?.match(/eval\s*=\s*(\w+)/);
+        const shouldEval = !evalParam || evalParam[1] !== 'false';
+
         // Mark the code block for Typst processing
         node.data = node.data || {};
         node.data.hProperties = node.data.hProperties || {};
-        node.data.hProperties.className = ['language-typst'];
+        node.data.hProperties.className = shouldEval ? ['language-typst'] : ['language-typst', 'typst-no-eval'];
       }
     });
 

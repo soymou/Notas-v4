@@ -10,9 +10,8 @@
     "astro": "astro",
     "execute-code": "node scripts/execute-code.js",
     "convert-code-syntax": "node scripts/convert-code-syntax.js",
-    "convert-diagram-syntax": "node scripts/convert-diagram-syntax.js",
     "typst-to-unicode": "node scripts/typst-to-unicode.js",
-    "process-all": "npm run convert-code-syntax && npm run convert-diagram-syntax && npm run typst-to-unicode && npm run execute-code"
+    "process-all": "npm run convert-code-syntax && npm run typst-to-unicode && npm run execute-code"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.36.0",
