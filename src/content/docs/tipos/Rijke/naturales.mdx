@@ -1,7 +1,7 @@
 ---
 title: Números naturales
 typstImports: 
-  - ''#import "@preview/curryst:0.5.1": rule, prooftree'
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -9,66 +9,99 @@ import { Aside } from '@astrojs/starlight/components';
 ## La especificación formal
 
 El tipo $NN$ de **números naturales** es el ejemplo arquetípico de un tipo inductivo.
-Las reglas que postulamos para los números naturales vienen en cuatro conjuntos, como el 
-caso de los $Pi$ tipos:
+Las reglas que postulamos para el tipo de los números naturales vienen en cuatro conjuntos,
+al igual que las reglas para los $Pi$-tipos:
 
-1. La regla de formación, que afirman que el tipo $NN$ se puede formar.
-2. Las reglas de introducción, que nos dan un elemento cero $0_NN$ y la función sucesor 
+1. La regla de formación, que afirma que el tipo $NN$ pude ser formado.
+2. Las reglas de introducción, que nos dan el elemento cero $0_NN$ y la función sucesor
   $"succ"_NN$.
-3. La regla de eliminación. Esta es la versión de la teoría de tipos del principio de 
-  inducción para $NN$.
-4. Las reglas de computación, que afirman que la aplicación de la regla de eliminación
-  sobre los constructores $0_NN$ y $"succ"_NN$ se comporta como debería.
+3. La regla de eliminación. Esta regla es la versión de la teoría de tipos del principio 
+  de inducción para $NN$.
+4. Las reglas de computación, que afirman que cualquier aplicación de la regla de 
+  eliminación se comporta como debería sobre los constructores $0_NN$ y $"succ"_NN$ de $NN$.
 
 ## La regla de formación de ℕ
 
-El tipo $NN$ se forma mediante la **$NN$-regla de formación**:
-$ ()/(tack.r NN "type") $
-En otras palabras, postulamos que $NN$ es un tipo en el contexto vacío.
+El tipo $NN$ se forma mediante la regla de **$NN$-formación**:
+
+```typst
+#prooftree(
+  rule(
+    name: $NN"-form"$,
+    $tack.r NN "type"$,
+    $space$
+  )
+)
+```
+
+En otras palabras, se postula que $NN$ es un tipo en el contexto vacío.
 
 ## Las reglas de introducción de ℕ
 
-Las reglas de formación para $NN$ lo equipan con un **elemento cero** y una **función sucesor**:
-$ 
-text(#1.2em, mat(delim: #none, column-gap: #2em,   ()/(tack.r 0_NN: NN), ()/(tack.r "succ"_NN : NN arrow.r NN)   )) 
-$
+Las reglas de introducción para $NN$ lo equipan con un **elemento cero** y una 
+**función sucesor**:
 
-<div id="observacion-3-1-1">
-<Aside type="tip" title="Observacion 3.1.1">
-Todo elemento de la teoría de tipos siempore viene equipado con su tipo. Así, es posible 
-que en la teoría de tipos todos los elementos tengan un *único* tipo.
-En general, es buena práctica asegurarnos de que todo elemento tenga un nombre único, de 
-hecho, en la matemática formalizada con asistentes de prueba esto es un requisito.
-Por ejemplo, $0_NN$ tiene tipo $NN$ y no tiene también el tipo $ZZ$. Es por esto que 
-anotamos estos elementos con un sub-índice que indica su tipo.
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  prooftree(
+    rule(
+      $tack.r 0_NN: NN$
+    )
+  ),
+  prooftree(
+    rule(
+      $"succ"_NN: NN arrow.r NN$
+    )
+  )
+)
+```
+<div id="obsercacion-3-1-1">
+<Aside type="note" title="Observación 3.1.1">
+
+Todo elemento en la teoría de tipos viene equipado con su tipo. Así, es posible que en la 
+teoría de tipos todos los elementos tengan un *único* tipo. En general, es buena práctica 
+asegurarnos de que cada elemento tenga un nombre único. Por ejemplo, el elemento $0_NN$ 
+tiene tipo $NN$ y no tiene también el tipo $ZZ$.tipo $NN$ y no tiene también el tipoZZ$.
 </Aside>
 </div>
 
-## El principio de inducción en ℕ
+## El principio de inducción de ℕ
 
-El principio de inducción clásico sobre los números naturales nos dice qué necesitamos 
-para demostrar que $forall_((n in NN)) P(n)$ se cumple, para un predicado $P$ sobre $NN$.
-Recordemos que un predicado $P$ sobre un conjunto $X$ no es más que una proposición $P(x)$
-para cada $x in X$.
+El principio de inducción clásico de los números naturales nos dice qué tenemos que hacer
+para mostrar que $forall_((n in NN)) P(n)$ se cumple, para un predicado $P$ sobre $NN$.
+Recordemos que un predicado $P$ sobre el conjunto $X$ es sólo una proposición $P(x)$
+sobre un $x in X$ asrbitrario. 
+En la teoría de tipos dependiente podemos pensar a una familia de tipos $P$ sobre $NN$
+como un predicado sobre $NN$. Así, el principio de inducción para $NN$ se postula 
+usando una famlia de tipos $P$ sobre $NN$:
 
-En la teoría de tipos dependiente podemos pensar una familia de tipos $P$ sobre $NN$ como 
-un predicado sobre $NN$. El principio de inducción de $NN$ en la teoría de tipos es 
-formulado usando una familia de tipos $P$ sobre $NN$:
+```typst
+#prooftree(
+  rule(
+    name: $NN"-ind"$ ,
+    $Gamma tack.r "ind"_NN (p_0, p_S): Pi_((n: NN)) P(n)$,
+    table(
+      stroke: none,
+      columns: 1,
+      align: left,
+      $Gamma,n: NN tack.r P(n) "type"$,
+      $Gamma tack.r p_0: P(0_NN)$,
+      $Gamma tack.r p_S: Pi_((n: NN)) P(n) arrow.r P("succ"_NN (n))$
+    )
+  )
+)
+```
+En otras palabras, el principio de inducción de $NN$ de la teoría de tipos nos deice qué 
+necesitamos para construir una función dependiente $Pi_((n: NN)) P(n)$.  
+Como en el principio de inducción clásico, tenemos que construir dos cosas dada una 
+familia de tipos $P$ sobre $NN$: en el **caso base** necesitamos construir un elemento 
+de tipo $p_0: P(0_NN)$ y, para el **paso inductivo** necesitamos construir una funcipon 
+de tipo $P(n) arrow.r P("succ"_NN (n))$ para cada $n: NN$.
 
-$ 
-  ( mat(delim: #none, align: #left, row-gap: #0.5em,
-    Gamma"," n":" NN tack.r P(n) "type";
-    Gamma tack.r p_0 ":" P(0_NN);
-    Gamma tack.r p_S ":" Pi_((n: NN)) P(n) arrow.r P("succ"_NN (n)) 
-  ))/
-  (
-    Gamma tack.r "ind"_NN (p_0, p_S) : Pi_((n: NN)) P(n)
-  ) NN-"ind".
-$
+<div id="obsercacion-3-1-2">
+<Aside type="note" title="Observación 3.1.2">
 
-En otras palabras, el principio de inducción de la teoría de tipos para $NN$ nos dice 
-qué necesitamos para construir una función dependiente $Pi_((n: NN)) P(n)$. Como en 
-el principio de inducción clásico hay dos cosas que se deben construir dada una familia 
-de tipos $P$ sobre $NN$: en el **caso base** debemos construir un elemento $p_0: P(0_NN)$ y,
-para el **paso inductivo** necesitamos construir una función de tipo 
-$P(n) arrow.r P("succ"_NN (n))$ para cada $n : NN$.
+</Aside>
+</div>

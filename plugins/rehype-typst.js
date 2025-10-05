@@ -125,6 +125,9 @@ export default function rehypeTypstCustom() {
               code = code.replace(/[\u201C\u201D]/g, '"');
               code = code.replace(/[\u2018\u2019]/g, "'");
 
+              // Get alignment from code node properties
+              const alignment = codeNode.properties?.dataAlign || 'center';
+
               try {
                 const svg = await renderTypstToSVG(code, false, true, importsString);
                 const root = fromHtmlIsomorphic(svg, { fragment: true });
@@ -142,7 +145,7 @@ export default function rehypeTypstCustom() {
                   parent.children[index] = {
                     type: 'element',
                     tagName: 'div',
-                    properties: { className: ['typst-display'] },
+                    properties: { className: ['typst-display', `typst-align-${alignment}`] },
                     children: [svgNode]
                   };
                 }

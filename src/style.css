@@ -58,6 +58,83 @@ starlight-menu-button svg {
   margin: 0 auto;
 }
 
+.typst-align-left {
+  text-align: left;
+}
+
+.typst-align-left svg {
+  margin: 0;
+}
+
+.typst-align-right {
+  text-align: right;
+}
+
+.typst-align-right svg {
+  margin: 0;
+}
+
+.typst-align-center {
+  text-align: center;
+}
+
+.typst-align-center svg {
+  margin: 0 auto;
+}
+
+/* Typst math rendering */
+.typst-inline {
+  display: inline-block !important;
+  vertical-align: middle;
+  font-size: inherit;
+}
+
+.typst-inline svg {
+  display: inline-block !important;
+  font-size: 1.2em;
+  width: auto !important;
+}
+
+.typst-display {
+  display: block !important;
+  text-align: center;
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.typst-display svg {
+  font-size: 1.5em;
+  width: auto !important;
+  max-width: none;
+  min-width: 0;
+  display: inline-block;
+  margin: 0 auto;
+}
+
+.typst-align-left {
+  text-align: left;
+}
+
+.typst-align-left svg {
+  margin: 0;
+}
+
+.typst-align-right {
+  text-align: right;
+}
+
+.typst-align-right svg {
+  margin: 0;
+}
+
+.typst-align-center {
+  text-align: center;
+}
+
+.typst-align-center svg {
+  margin: 0 auto;
+}
 
 /* Dark mode support - invert SVG colors (only Typst math SVGs) */
 .typst-display > svg,
@@ -69,6 +146,7 @@ starlight-menu-button svg {
 :root[data-theme='dark'] .typst-inline > svg {
   filter: invert(1);
 }
+
 
 
 /* ExecutableCode component styles */

@@ -1,0 +1,85 @@
+---
+import { NodeCompiler } from '@myriaddreamin/typst-ts-node-compiler';
+
+const { file } = Astro.props;
+let compilerInstance;
+
+// Import the Typst file dynamically
+const TypstDoc = await import(/* @vite-ignore */ file);
+const Content = TypstDoc.default;
+
+// Render the HTML content to a string
+const htmlContent = await Content.render();
+
+/**
+ * Render Typst math expression to SVG
+ */
+async function renderMathToSVG(code, displayMode = false) {
+  const compiler = compilerInstance || (compilerInstance = NodeCompiler.create());
+
+  const template = displayMode
+    ? `#set page(height: auto, width: auto, margin: 0pt)\n$ ${code} $`
+    : `#set page(height: auto, width: auto, margin: 0pt)\n$${code}$`;
+
+  try {
+    const docRes = compiler.compile({ mainFileContent: template });
+
+    if (!docRes.result) {
+      console.error('Typst math compilation failed');
+      return null;
+    }
+
+    const svg = compiler.svg(docRes.result);
+    compiler.evictCache(10);
+
+    // Extract just the math SVG content
+    const match = svg.match(/<svg[^>]*>(.*?)<\/svg>/s);
+    return match ? svg : null;
+  } catch (error) {
+    console.error('Error rendering math:', error);
+    return null;
+  }
+}
+
+// Extract text content from HTML
+const parser = new DOMParser();
+const doc = parser.parseFromString(htmlContent, 'text/html');
+const textContent = doc.body.textContent || '';
+
+// Find all math expressions in the text
+const mathExpressions = [];
+const inlineMathRegex = /\$([^$\n]+)\$/g;
+const displayMathRegex = /\$\$([^$]+)\$\$/g;
+
+let match;
+while ((match = displayMathRegex.exec(textContent)) !== null) {
+  mathExpressions.push({ code: match[1].trim(), display: true, placeholder: match[0] });
+}
+
+while ((match = inlineMathRegex.exec(textContent)) !== null) {
+  // Skip if it's part of display math
+  if (!mathExpressions.some(m => m.placeholder.includes(match[0]))) {
+    mathExpressions.push({ code: match[1].trim(), display: false, placeholder: match[0] });
+  }
+}
+
+// Render all math expressions
+const renderedMath = await Promise.all(
+  mathExpressions.map(async ({ code, display, placeholder }) => {
+    const svg = await renderMathToSVG(code, display);
+    return { placeholder, svg, display };
+  })
+);
+
+// Replace math placeholders with SVG in HTML
+let processedHtml = htmlContent;
+for (const { placeholder, svg, display } of renderedMath) {
+  if (svg) {
+    const className = display ? 'typst-display' : 'typst-inline';
+    const wrapper = `<span class="${className}">${svg}</span>`;
+    processedHtml = processedHtml.replace(placeholder, wrapper);
+  }
+}
+---
+
+<div set:html={processedHtml} />

@@ -1,0 +1,74 @@
+---
+title: Escribiendo en Typst
+sidebar:
+  order: 1
+---
+
+## Headings
+Typst usa markup simple para la mayoría de tareas de formateo de documentos. Para 
+añadir un titular usamos el caracter `=` y, para enfatizar un texto con itálicas lo
+encerramos entre `_`.
+
+```typst :eval false
+= Introducción
+Esta es la introducción
+
+```
+
+```typst :align left
+= Introducción 
+Esta es la introducción
+```
+Para añadir un nuevo párrafo, simplemente añadimos una línea en blanco entre dos líneas 
+de texto. Si el párrafo necesita un sub-titular podemos escribir `==` en lugar de `=`. 
+El número de caracteres `=` determina el nivel del titular.
+
+También podemos escribir listas numeradas. Para cada elemento de la lista usamos un `+`
+al principio de la línea. Typst automáticamente numera los elementos:
+
+```typst :eval false :align left
++ El clima
++ La topografía
++ La geología
+```
+
+```typst :align left
++ El clima
++ La topografía
++ La geología
+```
+
+Si queremos una lista con bullets usamos el caracter `-` en lugar de `+`. Podemos también 
+anidar listas:
+
+```typst :eval false
++ El clima 
+  - Temperatura
+  - Precipitación
++ La topografía
++ La geología 
+```
+
+```typst :align left
++ El clima 
+  - Temperatura
+  - Precipitación
++ La topografía
++ La geología 
+```
+
+## Añadir figuras
+Typst reserva los símbolos de markup solamente para las cosas más comunes. Lo demás se 
+inserta usando funciones. Para que mostremos una imagen en nuestra página usamos la función
+`image`:
+
+```typst :eval false
+#image("public/favicon.svg")
+```
+
+
+```typst
+#image("public/favicon.svg", width: 5em)
+```
+
+

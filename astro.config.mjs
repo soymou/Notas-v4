@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import starlightSiteGraph from 'starlight-site-graph'
 import remarkTypst from "./plugins/remark-typst.js";
 import rehypeTypst from "./plugins/rehype-typst.js";
 import starlightThemeObsidian from 'starlight-theme-obsidian'
@@ -14,7 +13,9 @@ export default defineConfig({
 		remarkPlugins: [
 			remarkTypst
 		],
-		rehypePlugins: [rehypeTypst],
+		rehypePlugins: [
+			rehypeTypst,
+		],
 	},
 	integrations: [
 		starlight({
@@ -40,11 +41,18 @@ export default defineConfig({
 			sidebar: [
 				{
 					label: 'Teoría de tipos',
+					collapsed: true,
 					autogenerate: { directory: 'tipos' },
 				},
 				{
 					label: "Teoría de categorías",
+					collapsed: true,
 					autogenerate: { directory: "categorias" },
+				},
+				{
+					label: "Typst",
+					collapsed: true,
+					autogenerate: { directory: "typst" },
 				}
 			],
 		}),
