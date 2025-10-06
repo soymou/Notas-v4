@@ -68,11 +68,12 @@ async function renderTypstToSVG(
 
   if (isCodeBlock) {
     // For code blocks, user provides complete Typst code
-    template = `${imports}#set page(height: auto, width: ${pageWidth}, margin: 0pt)\n${code}`;
+    // Add margin to prevent cutoff at edges
+    template = `${imports}#set page(height: auto, width: ${pageWidth}, margin: (top: 5pt, bottom: 5pt, left: 0pt, right: 0pt))\n${code}`;
   } else if (displayMode) {
-    template = `#set page(height: auto, width: ${pageWidth}, margin: 0pt)\n$ ${code} $`;
+    template = `#set page(height: auto, width: ${pageWidth}, margin: (top: 5pt, bottom: 5pt, left: 0pt, right: 0pt))\n$ ${code} $`;
   } else {
-    template = `#set page(height: auto, width: ${pageWidth}, margin: 0pt)\n$${code}$`;
+    template = `#set page(height: auto, width: ${pageWidth}, margin: (top: 5pt, bottom: 5pt, left: 0pt, right: 0pt))\n$${code}$`;
   }
 
   const docRes = compiler.compile({ mainFileContent: template });
@@ -144,8 +145,8 @@ export default function rehypeTypstCustom() {
           try {
             const percentWidth = detectPercentWidth(code);
             // If we have a percentage width, we need to give Typst a concrete page width in em units
-            // Using a reasonable default that represents the container width
-            const pageWidth = percentWidth ? '50em' : 'auto';
+            // Using a larger width to avoid cutting off content like lists
+            const pageWidth = percentWidth ? '200em' : 'auto';
             const { svgNode, usedFallback } = await compileToSvgNode(
               code,
               { isCodeBlock: true, importsString, pageWidth }
@@ -171,11 +172,11 @@ export default function rehypeTypstCustom() {
                   'width:100%;height:auto;max-width:100%;'
                 );
                 svgNode.properties['data-typst-width-percent'] = percentWidth;
-                adjustFontSizes(svgNode, scaleVar);
+                // Don't adjust font sizes - the image is already rendered at the correct size
                 // The wrapper width should be 100% (since the image is already at the desired percentage of the page)
                 wrapperStyle = appendStyle(
                   '',
-                  `width:100%;container-type:inline-size;--typst-percent:100;--typst-base-width:${widthEm}em;--typst-scale:calc(100 * 1% / ${widthEm}em);`
+                  `width:100%;`
                 );
               } else if (usedFallback) {
                 svgNode.properties.width = '100%';
@@ -183,8 +184,9 @@ export default function rehypeTypstCustom() {
                 svgNode.properties.style = appendStyle(svgNode.properties.style, 'width:100%;height:auto;');
                 svgNode.properties['data-typst-fallback'] = 'page-width-1em';
               } else {
-                svgNode.properties.height = `${heightEm}em`;
+                // Don't set explicit height, let it scale naturally
                 svgNode.properties.width = `${widthEm}em`;
+                delete svgNode.properties.height;
                 svgNode.properties.style = appendStyle(svgNode.properties.style, 'max-width:100%;height:auto;');
               }
 
@@ -252,8 +254,8 @@ export default function rehypeTypstCustom() {
               try {
                 const percentWidth = detectPercentWidth(code);
                 // If we have a percentage width, we need to give Typst a concrete page width in em units
-                // Using a reasonable default that represents the container width
-                const pageWidth = percentWidth ? '50em' : 'auto';
+                // Using a larger width to avoid cutting off content like lists
+                const pageWidth = percentWidth ? '200em' : 'auto';
                 const { svgNode, usedFallback } = await compileToSvgNode(
                   code,
                   { isCodeBlock: true, importsString, pageWidth }
@@ -279,11 +281,11 @@ export default function rehypeTypstCustom() {
                       'width:100%;height:auto;max-width:100%;'
                     );
                     svgNode.properties['data-typst-width-percent'] = percentWidth;
-                    adjustFontSizes(svgNode, scaleVar);
+                    // Don't adjust font sizes - the image is already rendered at the correct size
                     // The wrapper width should be 100% (since the image is already at the desired percentage of the page)
                     wrapperStyle = appendStyle(
                       '',
-                      `width:100%;container-type:inline-size;--typst-percent:100;--typst-base-width:${widthEm}em;--typst-scale:calc(100 * 1% / ${widthEm}em);`
+                      `width:100%;`
                     );
                   } else if (usedFallback) {
                     svgNode.properties.width = '100%';
@@ -291,8 +293,9 @@ export default function rehypeTypstCustom() {
                     svgNode.properties.style = appendStyle(svgNode.properties.style, 'width:100%;height:auto;');
                     svgNode.properties['data-typst-fallback'] = 'page-width-1em';
                   } else {
-                    svgNode.properties.height = `${heightEm}em`;
+                    // Don't set explicit height, let it scale naturally
                     svgNode.properties.width = `${widthEm}em`;
+                    delete svgNode.properties.height;
                     svgNode.properties.style = appendStyle(svgNode.properties.style, 'max-width:100%;height:auto;');
                   }
 

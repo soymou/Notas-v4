@@ -102,6 +102,23 @@ de tipo $P(n) arrow.r P("succ"_NN (n))$ para cada $n: NN$.
 
 <div id="obsercacion-3-1-2">
 <Aside type="note" title="Observación 3.1.2">
+Podemos presentar el principio de inducción de forma distinta con la siguiente regla de 
+inferencia
 
+```typst
+#prooftree(
+  rule(
+    $Gamma  tack.r "ind"_NN: P(0_NN) arrow.r ((  Pi_((n: NN)) P(n) arrow.r P("succ"_NN(n))) arrow.r Pi_((n: NN)) P(n))$,
+    $Gamma, n: NN tack.r P(n) "type"$
+  )
+)
+```
 </Aside>
 </div>
+
+En otras palabras, para cualquier familia de tipos $P$ sobre $NN$ hay una función 
+$"ind"_NN$ que toma dos argumentos, uno para el caso base y otro para el paso inductivo y 
+regresa una sección de $P$. 
+
+
+

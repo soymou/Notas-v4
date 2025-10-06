@@ -46,16 +46,18 @@ starlight-menu-button svg {
   text-align: center;
   margin: 1em 0;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
 }
 
 .typst-display svg {
   font-size: 1.5em;
   width: auto !important;
+  height: auto !important;
   max-width: none;
   min-width: 0;
   display: inline-block;
   margin: 0 auto;
+  overflow: visible !important;
 }
 
 .typst-align-left {
@@ -100,16 +102,18 @@ starlight-menu-button svg {
   text-align: center;
   margin: 1em 0;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
 }
 
 .typst-display svg {
   font-size: 1.5em;
   width: auto !important;
+  height: auto !important;
   max-width: none;
   min-width: 0;
   display: inline-block;
   margin: 0 auto;
+  overflow: visible !important;
 }
 
 .typst-align-left {

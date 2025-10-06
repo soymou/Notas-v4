@@ -1,24 +1,15 @@
----
-title: Escribiendo en Typst
-sidebar:
-  order: 1
----
 
-## Headings
+= Headings
 Typst usa markup simple para la mayoría de tareas de formateo de documentos. Para 
 añadir un titular usamos el caracter `=` y, para enfatizar un texto con itálicas lo
 encerramos entre `_`.
 
-```typst :eval false
+```typst
 = Introducción
 Esta es la introducción
-
 ```
+= Introducción
 
-```typst :align left
-= Introducción 
-Esta es la introducción
-```
 Para añadir un nuevo párrafo, simplemente añadimos una línea en blanco entre dos líneas 
 de texto. Si el párrafo necesita un sub-titular podemos escribir `==` en lugar de `=`. 
 El número de caracteres `=` determina el nivel del titular.
@@ -26,22 +17,20 @@ El número de caracteres `=` determina el nivel del titular.
 También podemos escribir listas numeradas. Para cada elemento de la lista usamos un `+`
 al principio de la línea. Typst automáticamente numera los elementos:
 
-```typst :eval false :align left
+```typst
 + El clima
 + La topografía
 + La geología
 ```
 
-```typst :align left
 + El clima
 + La topografía
 + La geología
-```
 
 Si queremos una lista con bullets usamos el caracter `-` en lugar de `+`. Podemos también 
 anidar listas:
 
-```typst :eval false
+```typst
 + El clima 
   - Temperatura
   - Precipitación
@@ -49,27 +38,21 @@ anidar listas:
 + La geología 
 ```
 
-```typst :align left
 + El clima 
   - Temperatura
   - Precipitación
 + La topografía
 + La geología 
-```
 
-## Añadir figuras
+== Añadir figuras
 Typst reserva los símbolos de markup solamente para las cosas más comunes. Lo demás se 
 inserta usando funciones. Para que mostremos una imagen en nuestra página usamos la función
 `image`:
 
-```typst :eval false
-#image("public/favicon.svg")
-```
-
-
 ```typst
-#image("public/favicon.svg")
+#image("Images/logo.svg")
 ```
+
 En general, una función produce una salida dado un conjunto de argumentos. Cuando 
 llamamos una función en markup, le damos argumentos y Typst inserta el resultado en el
 documento. En nuestro caso, la función `image` toma un argumento: el path a nuestro archivo.
@@ -80,14 +63,12 @@ La imagen insertada usa todo el ancho de nuestro documento. Para cambiar esto, p
 el argumento `width` a la función `image`. Este es un argumento con nombre y se especifica 
 como una pareja `name: value`. Si hay múltiples argumentos, estos se separan con comas.
 
-```typst :eval false
-#image("public/favicon.svg", width: 25%)
+```typst
+#image("Images/logo.svg", width: 50%)
 ```
 
+#image("Images/logo.svg", width: 50%)
 
-```typst :eval true
-#image("public/favicon.svg", width: 25%)
-```
 
 El argumento `width` es una *longitud relativa*. En nuestro caso, la especificamos con un 
 porcentaje de la página. También podríamos haber usado un valor absoluto como `1cm` o
@@ -102,23 +83,17 @@ de markup arbitrario. Para darle markup a una función hay que encerrarlo entre 
 cuadrados. A esta construcción se le llama un *content block*.
 
 
-```typst :eval false
+```typst
 #figure(
-  image("public/favicon.svg"),
+  image("Images/logo.svg"),
   caption: [Esta es una _caption_]
 )
 ```
 
-```typst
 #figure(
-  image("public/favicon.svg", width: 50%),
+  image("Images/logo.svg", width: 50%),
   caption: [Esta es una _caption_]
 ) <glaciar>
-```
-
-```typst
-hola @glaciar
-```
 
 
 
