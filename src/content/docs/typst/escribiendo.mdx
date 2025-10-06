@@ -68,7 +68,54 @@ inserta usando funciones. Para que mostremos una imagen en nuestra página usamo
 
 
 ```typst
-#image("public/favicon.svg", width: 5em)
+#image("public/favicon.svg")
 ```
+En general, una función produce una salida dado un conjunto de argumentos. Cuando 
+llamamos una función en markup, le damos argumentos y Typst inserta el resultado en el
+documento. En nuestro caso, la función `image` toma un argumento: el path a nuestro archivo.
+Para llamar una función en markup, primero necesitamos escribir el símbolo `#` seguido del
+nombre de la función. Después, encerramos los argumentos entre paréntesis.
+
+La imagen insertada usa todo el ancho de nuestro documento. Para cambiar esto, podemos pasar
+el argumento `width` a la función `image`. Este es un argumento con nombre y se especifica 
+como una pareja `name: value`. Si hay múltiples argumentos, estos se separan con comas.
+
+```typst :eval false
+#image("public/favicon.svg", width: 25%)
+```
+
+
+```typst :eval true
+#image("public/favicon.svg", width: 25%)
+```
+
+El argumento `width` es una *longitud relativa*. En nuestro caso, la especificamos con un 
+porcentaje de la página. También podríamos haber usado un valor absoluto como `1cm` o
+`0.7in`. 
+Como el texto, la imagen está alineada a la izquierda de la página por defecto. También le 
+falta una caption. Lo podemos arreglar con la función `figure`. Esta función toma 
+el contenido como argumento posicional y una caption opcional como un argumento nombrado.
+
+Dentro de la lista de argumentos de la función `figure`, Typst ya está en modo código. Esto 
+significa que ya no necesitamos el `#` antes de llamar una función. El caption consiste 
+de markup arbitrario. Para darle markup a una función hay que encerrarlo entre paréntesis 
+cuadrados. A esta construcción se le llama un *content block*.
+
+
+```typst :eval false
+#figure(
+  image("public/favicon.svg"),
+  caption: [Esta es una _caption_]
+)
+```
+
+```typst
+#figure(
+  image("public/favicon.svg", width: 50%),
+  caption: [Esta es una _caption_]
+)
+```
+
+Si queremos seguir
 
 

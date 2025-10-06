@@ -4,7 +4,62 @@ import { fromHtmlIsomorphic } from 'hast-util-from-html-isomorphic';
 
 let compilerInstance;
 
-async function renderTypstToSVG(code, displayMode = false, isCodeBlock = false, importsString = '') {
+function appendStyle(existing, extra) {
+  if (!extra) return existing;
+  if (!existing || existing.length === 0) return extra;
+
+  const trimmed = `${existing}`.trim();
+  const needsSemicolon = trimmed.length > 0 && !trimmed.endsWith(';');
+  return `${trimmed}${needsSemicolon ? ';' : ''}${extra}`;
+}
+
+function detectPercentWidth(source = '') {
+  // Check for width: X% pattern (for set page or show rules)
+  let match = source.match(/width\s*:\s*\(?\s*([0-9]+(?:\.[0-9]+)?)\s*%/i);
+  if (match) return match[1];
+
+  // Check for image(..., width: X%) pattern
+  match = source.match(/image\s*\([^)]*width\s*:\s*([0-9]+(?:\.[0-9]+)?)\s*%/i);
+  if (match) return match[1];
+
+  return null;
+}
+
+function formatNumber(value) {
+  return Number.isFinite(value) ? Number.parseFloat(value.toFixed(6)) : value;
+}
+
+function adjustFontSizes(node, scaleVar) {
+  const fontSizeRegex = /font-size\s*:\s*([0-9.]+)([a-z%]+)/i;
+
+  const visitNode = (current) => {
+    if (!current || typeof current !== 'object') return;
+
+    const style = current.properties?.style;
+    if (style && style.includes('font-size')) {
+      current.properties.style = style.replace(fontSizeRegex, (match, value, unit) => {
+        if (match.includes('calc(')) return match;
+        return `font-size: calc(${value}${unit} / ${scaleVar})`;
+      });
+    }
+
+    if (current.children) {
+      current.children.forEach(visitNode);
+    }
+  };
+
+  visitNode(node);
+}
+
+async function renderTypstToSVG(
+  code,
+  {
+    displayMode = false,
+    isCodeBlock = false,
+    importsString = '',
+    pageWidth = 'auto'
+  } = {}
+) {
   const compiler = compilerInstance || (compilerInstance = NodeCompiler.create());
 
   let template;
@@ -13,11 +68,11 @@ async function renderTypstToSVG(code, displayMode = false, isCodeBlock = false, 
 
   if (isCodeBlock) {
     // For code blocks, user provides complete Typst code
-    template = `${imports}#set page(height: auto, width: auto, margin: 0pt)\n${code}`;
+    template = `${imports}#set page(height: auto, width: ${pageWidth}, margin: 0pt)\n${code}`;
   } else if (displayMode) {
-    template = `#set page(height: auto, width: auto, margin: 0pt)\n$ ${code} $`;
+    template = `#set page(height: auto, width: ${pageWidth}, margin: 0pt)\n$ ${code} $`;
   } else {
-    template = `#set page(height: auto, width: auto, margin: 0pt)\n$${code}$`;
+    template = `#set page(height: auto, width: ${pageWidth}, margin: 0pt)\n$${code}$`;
   }
 
   const docRes = compiler.compile({ mainFileContent: template });
@@ -31,6 +86,29 @@ async function renderTypstToSVG(code, displayMode = false, isCodeBlock = false, 
   compiler.evictCache(10);
 
   return svg;
+}
+
+async function compileToSvgNode(code, options, { allowFallback = true } = {}) {
+  const firstSvg = await renderTypstToSVG(code, options);
+  let root = fromHtmlIsomorphic(firstSvg, { fragment: true });
+  let svgNode = root.children?.[0];
+  let usedFallback = false;
+
+  const needsFallback = (node) => {
+    if (!node || !node.properties) return true;
+    const rawWidth = node.properties['dataWidth'] ?? node.properties.width;
+    const numericWidth = rawWidth !== undefined ? parseFloat(rawWidth) : NaN;
+    return Number.isNaN(numericWidth) || numericWidth <= 0;
+  };
+
+  if (allowFallback && needsFallback(svgNode)) {
+    const fallbackSvg = await renderTypstToSVG(code, { ...options, pageWidth: '1em' });
+    root = fromHtmlIsomorphic(fallbackSvg, { fragment: true });
+    svgNode = root.children?.[0];
+    usedFallback = true;
+  }
+
+  return { svgNode, usedFallback };
 }
 
 export default function rehypeTypstCustom() {
@@ -64,23 +142,66 @@ export default function rehypeTypstCustom() {
           }
 
           try {
-            const svg = await renderTypstToSVG(code, false, true, importsString);
-            const root = fromHtmlIsomorphic(svg, { fragment: true });
-            const svgNode = root.children[0];
+            const percentWidth = detectPercentWidth(code);
+            // If we have a percentage width, we need to give Typst a concrete page width in em units
+            // Using a reasonable default that represents the container width
+            const pageWidth = percentWidth ? '50em' : 'auto';
+            const { svgNode, usedFallback } = await compileToSvgNode(
+              code,
+              { isCodeBlock: true, importsString, pageWidth }
+            );
 
             if (svgNode) {
               const height = parseFloat(svgNode.properties['dataHeight'] || '11');
               const width = parseFloat(svgNode.properties['dataWidth'] || '11');
               const defaultEm = 11;
+              const widthEm = formatNumber(width / defaultEm);
+              const heightEm = formatNumber(height / defaultEm);
 
-              svgNode.properties.height = `${height / defaultEm}em`;
-              svgNode.properties.width = `${width / defaultEm}em`;
+              let fluid = usedFallback;
+              let wrapperStyle = '';
+              const scaleVar = 'var(--typst-scale)';
+
+              if (percentWidth) {
+                fluid = true;
+                svgNode.properties.width = `${widthEm}em`;
+                svgNode.properties.height = `${heightEm}em`;
+                svgNode.properties.style = appendStyle(
+                  svgNode.properties.style,
+                  'width:100%;height:auto;max-width:100%;'
+                );
+                svgNode.properties['data-typst-width-percent'] = percentWidth;
+                adjustFontSizes(svgNode, scaleVar);
+                // The wrapper width should be 100% (since the image is already at the desired percentage of the page)
+                wrapperStyle = appendStyle(
+                  '',
+                  `width:100%;container-type:inline-size;--typst-percent:100;--typst-base-width:${widthEm}em;--typst-scale:calc(100 * 1% / ${widthEm}em);`
+                );
+              } else if (usedFallback) {
+                svgNode.properties.width = '100%';
+                delete svgNode.properties.height;
+                svgNode.properties.style = appendStyle(svgNode.properties.style, 'width:100%;height:auto;');
+                svgNode.properties['data-typst-fallback'] = 'page-width-1em';
+              } else {
+                svgNode.properties.height = `${heightEm}em`;
+                svgNode.properties.width = `${widthEm}em`;
+                svgNode.properties.style = appendStyle(svgNode.properties.style, 'max-width:100%;height:auto;');
+              }
+
+              const wrapperClasses = ['typst-display'];
+              if (fluid) {
+                wrapperClasses.push('typst-fluid');
+              }
 
               // Replace the div with a typst-display div containing the SVG
+              const wrapperProperties = { className: wrapperClasses };
+              if (wrapperStyle) {
+                wrapperProperties.style = wrapperStyle;
+              }
               parent.children[index] = {
                 type: 'element',
                 tagName: 'div',
-                properties: { className: ['typst-display'] },
+                properties: wrapperProperties,
                 children: [svgNode]
               };
             }
@@ -129,23 +250,66 @@ export default function rehypeTypstCustom() {
               const alignment = codeNode.properties?.dataAlign || 'center';
 
               try {
-                const svg = await renderTypstToSVG(code, false, true, importsString);
-                const root = fromHtmlIsomorphic(svg, { fragment: true });
-                const svgNode = root.children[0];
+                const percentWidth = detectPercentWidth(code);
+                // If we have a percentage width, we need to give Typst a concrete page width in em units
+                // Using a reasonable default that represents the container width
+                const pageWidth = percentWidth ? '50em' : 'auto';
+                const { svgNode, usedFallback } = await compileToSvgNode(
+                  code,
+                  { isCodeBlock: true, importsString, pageWidth }
+                );
 
                 if (svgNode) {
                   const height = parseFloat(svgNode.properties['dataHeight'] || '11');
                   const width = parseFloat(svgNode.properties['dataWidth'] || '11');
                   const defaultEm = 11;
+                  const widthEm = formatNumber(width / defaultEm);
+                  const heightEm = formatNumber(height / defaultEm);
 
-                  svgNode.properties.height = `${height / defaultEm}em`;
-                  svgNode.properties.width = `${width / defaultEm}em`;
+                  let fluid = usedFallback;
+                  let wrapperStyle = '';
+                  const scaleVar = 'var(--typst-scale)';
+
+                  if (percentWidth) {
+                    fluid = true;
+                    svgNode.properties.width = `${widthEm}em`;
+                    svgNode.properties.height = `${heightEm}em`;
+                    svgNode.properties.style = appendStyle(
+                      svgNode.properties.style,
+                      'width:100%;height:auto;max-width:100%;'
+                    );
+                    svgNode.properties['data-typst-width-percent'] = percentWidth;
+                    adjustFontSizes(svgNode, scaleVar);
+                    // The wrapper width should be 100% (since the image is already at the desired percentage of the page)
+                    wrapperStyle = appendStyle(
+                      '',
+                      `width:100%;container-type:inline-size;--typst-percent:100;--typst-base-width:${widthEm}em;--typst-scale:calc(100 * 1% / ${widthEm}em);`
+                    );
+                  } else if (usedFallback) {
+                    svgNode.properties.width = '100%';
+                    delete svgNode.properties.height;
+                    svgNode.properties.style = appendStyle(svgNode.properties.style, 'width:100%;height:auto;');
+                    svgNode.properties['data-typst-fallback'] = 'page-width-1em';
+                  } else {
+                    svgNode.properties.height = `${heightEm}em`;
+                    svgNode.properties.width = `${widthEm}em`;
+                    svgNode.properties.style = appendStyle(svgNode.properties.style, 'max-width:100%;height:auto;');
+                  }
+
+                  const wrapperClasses = ['typst-display', `typst-align-${alignment}`];
+                  if (fluid) {
+                    wrapperClasses.push('typst-fluid');
+                  }
 
                   // Replace the pre node with a div containing the SVG
+                  const wrapperProperties = { className: wrapperClasses };
+                  if (wrapperStyle) {
+                    wrapperProperties.style = wrapperStyle;
+                  }
                   parent.children[index] = {
                     type: 'element',
                     tagName: 'div',
-                    properties: { className: ['typst-display', `typst-align-${alignment}`] },
+                    properties: wrapperProperties,
                     children: [svgNode]
                   };
                 }
@@ -190,7 +354,10 @@ export default function rehypeTypstCustom() {
             const isDisplayMode = isMathDisplay;
 
             try {
-              const svg = await renderTypstToSVG(code, isDisplayMode, false, importsString);
+              const svg = await renderTypstToSVG(code, {
+                displayMode: isDisplayMode,
+                importsString
+              });
               const root = fromHtmlIsomorphic(svg, { fragment: true });
               const svgNode = root.children[0];
 
@@ -201,6 +368,9 @@ export default function rehypeTypstCustom() {
 
                 svgNode.properties.height = `${height / defaultEm}em`;
                 svgNode.properties.width = `${width / defaultEm}em`;
+                if (isDisplayMode) {
+                  svgNode.properties.style = appendStyle(svgNode.properties.style, 'max-width:100%;height:auto;');
+                }
 
                 if (isDisplayMode) {
                   node.tagName = 'div';

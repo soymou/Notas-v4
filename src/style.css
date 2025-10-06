@@ -147,6 +147,38 @@ starlight-menu-button svg {
   filter: invert(1);
 }
 
+/* Dark mode support for astro-typst package */
+:root[data-theme='dark'] svg.typst-doc {
+  filter: invert(1);
+}
+
+/* Dark mode support for HTML mode with math frames (html.frame renders as img.typst-frame) */
+:root img.typst-frame {
+  display: block;
+  margin: 0 auto;
+}
+
+:root .typst-inline img.typst-frame {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.25em;
+}
+
+:root .typst-display img.typst-frame {
+  display: block;
+  margin: 0 auto;
+}
+
+:root[data-theme='dark'] img.typst-frame {
+  filter: invert(1);
+}
+
+:root[data-theme='dark'] .typst-display {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
 
 
 /* ExecutableCode component styles */

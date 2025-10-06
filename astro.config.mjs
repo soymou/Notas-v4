@@ -6,6 +6,7 @@ import rehypeTypst from "./plugins/rehype-typst.js";
 import starlightThemeObsidian from 'starlight-theme-obsidian'
 import starlightUtils from '@lorenzo_lewis/starlight-utils';
 import mdx from '@astrojs/mdx';
+import { typst } from 'astro-typst';
 
 // https://astro.build/config
 export default defineConfig({
@@ -57,6 +58,17 @@ export default defineConfig({
 			],
 		}),
 		mdx(),
+		typst({
+			options: {
+				remPx: 14,
+			},
+			target: (id) => {
+				console.debug(`Detecting ${id}`);
+				if (id.endsWith('.html.typ') || id.includes('/html/'))
+					return "html";
+				return "svg";
+			},
+		}),
 	],
 	vite: {
 		define: {
