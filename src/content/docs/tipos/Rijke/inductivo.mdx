@@ -33,11 +33,12 @@ de inducción para los naturales.
 <Aside type="tip" title="Definición 4.2.1">
 Definimos el *tipo unidad* como un tipo *1* equipado con un término 
 $ star : 1, $
-que satisface el principio de inducición que dice que para cada familia de tipos 
+que satisface el principio de inducción que dice que para cada familia de tipos 
 $P(x)$ indizada por $star: 1$, hay una función 
 $ "ind"_1 : P(star) arrow.r Pi_((x: 1)) P(x) $
 para la cual, la regla de computación 
 $ "ind"_1 (p, star) equiv p $
+
 se cumple. De forma alternativa, una definición de una función dependiente 
 $f: Pi_((x: 1)) P(x)$ por inducción usando $p: P(star)$ puede presentarse vía 
 patrones como 
@@ -141,8 +142,51 @@ $ lambda f. lambda tilde(q). lambda p. tilde(q)(f(p)): (P arrow Q) arrow (not Q 
 
 ## Co-productos
 
+<div id="definicion-4-4-1">
+<Aside type="tip" title="Definición 4.4.1">
+Sean $A$ y $B$ tipos. Definimos el *co-producto+ $A + B$ como un tipo que viene 
+equipado con 
 
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $"inl": A arrow A + B$,
+  $"inr": B arrow A + B,$
+)
+```
+que satisface el principio de inducción que dice que para cada familia de 
+tipos $P(x)$ indizada por $x: A + B$, existe un término 
 
+$ "ind"_+ : (Pi_((x: A)) P("inl"(x))) arrow ((Pi_((y: B)) P("inr"(y))) arrow Pi_((z: A + B)) P(z))$
+
+para el cual las reglas de computación 
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $"ind"_+ (f, g, "inl"(x)) equiv f(x)$,
+  $"ind"_+ (f, g, "inr"(y)) equiv g(x)$
+)
+```
+se cumplen. Alternativamente, una definición de una función dependiente 
+$h: Pi_((x: A + B)) P(x)$ por inducción usando $f: Pi_((x: A)) P("inl"(x))$ y 
+$g: Pi_((y: B)) P("inr"(y))$ puede presentarse vía patrones como 
+
+$ h("inl"(x)) := f(x)  $
+$ h("inr"(y)) := g(y). $
+
+A veces escribimos $[f, g]$ en lugar de la función $"ind"_+ (f, g)$. El co-producto de
+dos tipos es también llamado *suma disjunta*.
+</Aside>
+</div>
+
+Por el principio de inducción para co-productos, obtenemos una función 
+
+$ "ind"_+ : (A arrow X) arrow ((B arrow X) arrow (A + B arrow X)) $
+
+para cualquier tipo $X$.
 
 
 
