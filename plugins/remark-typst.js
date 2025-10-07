@@ -1,88 +1,182 @@
 import { visit } from 'unist-util-visit';
 
 /**
- * Process a single text string and extract math expressions
- */
-function processTextNode(text) {
-  if (!text.includes('$')) return [{ type: 'text', value: text }];
-
-  const newNodes = [];
-  let lastIndex = 0;
-
-  const regex = /\$\$?([\s\S]+?)\$\$?/g;
-  let match;
-
-  while ((match = regex.exec(text)) !== null) {
-    const fullMatch = match[0];
-    const content = match[1];
-    const matchStart = match.index;
-    const matchEnd = matchStart + fullMatch.length;
-
-    // Add text before match
-    if (matchStart > lastIndex) {
-      newNodes.push({
-        type: 'text',
-        value: text.slice(lastIndex, matchStart)
-      });
-    }
-
-    // Determine if display mode
-    const isDoubleDollar = fullMatch.startsWith('$$');
-    const hasSpaces = /^\s+[\s\S]*\s+$/.test(content);
-    const isDisplay = isDoubleDollar || hasSpaces;
-    const cleanContent = content.trim();
-
-    // Escape curly braces for MDX
-    const escaped = cleanContent
-      .replace(/\{/g, '&#123;')
-      .replace(/\}/g, '&#125;');
-
-    // Create inline code node with class marker
-    newNodes.push({
-      type: 'inlineCode',
-      value: escaped,
-      data: {
-        hProperties: {
-          className: [isDisplay ? 'typst-math-display' : 'typst-math-inline']
-        }
-      }
-    });
-
-    lastIndex = matchEnd;
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    newNodes.push({
-      type: 'text',
-      value: text.slice(lastIndex)
-    });
-  }
-
-  return newNodes;
-}
-
-/**
  * Remark plugin to detect Typst math syntax and mark it for processing
  * - $math$ (no spaces) → inline
  * - $ math $ (with spaces) → display
  * - ```typst code ``` → typst code block
- * Handles multi-line by processing at paragraph level
  */
+
+function extractParam(meta, paramName, defaultValue) {
+  const match = meta?.match(new RegExp(`${paramName}\\s+(\\w+)`));
+  return match ? match[1] : defaultValue;
+}
+
+function shouldEvaluate(meta) {
+  const evalParam = meta?.match(/eval\s+(\w+)/);
+  return !evalParam || evalParam[1] !== 'false';
+}
+
+function buildTextMap(children) {
+  let fullText = '';
+  const nodeMap = [];
+
+  for (const child of children) {
+    const startPos = fullText.length;
+    if (child.type === 'text') {
+      fullText += child.value;
+      nodeMap.push({ startPos, endPos: fullText.length, node: child, type: 'text' });
+    } else {
+      fullText += '\uFFFC'; // Object replacement character
+      nodeMap.push({ startPos, endPos: fullText.length, node: child, type: 'node' });
+    }
+  }
+
+  return { fullText, nodeMap };
+}
+
+function tokenize(fullText, nodeMap) {
+  const tokens = [];
+  let i = 0;
+
+  while (i < fullText.length) {
+    const char = fullText[i];
+
+    if (char === '$') {
+      let dollarCount = 0;
+      while (i < fullText.length && fullText[i] === '$') {
+        dollarCount++;
+        i++;
+      }
+      tokens.push({ type: 'delim', value: '$'.repeat(dollarCount), pos: i - dollarCount });
+    } else if (char === '\uFFFC') {
+      const mapping = nodeMap.find(m => m.startPos === i);
+      tokens.push({ type: 'node', node: mapping?.node, pos: i });
+      i++;
+    } else {
+      let text = '';
+      while (i < fullText.length && fullText[i] !== '$' && fullText[i] !== '\uFFFC') {
+        text += fullText[i++];
+      }
+      tokens.push({ type: 'text', value: text, pos: i - text.length });
+    }
+  }
+
+  return tokens;
+}
+
+function findMatchingDelimiter(tokens, startIdx, delimLen) {
+  for (let j = startIdx + 1; j < tokens.length; j++) {
+    if (tokens[j].type === 'delim' && tokens[j].value.length === delimLen) {
+      return j;
+    }
+  }
+  return -1;
+}
+
+function extractTextRecursive(node) {
+  if (node.type === 'text') {
+    return node.value;
+  }
+  if (node.type === 'emphasis' || node.type === 'strong') {
+    const innerText = node.children.map(extractTextRecursive).join('');
+    return node.type === 'emphasis' ? `_${innerText}_` : `**${innerText}**`;
+  }
+  return '';
+}
+
+function collectContent(tokens, startIdx, endIdx, nodeMap) {
+  let content = '';
+  for (let j = startIdx; j < endIdx; j++) {
+    const t = tokens[j];
+    if (t.type === 'text' || t.type === 'delim') {
+      content += t.value;
+    } else if (t.type === 'node') {
+      // Check if it's an emphasis or strong node - if so, reconstruct the underscores
+      const mapping = nodeMap.find(m => m.startPos === t.pos);
+      if (mapping && (mapping.node.type === 'emphasis' || mapping.node.type === 'strong')) {
+        content += extractTextRecursive(mapping.node);
+      } else {
+        return null; // Other non-text nodes inside math are invalid
+      }
+    }
+  }
+  return content;
+}
+
+function createMathNode(content, delimLen) {
+  const isDoubleDollar = delimLen === 2;
+  const hasSpaces = /^\s+[\s\S]*\s+$/.test(content);
+  const isDisplay = isDoubleDollar || hasSpaces;
+  const cleanContent = content.trim();
+
+  // Escape special characters that MDX might interpret
+  const escaped = cleanContent
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\{/g, '&#123;')
+    .replace(/\}/g, '&#125;')
+    .replace(/"/g, '&quot;')
+    .replace(/_/g, '&#95;');
+
+  return {
+    type: 'inlineCode',
+    value: escaped,
+    data: {
+      hProperties: {
+        className: [isDisplay ? 'typst-math-display' : 'typst-math-inline']
+      }
+    }
+  };
+}
+
+function processTokens(tokens, nodeMap) {
+  const newChildren = [];
+  let idx = 0;
+
+  while (idx < tokens.length) {
+    const token = tokens[idx];
+
+    if (token.type === 'delim') {
+      const closeIdx = findMatchingDelimiter(tokens, idx, token.value.length);
+
+      if (closeIdx === -1) {
+        newChildren.push({ type: 'text', value: token.value });
+        idx++;
+        continue;
+      }
+
+      const content = collectContent(tokens, idx + 1, closeIdx, nodeMap);
+
+      if (content === null) {
+        newChildren.push({ type: 'text', value: token.value });
+        idx++;
+        continue;
+      }
+
+      newChildren.push(createMathNode(content, token.value.length));
+      idx = closeIdx + 1;
+    } else if (token.type === 'node') {
+      newChildren.push(token.node);
+      idx++;
+    } else {
+      newChildren.push({ type: 'text', value: token.value });
+      idx++;
+    }
+  }
+
+  return newChildren;
+}
+
 export default function remarkTypstMath() {
   return (tree) => {
-    // First pass: process code blocks with language 'typst'
+    // Process code blocks with language 'typst'
     visit(tree, 'code', (node) => {
       if (node.lang === 'typst' || node.lang?.startsWith('typst')) {
-        // Check for eval parameter in meta (e.g., ```typst eval=false)
-        const evalParam = node.meta?.match(/eval\s*(\w+)/);
-        const shouldEval = !evalParam || evalParam[1] !== 'false';
+        const shouldEval = shouldEvaluate(node.meta);
+        const alignment = extractParam(node.meta, ':align', 'center');
 
-        // Check for align parameter in meta (e.g., ```typst :align left)
-        const alignParam = node.meta?.match(/:align\s+(\w+)/);
-        const alignment = alignParam ? alignParam[1] : 'center';
-
-        // Mark the code block for Typst processing
         node.data = node.data || {};
         node.data.hProperties = node.data.hProperties || {};
         node.data.hProperties.className = shouldEval ? ['language-typst'] : ['language-typst', 'typst-no-eval'];
@@ -90,125 +184,15 @@ export default function remarkTypstMath() {
       }
     });
 
-    // Second pass: process text nodes inside strong/emphasis
-    visit(tree, ['strong', 'emphasis'], (node) => {
-      for (let i = 0; i < node.children.length; i++) {
-        const child = node.children[i];
-        if (child.type === 'text' && child.value.includes('$')) {
-          const newNodes = processTextNode(child.value);
-          if (newNodes.length > 1) {
-            node.children.splice(i, 1, ...newNodes);
-            i += newNodes.length - 1;
-          }
-        }
-      }
-    });
+    // Process paragraphs
+    visit(tree, 'paragraph', (node) => {
+      const { fullText, nodeMap } = buildTextMap(node.children);
 
-    // Third pass: process paragraphs to concatenate text across line breaks
-    visit(tree, 'paragraph', (node, index, parent) => {
-      if (!parent || index === null) return;
-
-      // Concatenate all text content from the paragraph
-      let fullText = '';
-      const childMap = [];
-
-      for (let i = 0; i < node.children.length; i++) {
-        const child = node.children[i];
-        const startPos = fullText.length;
-
-        if (child.type === 'text') {
-          fullText += child.value;
-          childMap.push({ start: startPos, end: fullText.length, child, index: i });
-        } else {
-          // Non-text node (like strong, emphasis) - use placeholder
-          fullText += '\0';
-          childMap.push({ start: startPos, end: startPos + 1, child, index: i });
-        }
-      }
-
-      // Check if paragraph contains any math
       if (!fullText.includes('$')) return;
 
-      const newChildren = [];
-      let lastIndex = 0;
+      const tokens = tokenize(fullText, nodeMap);
+      const newChildren = processTokens(tokens, nodeMap);
 
-      // Match $...$ patterns (use [\s\S] to match newlines)
-      const regex = /\$\$?([\s\S]+?)\$\$?/g;
-      let match;
-
-      while ((match = regex.exec(fullText)) !== null) {
-        const fullMatch = match[0];
-        const content = match[1];
-        const matchStart = match.index;
-        const matchEnd = matchStart + fullMatch.length;
-
-        // Add all children/text between lastIndex and matchStart
-        for (const item of childMap) {
-          // Skip if before our window
-          if (item.end <= lastIndex) continue;
-          // Stop if after our window
-          if (item.start >= matchStart) break;
-
-          if (item.child.type === 'text') {
-            // Calculate what portion of this text node to include
-            const textStart = Math.max(0, lastIndex - item.start);
-            const textEnd = Math.min(item.child.value.length, matchStart - item.start);
-            const portion = item.child.value.slice(textStart, textEnd);
-
-            if (portion) {
-              newChildren.push({ type: 'text', value: portion });
-            }
-          } else if (fullText[item.start] !== '\0') {
-            // Non-text node within range
-            newChildren.push(item.child);
-          } else if (item.start >= lastIndex && item.end <= matchStart) {
-            // Placeholder node fully within range
-            newChildren.push(item.child);
-          }
-        }
-
-        // Determine if display mode (has spaces after $ and before $)
-        const isDoubleDollar = fullMatch.startsWith('$$');
-        const hasSpaces = /^\s+[\s\S]*\s+$/.test(content);
-        const isDisplay = isDoubleDollar || hasSpaces;
-        const cleanContent = content.trim();
-
-        // Escape curly braces for MDX
-        const escaped = cleanContent
-          .replace(/\{/g, '&#123;')
-          .replace(/\}/g, '&#125;');
-
-        // Create inline code node with class marker
-        newChildren.push({
-          type: 'inlineCode',
-          value: escaped,
-          data: {
-            hProperties: {
-              className: [isDisplay ? 'typst-math-display' : 'typst-math-inline']
-            }
-          }
-        });
-
-        lastIndex = matchEnd;
-      }
-
-      // Add remaining children after last math
-      for (const item of childMap) {
-        if (item.end <= lastIndex) continue;
-
-        if (item.child.type === 'text') {
-          const textStart = Math.max(0, lastIndex - item.start);
-          const portion = item.child.value.slice(textStart);
-
-          if (portion) {
-            newChildren.push({ type: 'text', value: portion });
-          }
-        } else if (item.start >= lastIndex) {
-          newChildren.push(item.child);
-        }
-      }
-
-      // Replace paragraph children if we found math
       if (newChildren.length > 0) {
         node.children = newChildren;
       }

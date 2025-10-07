@@ -1,0 +1,28 @@
+---
+export type Props = {
+  initialCount: number;
+  message: string;
+};
+
+const { initialCount, message } = Astro.props;
+
+let count = initialCount;
+---
+
+<div>
+  <p>Counter: <span id="count">{count}</span></p>
+  <button id="increment">Increment</button>
+  <button id="msg">Alert</button>
+</div>
+
+<script is:inline define:vars={{ message }}>
+  const button = document.querySelector("button#increment");
+  const p = document.querySelector("#count");
+  button?.addEventListener("click", () => {
+    p.textContent = (parseInt(p.textContent) + 1).toString();
+  });
+  const msgBtn = document.querySelector("button#msg");
+  msgBtn?.addEventListener("click", () => {
+    alert(`Message from ${message}!`);
+  });
+</script>

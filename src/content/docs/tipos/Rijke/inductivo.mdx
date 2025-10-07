@@ -1,0 +1,150 @@
+---
+title: Más tipos inductivos
+sidebar:
+  order: 6
+typstImports: 
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+import { Aside } from '@astrojs/starlight/components';
+
+## La idea de los tipos inductivos
+
+Los tipos inductivos se especifican por sus _constructores_, un _principio de 
+inducción_ y sus _reglas de computación_:
+
+1. Los constructores dicen qué estructura tiene el tipo inductivo. Puede haber una 
+  cantidad finita de constructores, inclusive ninguno, en la especificación de 
+  un tipo inductivo.
+2. El principio de inducción especifica qué datos se deben dar para construir una 
+  sección de una familia de tipos arbitraria sobre el tipo inductivo. La idea es 
+  siempre la misma: para definir una función dependiente $f: Pi_((x: A)) B(x)$ 
+  necesitamos especificar el comportamiento de $f$ en los constructores de $A$.
+3. Las reglas de computación afirman que la sección definida inductivamente concuerda
+  en los constructores con los datos que se usaron para definir la sección. Así, 
+  hay una regla de computación para cada constructor.
+
+## El tipo unidad
+
+Un ejemplo sencillo de tipo inductivo es el _tipo unidad_ que tiene un sólo 
+constructor. Su principio de inducción es análogo a sólo el caso base del principio 
+de inducción para los naturales.
+
+<div id="definicion-4-2-1">
+<Aside type="tip" title="Definición 4.2.1">
+Definimos el *tipo unidad* como un tipo *1* equipado con un término 
+$ star : 1, $
+que satisface el principio de inducición que dice que para cada familia de tipos 
+$P(x)$ indizada por $star: 1$, hay una función 
+$ "ind"_1 : P(star) arrow.r Pi_((x: 1)) P(x) $
+para la cual, la regla de computación 
+$ "ind"_1 (p, star) equiv p $
+se cumple. De forma alternativa, una definición de una función dependiente 
+$f: Pi_((x: 1)) P(x)$ por inducción usando $p: P(star)$ puede presentarse vía 
+patrones como 
+$ f(star) := p. $
+</Aside>
+</div>
+
+Un caso especial de principio de inducción es cuando $P$ no depende de *1*. Si nos dan
+un tipo $A$, podemos debilitarlo para obtener una familia constante sobre *1* con 
+valor $A$. Entonces el principio de inducción del tipo unidad nos da una función 
+$ "ind"_1 : A arrow (1 arrow  A) $
+En otras palabras, el principio de inducción para el tipo unidad nos da para cada 
+$x: A$ una función $"pt"_x := "ind"_1(x): bold(1) arrow A$.
+
+## El tipo vacío
+
+El tipo vacío es un caso degenerado de un tipo inductivo. No viene equipado con 
+ningún constructor, y por tanto, no tiene reglas de computación. El principio de 
+inducción meramente dice que toda familia de tipos tiene una sección. En otras
+palabras: si asumimos que el tipo vacío tiene un término, entonces podemos probar
+cualquier cosa.
+
+<div id="definicion-4-3-1">
+<Aside type="tip" title="Definición 4.3.1">
+Definimos el *tipo vacío* como un tipo $emptyset$ que staisface el principio de 
+inducción que dice que para cada familia de tipos $P(x)$ indizada por $x: emptyset$,
+hay un término 
+$ "ind"_emptyset : Pi_((x: emptyset)) P(x) $
+De nuevo, es un caso especial del principio de inducción que tengamos una función 
+$ "ex-falso":= "ind"_emptyset : emptyset arrow A $
+para cada tipo $A$. Para obtener esta función, primero debilitamos $A$ para obtener
+una familia constante sobre $emptyset$ con valor $A$, y luego el principio de 
+inducción da la función deseseada. La función ex-falso puede usarse para derivar 
+cualquier consclusión después de derivar una contradicción.
+</Aside>
+</div>
+
+<div id="definicion-4-3-2">
+<Aside type="tip" title="Definición 4.3.2">
+Pra cada tipo $A$ definimos la *negación* de $A$ como 
+$ not A := A arrow emptyset. $
+También decimos que un tipo $A$ *está vacío* si viene equipado con un elemento
+de tipo $not A$. Así, definimos 
+$ "is-empty"(A) := A arrow emptyset. $
+</Aside>
+</div>
+
+<div id="observacion-4-3-3">
+<Aside type="note" title="Observación 4.3.3">
+Como $not A$ es el tipo de funciones de $A$ en $emptyset$, una demostración de 
+$not A$ se da asumiendo que se cumple $A$ y luego construyendo un elemento del 
+tipo vacío. En otras palabras, demostramos $not A$ asumiendo $A$ y derivando una 
+contradicción. Este estilo de demostración se llama *prueba de negación*.
+
+Las pruebas de negación no deben confundirse con las demostraciones por contradicción.
+Incluso si una demostración de negación involucra llegar a una contradicción, en 
+lógica, una *demostración por contradicción* de una proposición $P$ es un argumento 
+en el que concluimos que $P$ se cumple después de mostrar que $not P$ implica una 
+contradicción. En otras palabras, una demostración por contradicción usa el paso 
+lógico $not not P arrow.double P$, que también es llamado *eliminación de la doble
+negación*.
+En la teoría de tipos, el tipo $not not A$ es el tipo de funciones 
+$ (A arrow emptyset) arrow emptyset. $
+Este tipo es muy distinto del tipo $A$, y con las reglas de la teoría de tipos no 
+es posible construir una función $not not A arrow A$ a menos que sepamos más cosas 
+sobre $A$. 
+</Aside>
+</div>
+
+En la siguiente proposición mostramos como trabajar con la definición de la negación.
+
+<div id="proposicion-4-3-4"> 
+<Aside type="tip" title="Proposición 4.3.4" >
+Para cualesquiera dos tipos $P$ y $Q$, hay una función 
+$ (P arrow Q) arrow (not Q arrow not P) $ 
+
+_Demostración._ La función deseada es definida por $lambda$-abstracción, así que 
+empezamos asumiendo que tenemos una función $f: P arrow Q$. Luego, tenemos que 
+construir una función $not Q arrow not P$, que también es construida mediante 
+$lambda$-abstracción. Asumimos que tenemos $tilde(q): not Q$. Por nuestra definición
+de $not Q$, $tilde(q)$ es una función $Q arrow emptyset$. Ahora debemos construir
+un término de tipo $not P$, que es el tipo de funciones $P arrow emptyset$.
+Aplicamos $lambda$-abstracción una vez más, así que asumimos $p: P$. Ahora tenemos 
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $f: P arrow Q$,
+  $tilde(q): Q arrow emptyset$,
+  $p: P,$
+)
+```
+
+Como tenemos $f: P arrow Q$ y $p: P$, obtenemos $f(p): Q$. También, tenemos 
+$tilde(q): Q arrow emptyset$, así obtenemos $tilde(q)(f(p)): emptyset$. Esto completa
+la prueba. La función que construimos es 
+$ lambda f. lambda tilde(q). lambda p. tilde(q)(f(p)): (P arrow Q) arrow (not Q arrow not P) $
+</Aside>
+</div>
+
+## Co-productos
+
+
+
+
+
+
+
+

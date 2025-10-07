@@ -239,10 +239,15 @@ export default function rehypeTypstCustom() {
                 return;
               }
 
-              // Unescape HTML entities
+              // Unescape HTML entities (in reverse order of escaping)
               code = code
+                .replace(/&#95;/g, '_')
+                .replace(/&quot;/g, '"')
                 .replace(/&#123;/g, '{')
-                .replace(/&#125;/g, '}');
+                .replace(/&#125;/g, '}')
+                .replace(/&gt;/g, '>')
+                .replace(/&lt;/g, '<')
+                .replace(/&amp;/g, '&');
 
               // Convert smart quotes to straight quotes
               code = code.replace(/[\u201C\u201D]/g, '"');
@@ -345,10 +350,15 @@ export default function rehypeTypstCustom() {
               return;
             }
 
-            // Unescape HTML entities
+            // Unescape HTML entities (in reverse order of escaping)
             code = code
+              .replace(/&#95;/g, '_')
+              .replace(/&quot;/g, '"')
               .replace(/&#123;/g, '{')
-              .replace(/&#125;/g, '}');
+              .replace(/&#125;/g, '}')
+              .replace(/&gt;/g, '>')
+              .replace(/&lt;/g, '<')
+              .replace(/&amp;/g, '&');
 
             // Convert smart quotes to straight quotes
             code = code.replace(/[\u201C\u201D]/g, '"');
