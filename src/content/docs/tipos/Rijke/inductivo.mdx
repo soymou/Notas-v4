@@ -213,4 +213,66 @@ como
 </Aside>
 </div>
 
+<div id="proposicion-4-4-3">
+<Aside title="Proposición 4.4.3">
+Consideremos dos tipos $A$ y $B$ y supongamos que $B$ es vacío. Entonces hay una 
+función 
+$ (A + B) arrow A. $
+
+_Demostración._ Construiremos la función $(A + B) arrow A$ con el principio de 
+inducción para el co-producto $A + B$. Así, necesitamos construir dos funciones 
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $f: A arrow A$,
+  $g: B arrow A$
+)
+```
+La función $f$ es simplemente la identidad $id_A : A arrow A$ y, como asumimos que 
+$B$ es vacío, entonces tenemos una función $tilde(b): B arrow emptyset$, además,
+siempre tenemos la función $"ex-falso": emptyset arrow A$. Entonces podemos definir
+$g = "ex-falso" compose tilde(b)$ para completar la prueba.
+</Aside>
+</div>
+
+## El tipo de los enteros
+El conjunto de los enteros usualmente se define como un cociente sobre el conjunto 
+$NN times NN$, por la relación de equivalencia 
+$ ((n, m) tilde (n', m')) := (n + m', n' +m). $
+El problema es que no hay tipos cociente en la teoría de tipos dependientes de 
+Martin-Löf. 
+
+<div id="definicion-4-5-1">
+<Aside type="tip" title="Definición 4.5.1">
+Definimos a los *enteros* como el tipo $ZZ := NN + (bold(1) + NN)$. El tipo 
+de los enteros viene equipado con las funciones inclusión de los enteros positivos 
+y negativos.
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $"in-pos":= "inr" compose "inr" : NN arrow ZZ$,
+  $"in-neg":= "inl" : NN arrow ZZ $
+)
+```
+y con las constantes
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $-1_ZZ := "in-neg"(0_NN)$,
+  $0_ZZ := "inr"("inl"(star))$,
+  $1_ZZ := "in-pos"(0_NN)$
+)
+```
+</Aside>
+</div>
+
+La definición de los enteros como el co-producto $NN + (bold(1) + NN)$ pude 
+representarse visualmente como sigue:
+
 
