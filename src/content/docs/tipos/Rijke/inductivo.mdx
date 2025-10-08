@@ -186,9 +186,31 @@ Por el principio de inducción para co-productos, obtenemos una función
 
 $ "ind"_+ : (A arrow X) arrow ((B arrow X) arrow (A + B arrow X)) $
 
-para cualquier tipo $X$.
+para cualquier tipo $X$. Notemos que este caso especial del principio de inducción 
+para co-productos es muy similar a la regla de eliminación de la disyunción en
+la lógica de primer orden: si $P$, $P'$ y $Q$ son proposiciones, entonces 
+$ (P arrow Q) arrow ((P' arrow Q) arrow (P or P' arrow Q)) $
+En efecto, podemos pensar en las _proposiciones como tipos_ y los términos como 
+sus demostraciones constructivas. Bajo esta interpretación el co-producto es de hecho
+la disyunción.
 
+<div id="observacion-4-4-2">
+<Aside type="note" title="Observación 4.4.2">
+Una aplicación simple del principio de inducción para co-productos nos da un mapa 
+$ f + g : A + B arrow A' + B' $
+para cada $f: A arrow A'$ y $g: B arrow B'$. En efecto, el mapa $f + g$ se define 
+como
 
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $(f + g)("inl"(x)) := "inl"(f(x))$,
+  $(f + g)("inr"(y)) := "inr"(g(x))$
+)
+```
 
+</Aside>
+</div>
 
 
