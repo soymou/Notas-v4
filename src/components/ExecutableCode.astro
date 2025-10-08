@@ -8,16 +8,19 @@ interface Props {
   showOutput?: boolean;
   id?: string;
   session?: string;
+  filename?: string;
+  eval?: string;
 }
 
-const { language, code, output: manualOutput, showOutput = true, id, session } = Astro.props;
+const { language, code, output: manualOutput, showOutput = true, id, session, filename, eval: evalProp } = Astro.props;
+const shouldEval = evalProp !== 'false';
 
 // Strip leading and trailing newlines from code
 const cleanCode = code.replace(/^\n+|\n+$/g, '').trim();
 
-// Load outputs from JSON if id is provided
+// Load outputs from JSON if id is provided and eval is true
 let autoOutput = null;
-if (id && !manualOutput) {
+if (id && !manualOutput && shouldEval) {
   try {
     // Get filename from Astro.url
     const filename = Astro.url.pathname.split('/').filter(Boolean).pop() || 'index';
@@ -48,11 +51,12 @@ const highlightedOutput = cleanOutput ? await codeToHtml(cleanOutput, {
   <div class="code-section">
     <div class="code-header">
       <span class="language-label">{language}</span>
+      {filename && <span class="filename-label">{filename}</span>}
     </div>
     <div set:html={highlightedCode} />
   </div>
 
-  {showOutput && finalOutput && (
+  {showOutput && shouldEval && finalOutput && (
     <div class="output-section">
       <div class="output-header">
         <span class="output-label">Output</span>

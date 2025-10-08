@@ -210,6 +210,9 @@ starlight-menu-button svg {
   font-weight: 500;
   font-family: var(--sl-font, system-ui, sans-serif);
   border-bottom: 2px solid var(--sl-color-gray-5, #4a5568);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .code-header {
@@ -233,6 +236,13 @@ starlight-menu-button svg {
 .language-label,
 .output-label {
   font-size: 0.8125rem;
+}
+
+.filename-label {
+  font-size: 0.8125rem;
+  margin-left: auto;
+  opacity: 0.8;
+  font-weight: 400;
 }
 
 .code-section div,
@@ -262,6 +272,46 @@ starlight-menu-button svg {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.875rem;
   line-height: 1.7;
+}
+
+/* Apply similar styling to all code blocks (expressive-code) */
+.expressive-code {
+  margin: 1.5rem 0;
+}
+
+.expressive-code .frame {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--sl-color-gray-6, #2d3748) !important;
+}
+
+.expressive-code .frame.has-title .header,
+.expressive-code .frame.is-terminal .header {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: #1e2227 !important;
+  color: #e1e4e8;
+  border-bottom: 2px solid var(--sl-color-gray-5, #4a5568) !important;
+}
+
+/* Language header for code blocks (injected via JS) */
+.expressive-code .code-language-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: var(--sl-font, system-ui, sans-serif);
+  background: #1e2227;
+  color: #e1e4e8;
+  border-bottom: 2px solid var(--sl-color-gray-5, #4a5568);
+  text-transform: lowercase;
+}
+
+.expressive-code pre {
+  margin: 0 !important;
+  background: #24292e !important;
+  border-radius: 0 !important;
 }
 
 /* Multi-sidebar styling */

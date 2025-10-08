@@ -2,6 +2,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import remarkTypst from "./plugins/remark-typst.js";
+import { remarkExecutableCode } from "./src/plugins/remark-executable-code.js";
+import { remarkCodeOutput } from "./src/plugins/remark-code-output.js";
 import rehypeTypst from "./plugins/rehype-typst.js";
 import starlightThemeObsidian from 'starlight-theme-obsidian'
 import starlightUtils from '@lorenzo_lewis/starlight-utils';
@@ -12,7 +14,9 @@ import { typst } from 'astro-typst';
 export default defineConfig({
 	markdown: {
 		remarkPlugins: [
-			remarkTypst
+			remarkTypst,
+			remarkExecutableCode,
+			remarkCodeOutput
 		],
 		rehypePlugins: [
 			rehypeTypst,
@@ -36,6 +40,12 @@ export default defineConfig({
 						src: '/scripts/dropdown-arrow.js',
 					},
 				},
+				{
+					tag: 'script',
+					attrs: {
+						src: '/scripts/add-code-headers.js',
+					},
+				},
 			],
 			title: 'Junoy',
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/soymou' }],
@@ -49,6 +59,11 @@ export default defineConfig({
 					label: "Teoría de categorías",
 					collapsed: true,
 					autogenerate: { directory: "categorias" },
+				},
+				{
+					label: "Nix",
+					collapsed: true,
+					autogenerate: { directory: "nix" },
 				},
 				{
 					label: "Typst",

@@ -39,14 +39,57 @@ function extractCodeBlocks(content) {
     const idMatch = component.match(/\bid=["']([^"']+)["']/);
     const langMatch = component.match(/\blanguage=["']([^"']+)["']/);
     const sessionMatch = component.match(/\bsession=["']([^"']+)["']/);
+    const evalMatch = component.match(/\beval=["']([^"']+)["']/);
     const codeMatch = component.match(/code=\{`([\s\S]*?)`\}/);
 
+    // Skip blocks with eval="false"
+    if (evalMatch && evalMatch[1] === 'false') {
+      continue;
+    }
+
     if (idMatch && langMatch && codeMatch) {
+      // Don't trim - preserve indentation
+      const code = codeMatch[1];
       blocks.push({
         id: idMatch[1],
         language: langMatch[1],
-        code: codeMatch[1].trim(),
+        code: code,
         session: sessionMatch ? sessionMatch[1] : null,
+        position: match.index
+      });
+    }
+  }
+
+  // Method 1.5: Match CodeWithOutput components wrapping code blocks
+  const codeWithOutputRegex = /<CodeWithOutput[^>]*>([\s\S]*?)<\/CodeWithOutput>/g;
+
+  while ((match = codeWithOutputRegex.exec(content)) !== null) {
+    const wrapper = match[0];
+    const innerContent = match[1];
+
+    // Extract wrapper attributes
+    const idMatch = wrapper.match(/\bid=["']([^"']+)["']/);
+    const evalMatch = wrapper.match(/\beval=["']([^"']+)["']/);
+
+    // Skip if eval="false"
+    if (evalMatch && evalMatch[1] === 'false') {
+      continue;
+    }
+
+    // Extract code block from inner content (it's a regular markdown code block)
+    const codeBlockMatch = innerContent.match(/```(\w+)(?:\s+[^\n]*)?\n([\s\S]*?)```/);
+
+    if (idMatch && codeBlockMatch) {
+      const language = codeBlockMatch[1];
+      const code = codeBlockMatch[2];
+      // Remove only trailing newline, preserve indentation
+      const cleanCode = code.replace(/\n$/, '');
+
+      blocks.push({
+        id: idMatch[1],
+        language: language,
+        code: cleanCode,
+        session: null,
         position: match.index
       });
     }
@@ -57,7 +100,8 @@ function extractCodeBlocks(content) {
 
   while ((match = codeBlockRegex.exec(content)) !== null) {
     const meta = match[1];
-    const code = match[2].trim();
+    // Remove only trailing newline, preserve indentation
+    const code = match[2].replace(/\n$/, '');
 
     // Extract :key value or :key "value" pairs
     const attributes = {};
@@ -68,6 +112,11 @@ function extractCodeBlocks(content) {
       const key = attrMatch[1] || attrMatch[3];
       const value = attrMatch[2] || attrMatch[4];
       attributes[key] = value;
+    }
+
+    // Skip blocks with eval=false
+    if (attributes.eval === 'false') {
+      continue;
     }
 
     const language = attributes.language || 'python';
@@ -130,6 +179,20 @@ async function executeRust(code) {
   }
 }
 
+// Execute Nix code
+async function executeNix(code) {
+  try {
+    // Create temporary file
+    const tmpFile = `/tmp/temp_${Date.now()}.nix`;
+    await writeFile(tmpFile, code);
+    // Use --strict to fully evaluate thunks
+    const { stdout, stderr } = await execAsync(`nix-instantiate --eval --strict ${tmpFile}`);
+    return stdout || stderr;
+  } catch (error) {
+    return `Error: ${error.stderr || error.message}`;
+  }
+}
+
 // Execute code based on language
 async function executeCode(language, code) {
   switch (language.toLowerCase()) {
@@ -142,6 +205,8 @@ async function executeCode(language, code) {
     case 'rust':
     case 'rs':
       return await executeRust(code);
+    case 'nix':
+      return await executeNix(code);
     default:
       return `Unsupported language: ${language}`;
   }

@@ -4,6 +4,18 @@ export function remarkExecutableCode() {
   return (tree, file) => {
     let hasExecutableCode = false;
     const nodesToReplace = [];
+    let codeBlockCounter = 0;
+
+    // Extract filename from file path for auto-generated IDs
+    const getFilename = () => {
+      if (file.history && file.history.length > 0) {
+        const path = file.history[0];
+        const parts = path.split('/');
+        const filename = parts[parts.length - 1];
+        return filename.replace(/\.mdx?$/, '');
+      }
+      return 'code';
+    };
 
     visit(tree, 'code', (node, index, parent) => {
       // Check if the code block has lang="code"
@@ -27,23 +39,28 @@ export function remarkExecutableCode() {
       while ((match = attrRegex.exec(meta)) !== null) {
         const key = match[1] || match[3];
         const value = match[2] || match[4];
-        attributes[key] = value;
+        // Remove quotes from values if present
+        attributes[key] = value.replace(/^["']|["']$/g, '');
       }
 
       // If language is specified in meta, use it; otherwise default to python
       const language = attributes.language || 'python';
-      const id = attributes.id || null;
+
+      // Auto-generate ID if not provided
+      let id = attributes.id;
+      if (!id) {
+        codeBlockCounter++;
+        const filename = getFilename();
+        id = `${filename}-${codeBlockCounter}`;
+      }
+
       const session = attributes.session || null;
+      const filename = attributes.filename || null;
+      const evalCode = attributes.eval !== 'false'; // Default to true unless explicitly set to false
 
-      // Escape special characters for JavaScript template literal
-      // For raw: escape backslashes and backticks, and ${ to \${
-      const rawEscaped = node.value
-        .replace(/\\/g, '\\\\')
-        .replace(/`/g, '\\`')
-        .replace(/\$\{/g, '\\${');
-
-      // For cooked: just the original value (JavaScript will interpret it)
-      const cookedValue = node.value;
+      // Escape special characters for JavaScript string literal
+      // We'll use JSON.stringify to properly escape the string while preserving formatting
+      const escapedCode = JSON.stringify(node.value);
 
       // Store the replacement info instead of modifying immediately
       nodesToReplace.push({
@@ -68,12 +85,22 @@ export function remarkExecutableCode() {
               name: 'session',
               value: session,
             },
+            filename && {
+              type: 'mdxJsxAttribute',
+              name: 'filename',
+              value: filename,
+            },
+            !evalCode && {
+              type: 'mdxJsxAttribute',
+              name: 'eval',
+              value: 'false',
+            },
             {
               type: 'mdxJsxAttribute',
               name: 'code',
               value: {
                 type: 'mdxJsxAttributeValueExpression',
-                value: `\`${rawEscaped}\``,
+                value: escapedCode,
                 data: {
                   estree: {
                     type: 'Program',
@@ -82,18 +109,9 @@ export function remarkExecutableCode() {
                       {
                         type: 'ExpressionStatement',
                         expression: {
-                          type: 'TemplateLiteral',
-                          quasis: [
-                            {
-                              type: 'TemplateElement',
-                              value: {
-                                raw: rawEscaped,
-                                cooked: cookedValue,
-                              },
-                              tail: true,
-                            },
-                          ],
-                          expressions: [],
+                          type: 'Literal',
+                          value: node.value,
+                          raw: escapedCode,
                         },
                       },
                     ],
