@@ -275,4 +275,100 @@ y con las constantes
 La definición de los enteros como el co-producto $NN + (bold(1) + NN)$ pude 
 representarse visualmente como sigue:
 
+```typst
+#import "@preview/fletcher:0.5.8" as fletcher: diagram, node, edge
+
+#diagram(
+  $ 
+    & bold(1) edge("dr", ->) & & NN edge("dl", ->) \
+    NN edge("dr", ->) & & bold(1) + NN edge("dl", ->) & \
+    & ZZ & & 
+  $
+)
+```
+
+<div id="observacion-4-5-2">
+<Aside type="note" title="Observación 4.5.2">
+El tipo de los enteros es construido enteramente a partir de tipos inductivos, de 
+modo que es posible derivar un principio de inducción para él, que se puede usar 
+para definir las operaciones básicas sobre $ZZ$, como el mapa sucesor, adición y 
+multipicación. Este principio de inducción afirma que para cualquier familia de tipos
+$P$ sobre $ZZ$, podemos definir una función dependiente $f: Pi_((k: ZZ)) P(k)$
+recursivamente por 
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $f(-1_ZZ) := p_(-1)$,
+  $f("in-neg"("succ"_NN (n))) := p_(-S)(n, f("in-neg"(n)))$,
+  $f(0_ZZ) := p_0$,
+  $f(1_ZZ) := p_1$,
+  $f("in-pos"("succ"_NN (n))) := p_S (n, f("in-pos"(n))),$
+)
+```
+donde los tipos de $p_(-1), p_(-S), p_0, p_1$ y $p_S$ son
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $f(-1_ZZ) : P(-1_ZZ)$,
+  $f("in-neg"("succ"_NN (n))) : Pi_((n: NN)) P("in-neg"(n)) arrow P("in-neg"("succ"_NN (n)))$,
+  $f(0_ZZ) : P(0_ZZ)$,
+  $f(1_ZZ) : P(1_ZZ)$,
+  $f("in-pos"("succ"_NN (n))) : Pi_((n: NN)) P("in-pos"(n)) arrow P("in-pos"("succ"_NN (n))).$
+)
+```
+</Aside>
+</div>
+
+<div id="definicion-4-5-3">
+<Aside type="tip" title="Definición 4.5.3">
+Definimos la *función sucesor* en los enteros $"succ"_ZZ : ZZ arrow ZZ$ usando el 
+principio de inducción de la observación [4.5.2](#observacion-4-5-2), tomando 
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $"succ"_ZZ (-1_ZZ) := 0_ZZ$,
+  $"succ"_ZZ ("in-neg"("succ"_NN (n))) := "in-neg"(n)$,
+  $"succ"_ZZ (0_ZZ) := "in-pos"(1_NN)$,
+  $"succ"_ZZ ("in-pos"("succ"_NN (n))) := "in-pos"("succ"_NN (n)).$
+)
+```
+</Aside>
+</div>
+
+## Tipos par dependiente 
+
+Dada una familia de tipos $B$ sobre $A$, podemos considerar las parejas $(a,b)$ de 
+términos, donde $a: A$ y $b: B(a)$. Notemos que el tipo de $b$ depende de el primer 
+término en el par. Así, llamamos a un par así un *par dependiente* El tipo de este 
+tipo de pares es el tipo inductivo generado por los pares dependientes.
+
+<div id="definicion-4-6-1">
+<Aside type="tip" title="Definición 4.6.1">
+Consideremos una familia de tipos $B$ sobre $A$. El *tipo par dependiente* o *$Sigma$-tipo* se define como el tipo inductivo $Sigma_((x: A)) B(x)$ equipado con una 
+*función de emparejamiento*
+
+$ "pair" : Pi_((x: A)) ( B(x) arrow Sigma_((y: A)) B(y)). $
+</Aside>
+</div>
+
+El principio de inducción para $Sigma_((x: A)) B(x)$ afirma que para cualquier 
+familia de tipos $P(p)$ indizada por $p: Sigma_((x: A)) B(x)$, hay una función 
+$ "ind"_Sigma : (Pi_((x: A)) Pi_((y: B(x))) P ("pair"(x,y))) arrow (Pi_((z: Sigma_((x: A))))  P(z) ) $
+que satisface la regla de computación 
+$ "ind"_Sigma (g, "pair"(x,y)) equiv g(x,y). $
+Alternativamente, una definición de una función dependiente
+$f: Pi_((z: Sigma_((x: A)))) P(z) $ pude presentarse vía patrones como 
+$ f("pair"(x,y)) := g(x,y). $
+usualmente escribimos $(x,y)$ en lugar de $"pair"(x,y)$.
+
+
+
+
+
 
