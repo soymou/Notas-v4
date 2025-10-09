@@ -367,6 +367,72 @@ $f: Pi_((z: Sigma_((x: A)))) P(z) $ pude presentarse vía patrones como
 $ f("pair"(x,y)) := g(x,y). $
 usualmente escribimos $(x,y)$ en lugar de $"pair"(x,y)$.
 
+El principio de inducción para $Sigma$-tipos puede usarse para definir las funciones
+proyección
+
+<div id="definicion-4-6-2">
+<Aside type = "tip" title = "Definición 4.6.2">
+Consideremos un tipo $A$ y una familia de tipos $B$ sobre $A$.
+
+1. La *función primera proyección* $ "pr"_1 : (Sigma_((x: A)) B(x)) arrow A $ se define
+  por inducción como $ "pr"_1 (x, y) := x. $
+2. La *función segunda proyección* es una función dependiente
+  $ "pr"_2 : Pi_((p: Sigma_((x: A)) B(x))) B("pr"_1 (p)), $
+  se define por inducción como $ "pr"_2 (x, y) := y. $
+</Aside>
+</div>
+
+<div id="observacion-4-6-3">
+<Aside type = "note" title = "Observación 4.6.3">
+Si queremos construir una función $ f: Pi_((z: Sigma_((x: A)) B(x))) P(z) $
+por $Sigma$-inducción, entonces debemos asumir un par $(x, y)$ consistente de $x: A$ y 
+$y: B(x)$ y nuestra meta es construir un elemento de tipo $P(x, y)$. El principio de 
+inducción para $Sigma$-tipos es entonces el recíproco de la *operación de currying*,
+un concepto familiar de la teoría de lenguajes de programación, que está dado por la 
+función 
+$ "ev-pair": ( Pi_((z: Sigma_((x: A)) B(x) )) P(z) ) arrow (Pi_((x: A)) Pi_((y: B(x))) P(x, y)) $
+dada por $f mapsto lambda x. lambda y. f(x,y)$. El principio de inducción $"ind"_Sigma$
+es entonces conocido como la operación de *des-curryficación*.
+</Aside>
+</div>
+
+Un caso especial muy común de $Sigma$-tipo ocurre cunado $B$ es una familia constante 
+sobre $A$, i.e., cuando $B$ es sólo un tipo debilitado por $A$. En este caso, el tipo 
+$Sigma_((x: A)) B$ es el tipo de _pares ordinarios_ $(x, y)$ donde $x: A$ y $y: B$, 
+aquí, el tipo de $y$ no depende de $x$. El tipo de pares ordinarios $(x, y)$ que 
+consiste de $x: A$ y $y: B$ es por supuesto el _producto_ de $A$ y $B$, así que 
+los tipos productos aparecen com un caso especial de los $Sigma$-tipos, de la misma 
+manera en la que los tipos función fueron definidos como un caso especial de los 
+$Pi$-tipos.
+
+<div id="definicion-4-6-4">
+<Aside type = "tip" title = "Definción 4.6.4">
+Consideremos dos tipos $A$ y $B$. Entonces podemos definir el *producto cartesiano*
+$A times B$ de $A$ y $B$ como $ A times B := Sigma_((x: A)) B. $
+</Aside>
+</div>
+
+<div id="observacion-4-6-5">
+<Aside type = "note" title = "Observación 4.6.5">
+Como $A times B$ es definido como un $Sigma$-tipo, se sigue el los productos
+cartesianos también satisfacen el principio de inducción para $Sigma$-tipos. En este 
+caso especial, el principio de inducción para $A times B$ deice que para cada familia 
+de tipos $P$ sobre $A times B$ hay una función 
+$ "ind"_times : (Pi_((x: A)) Pi_((y: B)) P(x,y)) arrow (Pi_((z: A times B)) P(z)) $
+que satisface la regla de computación 
+$ "ind"_times (g, (x, y)) equiv g(x, y). $
+</Aside>
+</div>
+Los mapas de proyección se definen de manera similar a los mapas de proyección para los
+$Sigma$-tipos. Cuando uno piensa en proposiciones, el tipo $A times B$ es interpretado 
+como la conjunción de $A$ y $B$.
+
+
+
+
+
+
+
 
 
 
