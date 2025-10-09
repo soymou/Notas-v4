@@ -1,5 +1,5 @@
 ---
-title: Básicos de Nix
+title: Básicos del lenguaje Nix
 sidebar:
   order: 3
 ---
@@ -119,7 +119,7 @@ atributo.
   language="nix"
   id="tres"
   code={`let
-  \t attrset = { x = 1; };
+  attrset = { x = 1; };
 in 
   attrset.x`}
 />
@@ -162,8 +162,56 @@ es equivalente a
 ```code :language nix :eval false
 [ a.x a.y a.z ]
 ```
-Las atributos que se hacen disponibles con `with` sólo están en el scope sigueiendo
+Las atributos que se hacen disponibles con `with` sólo están en el scope siguiendo
 al `;`.
 
+## `inherit ...`
+`inherit` es una abreviación para asignar el valor de un nombre de un alcance
+existente al mismo nombre en un alcance anidado. Es por conveniencia, para evitar
+repetir el mismo nombre múltiples veces.
 
+```code :language nix :eval false 
+let 
+  x = 1;
+  y = 2;
+in 
+{
+  inherit x y;
+}
+```
 
+El fragmento 
+```code :language nix :eval false
+inherit x y;
+```
+es equivalente a 
+```code :language nix :eval false
+x = x; y = y;
+```
+Es también posible hacer `inherit` no nombres de un attribute set específico con 
+paréntesis (`inherit (...) ...`)
+
+```code :language nix :eval false
+let
+  a = { x = 1; y = 2; };
+in 
+{
+  inherit (a) x y; 
+}
+```
+El fragmento 
+```code :language nix :eval false
+inherit (a) x y;
+```
+es equivalente a 
+
+```code :language nix :eval false
+x = a.x; y = a.y;
+```
+`inherit` también funciona dentro de expresiones `let`.
+
+```code :language nix :eval false
+let 
+  inherit ({ x = 1; y = 2; }) x y;
+in [x y]
+```

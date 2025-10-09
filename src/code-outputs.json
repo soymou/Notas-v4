@@ -4,7 +4,7 @@
   "how-to-use::block-2": "x + y = 30\nx + y = 30",
   "how-to-use::python-example": "120",
   "how-to-use::lean-example": "42",
-  "how-to-use::setup": "Error: Traceback (most recent call last):\n  File \"/tmp/temp_1759895109208.py\", line 1, in <module>\n    import numpy as np\nModuleNotFoundError: No module named 'numpy'",
+  "how-to-use::setup": "Error: Traceback (most recent call last):\n  File \"/tmp/temp_1759972091224.py\", line 1, in <module>\n    import numpy as np\nModuleNotFoundError: No module named 'numpy'",
   "how-to-use::showcase-fibonacci": "0 1 1 2 3 5 8 13 21 34",
   "how-to-use::showcase-lean": "30",
   "how-to-use::showcase-rust": "Sum: 15\nDoubled: [2, 4, 6, 8, 10]",
@@ -13,6 +13,6 @@
   "how-to-use::showcase-data-3": "Original data: [23, 45, 12, 67, 34, 89, 56]\nMean: 46.57\nMedian: 45\nSorted: [12, 23, 34, 45, 56, 67, 89]\nMin: 12, Max: 89",
   "basicos-nix::uno": "2",
   "basicos-nix::dos": "3",
-  "basicos-nix::tres": "Error: error: syntax error, unexpected invalid token, expecting IN_KW or INHERIT\n       at /tmp/temp_1759895109664.nix:2:3:\n            1| let\n            2|   \\t attrset = { x = 1; };\n             |   ^\n            3| in",
+  "basicos-nix::tres": "1",
   "basicos-nix::cuatro": "[ 1 2 3 ]"
 }
