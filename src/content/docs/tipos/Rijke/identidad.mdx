@@ -1,0 +1,123 @@
+---
+title: Tipos identidad
+sidebar:
+    order: 7
+typstImports: 
+    - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+import { Aside } from '@astrojs/starlight/components';
+    
+Desde la perspectiva de los tipos como proposiciones donde las demostraciones son relevantes, ¡cómo deberíamos pensar
+la *igualdad* en la teoría de tipos? Dado un tipo $a$, y dos elementos $x,y: A$, la igualdad $x=y$ debe ser de nuevo
+un tipo. En efecto, queremos *usar* la teoría de tipos para demostrar igualdades. La teoría de tipos dependiente nos
+da un lugar adecuado para esto: el tipo identidad $x=y$ depende de $x, y: A$
+
+Entonces, si $x=y$ va a ser un tipo, ¿cómo deberíamos pensar sobre los elementos de $x=y$? Un elemento $p: x = y$
+es un observador de que $x$ y $y$ son elementos iguales de tipo $A$. En otras palabras, $p: x = y$ es una 
+*identificación* de $x$ y $y$. En el mundo donde las demostraciones son relevantes, podría haber muchos elementos 
+de tipo $x = y$, es decir, muchas identificaciones de $x$ y $y$. Y como $x = y$ es un tipo, podemos formar el tipo 
+$p = q$ para cualesquiera dos identificaciones $p, q: x = y$. Es decir, como $x = y$ es un tipo, en la teoría de 
+tipos también podemos probar cosas sobre las identificaciones y podemos usar la teoría de tipos para realizar 
+construcciones sobre ellas. Como veremos más adelante, a cada tipo le podemos dar estructura de grupoide.
+
+Claramente, el tipo igualdad no debe ser un tipo cualquiera que dependa de $x, y: A$. Entonces, ¿cómo formamos
+el tipo igualada y qué maneras hay de usar las identificaciones en la teoría de tipos? La respuesta a ambas preguntas
+es que formaremos el tipo igualdad como un *tipo inductivo*, generado por un sólo elemento reflexivo, que será una 
+identificación que identifica a $x$ consigo mismo. El principio de inducción nos dará una manera de realizar 
+construcciones sobre estas identificaciones, como concatenarlas, invertirlas y demás. Así, el tipo identidad 
+está equipado con un elemento reflexivo y posee la estructura que se genera por el principio de inducción y la 
+teoría de tipos. Esta construcción es elegante, hermosamente simple y muy lejos de ser trivial.
+
+La situación en la que dos elementos se pueden identificar en más de una manera es análoga a la situación en la 
+teoría de *homotopia*, donde dos puntos de un espacio pueden conectares por más de una trayectoria. En efecto, para 
+cualesquiera dons puntos $x$ y $y$ en un espacio, hay un espacio de *homotopías* entre ellos.
+
+## La definición inductiva de los tipos identidad
+
+<div id="definicion 5.1.1">
+<Aside type="tip" title="Definición 5.1.1">
+Consideremos un tipo $A$ y sea $a: A$. Entonces definimos el **tipo identidad**  de $A$ en $a$ como la familia 
+inductiva de tipos $a attach(a, br: A) x$ indizada por $x: A$, de la cual el constructor es 
+$ "refl"_a : a attach(=, br: A) a. $
+El principio de inducción para el tipo identidad postula que para cualquier familia de tipos $P(x, p)$ indizada 
+por $x: A$ y $p: a attach(=, br: A) x$, hay una función
+$ "ind-eq"_a : P(a, "refl"_a) arrow Pi_((x: A)) Pi_((p: a attach(=, br: A) x)) P(x, p) $
+que satisface $"ind-eq"_a (u, a, "refl"_a) equiv u$, dada $u: P(a, "refl"_a)$.
+
+Un elemento de tipo $a attach(=, br: A) x$ es también llamado una **identificación** de $a$ con $x$ o una 
+**trayectoria** de $a$ a $x$. El principio de inducción para los tipos identidad es a veces llamado 
+**eliminación de identificaciones** o **inducción de trayectorias**. También escribimos $"Id"_A$ para el tipo 
+identidad en $A$ y escribimos $a = x$ para el tipo de identificaciones de $a$ con $x$, omitiendo la referencia al 
+espacio ambiente $A$.
+</Aside>
+</div>
+
+<div id="observacion 5.1.2">
+<Aside type="note" title="Observación 5.1.2">
+Vemos que el tipo identidad no es un tipo inductivo cualquiera, como $NN, emptyset$ y $bold(1)$ por ejemplo, sino 
+una *familia* inductiva de tipos. Aunque tenemos un tipo $a attach(=, br: A) x$ para cada $x: A$, el constructor sólo
+nos da un elemento $"refl"_a: a attach(=, br: A) a$, que identifica a $a$ consigo mismo. El principio de inducción
+entonces dice que para probar algo sobre todas las identificaciones de $a$ con algún $x: A$, es suficiente probarlo 
+para $"refl"_a$ solamente. Veremos más adelante que este principio de inducción es suficientemente fuerte para 
+derivar muchos hechos familiares sobre la igualdad, por ejemplo, que es una relación de equivalencia y que todas 
+las funciones la preservan.
+
+</Aside>
+</div>
+
+
+<div id="observacion 5.1.3">
+<Aside type="tip" title="Observacíón 5.1.3">
+Como los tipos identidad requieren que nos acostumbremos a ellos, damos sus reglas formales. El tipo identidad es 
+formado por la regla de formación
+
+```typst
+#prooftree(
+    rule(
+       $Gamma, x: A tack.r a attach(=, br: A) x "type"$,
+       $Gamma tack.r a: A $
+    )
+)
+```
+El constructor del tipo identidad está dado por la regla de introducción:
+```typst
+#prooftree(
+    rule(
+       $Gamma tack.r "refl"_a : a attach(=, br: A) a$,
+       $Gamma tack.r a: A$
+    )
+)
+```
+
+El principio de inducción está dado por al regla de eliminación:
+
+```typst
+#prooftree(
+    rule(
+        $Gamma tack.r "ind-eq"_a : P(a, "refl"_a) arrow Pi_((x: A)) Pi_((p: a attach(=, br: A) x)) P(x, p)$,
+        $Gamma tack.r a: A$,
+        $Gamma, x: A, p: a attach(=, br: A) x tack.r P(x, p) "type"$,
+    )
+)
+```
+Y finalmente, la regla de computación es:
+
+```typst
+#prooftree(
+    rule(
+       $Gamma, u: P(a, "refl"_a) tack.r "ind-eq"_a (u, a, "refl"_a) equiv u: P(a, "refl"_a)$,
+       $Gamma tack.r a: A$,
+       $Gamma, x: A, p: a attach(=, br: A) x tack.r P(x, p) "type"$
+    )
+)
+```
+</Aside>
+</div>
+
+
+
+
+
+
+
+

@@ -54,7 +54,7 @@ function convertCodeBlocks(content) {
     const props = [`language="${language}"`];
     if (id) props.push(`id="${id}"`);
     if (session) props.push(`session="${session}"`);
-    props.push(`code={\`${code.trim()}\`}`);
+    props.push(`code={\`${code}\`}`);
 
     return `<ExecutableCode\n  ${props.join('\n  ')}\n/>`;
   });
