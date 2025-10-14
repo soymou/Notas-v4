@@ -114,9 +114,163 @@ Y finalmente, la regla de computación es:
 </Aside>
 </div>
 
+<div id="observacion 5.1.4">
+<Aside type="note" title="Observación 5.1.4">
+
+Uno podría preguntarse si es posible formar el tipo identidad en un tipo *variable* de tipo $A$, en lugar de un 
+elemento. Esto es ciertamente posible: como podemos formar el tipo identidad en cualquier contexto, podemos 
+formar el tipo identidad en una variable $x: A$ como sigue:
+
+```typst 
+#prooftree(
+    rule(
+       $Gamma, x: A, y: A tack.r x attach(=, br: A) y "type"$,
+       $Gamma, x: A tack.r x: A$
+    )
+)
+```
+De esta manera, obtenemos el tipo identidad "binario". Su constructor es también indizado por $x: A$. Tenemos 
+la siguiente regla de introducción 
+```typst
+#prooftree(
+    rule(
+       $Gamma, x: A tack.r "refl"_x : x attach(=, br: A) x$,
+       $Gamma, x: A tack.r x: A$
+    )
+)
+```
+y similarmente tenemos reglas de eliminación y computación.
+</Aside>
+</div>
 
 
+## La estructura de grupoide de los tipos
 
+Mostraremos que las identificaciones pueden ser *concatenadas* e *invertidas*, lo que corresponde a la transitividad
+y simetría del tipo identidad.
+
+<div id="definicion 5.2.1">
+<Aside type="note" title="Definición 5.2.1">
+Sea $A$ un tipo. Definimos la operación de **concatenación**
+$ "concat": Pi_((x, y, z: A)) (x = y) arrow ((y = z) arrow (x = z)) $
+Escribiremos $p dot q$ para $"concat"(p, q)$.
+
+*Construcción* Primero construimos una función
+$ f(x) : Pi_((y: A)) (x = y) arrow Pi_((z: A)) (y = z) arrow (x = z) $
+para cada $x: A$. Por el principio de inducción para tipos identidad, basta construir 
+$ f(x, x, "refl"_x): Pi_((z: A)) (x = z) arrow (z = z). $
+Aquí, tenemos la función $lambda z. "id"_ ((x = Z))$. La función $f(x)$ que obtenemos vía eliminación de identidades 
+está explícitamente definida como 
+$ f(x) := "ind-eq"_(x) (lambda z. "id") : Pi_((y: A)) (x = y) arrow Pi_((z: A)) (y = z) arrow (x = z). $
+
+Para terminar la construcción de concat, usamos el ejercicio 4.2 para cambiar el orden de la tercera y cuarta variable
+de $f$, es decir, definimos 
+$ "concat"_ (x, y, z) (p, q) := f(x, y, p, z, q) $ 
+</Aside>
+</div>
+
+<div id="definicion-5-2-2">
+<Aside type="tip" title="Definición 5.2.2">
+Sea $A$ un tipo. Definimos la **operación de inversión**
+$ "inv": Pi_((x, y: A)) (x = y) arrow (y = x) $
+
+La mayoría de las veces escribimos $p^(-1)$ en lugar de $"inv"(p)$.
+
+*Construcción* Por el principio de inducción para tipos identidad, es suficiente construir 
+$ "inv" ("refl" _x): x = x $
+para cada $x: A$. Así, tomamos $"inv"("refl") _x := "refl" _x$.
+</Aside>
+</div>
+
+La siguiente pregunta es si las operaciones de concatenación e inversión sobre identificaciones se comportan como 
+esperamos. Más concretamente: ¿es la concatenación de identificaciones asociativa?, ¿satisface las leyes de 
+unidad?, ¿es el inverso de una identificación inverso por ambos lados?
+
+Por ejemplo, en el caso de la asociatividad, estamos comparando las identificaciones 
+$ (p dot q) dot r " y " p dot (q dot r) $
+para cualesquiera $p: x = y$, $q: y = z$ y $r: z = w$ en un tipo $A$. Las reglas de computación para el tipo 
+identidad no son lo suficientemente fuertes para probar que $(p dot q) dot r$ y $p dot (q dot r)$ son juiciosamente
+iguales. Sin embargo, $(p dot q) dot r$ y $p dot (q dot r)$ son elementos del mismo tipo, ambos son identificaciones 
+de tipo $x = w$. Como el tipo identidad es un tipo como cualquier otro, podemos preguntarnos si hay una 
+*identificación*
+$ (p dot q) dot r = p dot (q dot r). $
+Esta es una idea muy útil: aunque a veces es imposible mostrar que dos elementos del mismo tipo son iguales en juicio,
+puede ser posible que esos elementos puedan ser *identificados*. En efecto, identificamos dos elementos construyendo
+un elemento del tipo identidad y podemos usar toda la teoría de tipos a nuestra disposición para construir dicho 
+elemento. De esta manera, podemos mostrar, por ejemplo, que la adición en los números naturales o en los enteros
+es asociativa y satisface las leyes de la unidad. Aquí mostraremos que la concatenación de identificaciones es 
+asociativa y satisface las leyes de la unidad.
+
+<div id="definicion-5-2-3">
+<Aside type="tip" title="Definición 5.2.3">
+Sea $A$ un tipo y consideremos tres identificaciones consecutivas 
+$ x =^p y =^q z =^r w $
+en $A$. Definimos el *asociador* 
+$ "assoc(p, q, r)": (p dot q) dot r = p dot (q dot r) $
+
+*Construcción* Por el principio de inducción para tipos identidad, es suficiente probar que
+$ Pi_((z: A)) Pi_((q: x = z)) Pi_((w: A)) Pi_((r: z=w)) ("refl" _x dot q) dot r  = "refl" _x dot (q dot r) $
+Sea $q: x = z$ y $r: z = w$. Notemos que por la regla de computación para tipos identidad, tenemos una igualdad 
+juiciosa $"refl" _x dot q equiv q$. Entonces concluimos que 
+$ ("refl" _x dot q) dot r equiv q dot r $
+Similarmente, tenemos la igualdad juiciosa $"refl" _x dot (q dot r) equiv q dot r$. Así, vemos que el lado 
+izquierdo y el lado derecho en 
+$ ("refl" _x dot q) dot r = "refl" _x dot (q dot r) $
+son juiciosamente iguales, de modo que simplemente podemos definir $"assoc"("refl" _x, q, r) := "refl" _(q dot r)$.
+</Aside>
+</div>
+
+<div id="definicion-5-2-4">
+<Aside type="tip" title="Definición 5.2.4">
+Sea $A$ un tipo. Definimos las operaciones de *leyes de unidad* derecha e izquierda, que asignan a cada $p: x = y$
+las identificaciones
+$ "left-unit"(p) : "refl" _x dot p = p $
+$ "right-unit"(p) : p dot "refl" _x. $
+respectivamente.
+
+*Construcción* Por eliminación de identificaciones, es suficiente construir 
+$ "left-unit"("refl" _x): "refl" _x dot "refl" _x = "refl" _x $
+$ "right-unit"("refl" _x): "refl" _x dot "refl" _x = "refl" _x. $
+en ambos casos, tomamos $"refl" _("refl" _x)$.
+</Aside>
+</div>
+
+<div id="definicion-5-2-5">
+<Aside type="tip" title="Definición 5.2.5">
+Sea $A$ un tipo. Definimos las *leyes de inversión* derechas e izquierdas 
+$ "left-inv"(p): p^(-1) dot p = "refl" _y $
+$ "right-inv"(p): p dot p^(-1) = "refl" _x $
+
+*Construcción* Por eliminación de identificaciones, es suficiente probar 
+$ "left-inv"("refl" _x): "refl"^(-1) _(x) dot "refl" _x = "refl" _x $
+$ "right-inv"("refl" _x): "refl" _x dot "refl"^(-1) _x = "refl" _x $
+Usando las reglas de computación vemos que 
+$ "refl"^(-1) _x dot "refl" _x equiv "refl" _x dot "refl" _x equiv "refl" _x, $
+de modo que definimos $"left-inv" ("refl" _x) := "refl" _("refl" _x)$. Similarmente, se sigue de las reglas de 
+computación que 
+$ "refl" _x dot "refl"^(-1) _x equiv "refl"^(-1) _x equiv "refl" _x $
+Así que definimos $"right-inv" ("refl" _x) := "refl" _("refl" _x)$.
+</Aside>
+</div>
+
+<div id="observacion-5-2-6">
+<Aside type="note" title="Observación 5.2.6">
+Hemos visto que el asociador, las leyes de la unidad y las leyes de la inversión todas se demuestran 
+construyendo una identificación de identificaciones. Y, por supuesto, no hay nada que nos detenga de considerar
+identificaciones de esas identificaciones. Podemos ir tan arriba como queramos en la torre de los *tipos identidad*,
+que se obtiene tomando tipos identidad de forma iterada.
+Los tipos identidad iterados dan tipos en la teoría homotópica de tipos que tienen una estructura muy intricada.
+Una forma importante de estudiar esta estructura es mediante los grupos de homotopía de los tipos, algo que poco a 
+poco iremos construyendo.
+</Aside>
+</div>
+
+## La acción de las funciones sobre las identificaciones
+Usando el principio de inducción de los tipos identidad, podemos mostrar que toda función preserva las 
+identificaciones. En otras palabras, toda función manda elementos identificados a objetos identificados. Notemos
+que esta es una forma de continuidad para funciones en la teoría de tipos: si hay una identificación que 
+identifica dos puntos $x$ y $y$ de un tipo $A$, entonces también hay una identificación entre los valores 
+$f(x)$ y $f(y)$ en el co-dominio de $f$.
 
 
 
