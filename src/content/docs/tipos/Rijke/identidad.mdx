@@ -272,6 +272,144 @@ que esta es una forma de continuidad para funciones en la teoría de tipos: si h
 identifica dos puntos $x$ y $y$ de un tipo $A$, entonces también hay una identificación entre los valores 
 $f(x)$ y $f(y)$ en el co-dominio de $f$.
 
+<div id ="definicion-5-3-1">
+<Aside type="tip" title="Definción 5.3.1">
+Sea $f: A arrow B$ una función. Definimos la **acción sobre trayectorias** de $f$ como una 
+operación 
+$ "ap"_f : Pi_((x, y: A)) (x = y) arrow (f(x) = f(y)). $
 
+Además, hay operaciones 
 
+$ "ap-id"_A : Pi_((x, y: A)) Pi_((p: x = y)) "ap"_("id"_A) (p) $
 
+$ "ap-comp" (f, g) : Pi_((x, y: A)) Pi_((p: x = y)) "ap" _g ("ap" _f (p)) = "ap" _(g compose f) (p) $
+
+*Construcción* Primero definimos $"ap"_f$ por el principio de inducción para tipos identidad,
+tomando 
+$ "ap_f" ("refl"_x) := "refl"_(f(x)). $
+
+Luego, construimos $"ap-id"_A$ por el principio de inducción para tipos identidad, tomando 
+$ "ap-id"_A ("refl"_x) := "refl"_("refl"_x). $
+
+Finalmente, construimos $"ap-comp" (f, g)$ por el principio de inducción para tipos 
+identidad, tomando 
+$ "ap-comp" (f, g, "refl"_x) := "refl"_("refl"_(g(f(x)))) $
+
+</Aside>
+</div>
+
+<div id="definicion-5-3-2">
+<Aside type="tip" title="Definción 5.3.2">
+Sea $f: A arrow B$ una función. Entonces hay identificaciones
+$ "ap-refl" (f, x) : "ap"_f ("refl"_x) = "refl"_(f(x)) $
+$ "ap-inv" (f, p): "ap"_f (p^(-1)) = "ap"_f (p)^(-1) $
+$ "ap-concat" (f, p, q): "ap"_f (p dot q) = "ap"_f (p) dot "ap"_f (q) $
+para cada $p: x = y$ y $q: x = y$.
+
+*Construcción* Para construir $"ap-refl" (f, x)$ simplemente observamos que 
+$"ap"_f ("refl"_x) equiv "refl"_(f(x))$, así que tomamos 
+
+$ "ap-refl" (f, x) := "refl"_("refl"_(f(x))). $
+
+Construimos $"ap-inv (f, p)"$ por eliminación de identificaciones sobre $p$, tomando 
+$ "ap-inv" (f, "refl"_x) := "refl"_("ap"_f ("refl")) $
+
+Finalmente, construimos $"ap-concat" (f, p, q)$ por eliminación de identificaciones sobre 
+$p$, tomando 
+
+$ "ap-concat" (f, "refl"_x, q) := "refl"_("ap"_f (q)). $
+</Aside>
+</div>
+
+## Transporte
+
+Los tipos dependientes tambíen bienen con una acción sobre las identificaciones, las
+funciones de *transporte*. Dada una identificación $p: x = y$ en el tipo base $A$, podemos 
+transportar cualquier elemento $b: B(x)$ a la fibra $B(y)$.
+
+<div id="definicion-5-4-1">
+<Aside type="tip" title="Definición 5.4.1">
+Sea $A$ un tipo y $B$ una familia de tipos sobre $A$. Construiremos una operación de 
+*transporte* 
+
+$ "tr"_B: Pi_((x, y: A)) (x = y) arrow (B(x) arrow B(y)) $
+
+*Construcción* Construimos $"tr"_B (p)$ por inducción sobre $p: x attach(=, br: A) y$, 
+tomando 
+$ "tr"_B ("refl"_x):= "id"_(B(x)). $
+</Aside>
+</div>
+
+Así, vemos que la teoría de tipos no puede distinguir entre elementos identificados $x$ y 
+$y,$ pues para cada familia de tipos $B$ sobre $A$, se obtiene un elemento de $B(y)$ a 
+partir de los elementos de $B(x)$.
+
+Como una aplicación de la función de transporte, podemos construir la acción *dependiente*
+sobre trayectorias de una función dependiente $f: Pi_((x: A)) B(x)$. Notemos que para
+una función dependiente $f$ de este tipo y una identificación $p: x attach(=, br: A) y$, 
+no hace sentido comparar directamente a $f(x)$ y $f(y)$, pues el tipo de $f(x)$ es $B(x)$,
+mientras que el tipo de $f(y)$ es $B(y)$, que puede no ser el mismo tipo. Sin embargo, 
+podemos primero *transportar* $f(x)$ a lo largo de $p$, de modo que obtengamos el elemento
+$"tr"_B (p, f(x))$ que es de tipo $B(y)$. Ahora podemos preguntarnos si sucede que 
+$"tr"_B (p, f(x)) = f(y)$. La acción dependiente sobre trayectorias de $f$ establece esta 
+identificación.
+
+<div id="definicion-5-4-2">
+<Aside type="tip" title="Definición 5.4.2">
+Dada una función dependiente $f: Pi_((a: A)) B(a)$ y una identificación $p: x = y$ en $A$,
+podemos construir una identificación 
+
+$ "apd"_f (p): "tr"_B (p, f(x)) = f(y). $
+
+*Construcción* La identificación $"apd"_f (p)$ se construye por el principio de inducción 
+para tipos identidad. Así, es suficiente construir una identificación 
+
+$ "apd"_f ("refl"_x): "tr"_B ("refl"_x, f(x)) = f(x). $
+
+Como transportar a lo largo de $"refl"_x$ es la función identidad en $B(x)$, simplemente 
+  tomamos $"apd"_f ("refl"_x) := "refl"_(f(x))$.
+</Aside>
+</div>
+
+## La unicidad de refl
+
+El tipo indentidad es una *familia* inductiva de tipos. Esto tiene unas implicaciones
+sutiles pero importantes. Por ejemplo, mientras que el tipo $a = x$ indizado por $x: A$
+es indutivamente generado por $"refl"_a$, el tipo #$a = a$ *no* está inductivamente 
+generado por $"refl"_a$. Así que no podemos usar el ptincipio de de inducción de los tipos 
+identidad para mostrar que $p = "refl"_a$ para cualquier $p: a = a$. El obstáculo que 
+no nos permite aplicar el principio de inducción para tipos identidad en este caso es que 
+el extremo $p: a = a$ no es libre.
+
+Sin embargo, el tipo $a = x$ está genereado por un solo elemento $"refl"_a : a = a$, así que 
+es natural preguantarse en qué sentido es la identificación $"refl"$ única. Una
+identificación con un elemento $a$ está especificada dando primero el extremo $x$ con el que 
+se busca identificar a $a$ y luego dando la identificación $p: a = x$. Entonces lo que 
+es único es el par $(a, "refl"_a)$ en el tipo de todos los pares
+
+$ (x, p): Sigma_((x: A)) a = x $
+
+Probamos este hecho en la siguiente proposición.
+
+<div id="proposicion-5-5-1">
+<Aside type="tip" title="Proposición 5.5.1">
+Consideremos un elemento $a: A$. Entonces hay una identificación 
+
+$ (a, "refl"_a) = y $
+en el tipo $Sigma_((x: A)) a = x$, para cualquier $y: Sigma_((x: A)) a = x$.
+
+*Demostración* Por $Sigma$-inducción, basta probar que hay una identificación 
+
+$ (a, "refl"_a) = (x, p) $
+
+para cada $x: A$ y $p: a = x$. Procedemos mediante el principio de inducción para tipos 
+identidad. Así, basta probar que 
+
+$ (a, "refl"_a) = (a, "refl"_a) $
+
+lo cual se obtiene mediante reflexividad.
+</Aside>
+</div>
+
+La proposición [5.5.1](#proposicion-5-5-1) muestra que, salvo identificaciones, hay un sólo 
+elemento en el $Sigma$-tipo del tipo identidad. A estos tipos les llamamos contraibles.
