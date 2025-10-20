@@ -25,8 +25,20 @@ async function findMdxFiles(dir) {
 }
 
 // Extract ExecutableCode blocks from MDX content
-function extractCodeBlocks(content) {
+function extractCodeBlocks(content, filepath) {
   const blocks = [];
+
+  // Get filename for auto-generated IDs
+  const getFilename = () => {
+    if (filepath) {
+      const parts = filepath.split('/');
+      const filename = parts[parts.length - 1];
+      return filename.replace(/\.mdx?$/, '');
+    }
+    return 'code';
+  };
+
+  let codeBlockCounter = 0;
 
   // Method 1: Match ExecutableCode components including attributes across multiple lines
   const componentRegex = /<ExecutableCode[\s\S]*?\/>/g;
@@ -120,18 +132,20 @@ function extractCodeBlocks(content) {
     }
 
     const language = attributes.language || 'python';
-    const id = attributes.id || null;
     const session = attributes.session || null;
 
-    if (id) {
-      blocks.push({
-        id,
-        language,
-        code,
-        session,
-        position: match.index
-      });
-    }
+    // Always auto-generate ID (same logic as remark plugin)
+    codeBlockCounter++;
+    const filename = getFilename();
+    const id = `${filename}-${codeBlockCounter}`;
+
+    blocks.push({
+      id,
+      language,
+      code,
+      session,
+      position: match.index
+    });
   }
 
   // Sort blocks by position to maintain order
@@ -159,10 +173,12 @@ async function executeLean4(code) {
     // Create temporary file
     const tmpFile = `/tmp/temp_${Date.now()}.lean`;
     await writeFile(tmpFile, code);
-    const { stdout, stderr } = await execAsync(`lean ${tmpFile}`);
-    return stderr || stdout;
+    const { stdout, stderr } = await execAsync(`lean ${tmpFile} 2>&1`);
+    // Lean outputs to stderr, return whichever has content
+    return (stderr || stdout || '').trim();
   } catch (error) {
-    return `Error: ${error.message}`;
+    // Return stderr if available, otherwise the error message
+    return (error.stderr || error.stdout || error.message).trim();
   }
 }
 
@@ -225,7 +241,7 @@ async function main() {
   for (const file of mdxFiles) {
     console.log(`\n📄 Processing: ${file}`);
     const content = await readFile(file, 'utf-8');
-    const blocks = extractCodeBlocks(content);
+    const blocks = extractCodeBlocks(content, file);
 
     if (blocks.length === 0) {
       console.log('  No executable code blocks found');

@@ -1,0 +1,41 @@
+---
+title: Universos
+sidebar: 
+  order: 8
+typstImports: 
+    - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+
+Para completar nuestra especificación so la teoría de tipos dependiente, introducimos los 
+universos de la teoría de tipos. Los universos se pueden pensar como tipos que consisten 
+de tipos. En realidad, un universo consiste de un tipo $cal(U)$ equipado con una familia de 
+tipos $cal(T)$ sobre $cal(U)$. Para cada $X: cal(U)$ pensamos a $X$ como una *codificación*
+del tipo $cal(T)(X)$. La familia de tipos $cal(T)$ es llamada una *familia universal de tipos.
+Hay varias razones para equipar a la teoría de tipos con universos. Una razón importante es 
+que nos permite definir nuevas familias de tipos sobre tipos inductivos, usando su 
+principio de inducción. Usamos esta manera de definir familias de tipos para definir muchas 
+relaciones familiares sobre $NN$, como las relaciones de orden $lt.eq$ y $lt$.
+
+También introducimos la relación $"Eq" _NN$ llamada la *igualdad observacional* en $NN$.
+Esta relación de equivalencia se puede usar para mostrar que $0_NN eq.not 1_NN$.
+
+La idea de introducir la igualdad observacional para un tipo en particular es que nos 
+debe poder ayudar a pensar cobre el tipo identidad. El tipo identidad fue introducido 
+de manera genérica y uniforme. Sin embargo, en casos específicos, tenemos una idea clara de 
+cómo *debe ser* la relación de igualdad. En el caso de los números naturales, por ejemplo, 
+usaremos la igualdad observacional $"Eq" _NN$ para caracterizar al tipo identidad de 
+$NN$. Caracterizar tipos identidad es uno de los temas principales de la teoría homotópica 
+de tipos.
+
+Una segunda razón para introducir universos es que nos permite definir muchos tipos de tipos 
+equipados con estructura. Uno de los ejemplos más importantes es el tipo de los grupos, que 
+es el tipo de tipos equipado con las operaciones de grupo que satisfacen las leyes de grupos 
+y para los cuales el tipo subyacente es un conjunto.
+
+## especificación de los universos de la teoría de tipos 
+
+Un universo consiste de un tipo $cal(U)$ cuyos elementos pueden pensarse como "códigos" 
+para tipos. Un universo también viene equipado con una familia de tipos $cal(T)$ indizada 
+por $cal(U)$. Dado un elemento $X: cal(U)$, ,pensamos en el tipo $cal(T)(X)$ como 
+el tipo de elementos de $X$. La familia $cal(T)$ es llamada la **familia universal de tipos**.
+

@@ -1,0 +1,17 @@
+---
+title: Empacando software existente
+sidebar: 
+  order: 4
+---
+
+Para empezar, consideremos este esqueleto de una derivación 
+
+```code :language nix :eval false 
+{stdenv}:
+
+stdenv.mkDerivation { }
+```
+Esta es una función que toma como entrada un conjunto de atributos que contiene 
+`stdenv` y produce una derivación (que actualmente no hace nada).
+
+

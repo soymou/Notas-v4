@@ -22,12 +22,20 @@ const cleanCode = code.replace(/^\n+|\n+$/g, '').trim();
 let autoOutput = null;
 if (id && !manualOutput && shouldEval) {
   try {
-    // Get filename from Astro.url
-    const filename = Astro.url.pathname.split('/').filter(Boolean).pop() || 'index';
-    const prefixedId = `${filename}::${id}`;
+    // Get filename from Astro.url - try both the last segment and 'index'
+    const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1] || 'index';
 
     const outputs = await import('../code-outputs.json');
+
+    // Try with last segment first, then try with 'index'
+    let prefixedId = `${lastSegment}::${id}`;
     autoOutput = outputs.default[prefixedId];
+
+    if (!autoOutput && lastSegment !== 'index') {
+      prefixedId = `index::${id}`;
+      autoOutput = outputs.default[prefixedId];
+    }
   } catch (e) {
     // File doesn't exist yet, that's okay
   }

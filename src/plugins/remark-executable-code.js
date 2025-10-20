@@ -1,4 +1,5 @@
 import { visit } from 'unist-util-visit';
+import { relative, dirname } from 'path';
 
 export function remarkExecutableCode() {
   return (tree, file) => {
@@ -15,6 +16,36 @@ export function remarkExecutableCode() {
         return filename.replace(/\.mdx?$/, '');
       }
       return 'code';
+    };
+
+    // Calculate relative import path from MDX file to component
+    const getRelativeImportPath = () => {
+      if (file.history && file.history.length > 0) {
+        const filePath = file.history[0];
+        const fileDir = dirname(filePath);
+
+        // Find the src directory in the path
+        const srcIndex = filePath.indexOf('/src/');
+        if (srcIndex !== -1) {
+          const srcPath = filePath.substring(0, srcIndex + 4); // +4 to include '/src'
+          const componentPath = srcPath + '/components/ExecutableCode.astro';
+
+          // Calculate relative path
+          let relativePath = relative(fileDir, componentPath);
+
+          // Ensure forward slashes
+          relativePath = relativePath.replace(/\\/g, '/');
+
+          // Ensure proper prefix
+          if (!relativePath.startsWith('.')) {
+            relativePath = './' + relativePath;
+          }
+
+          return relativePath;
+        }
+      }
+      // Fallback to original path
+      return '../../../components/ExecutableCode.astro';
     };
 
     visit(tree, 'code', (node, index, parent) => {
@@ -46,16 +77,13 @@ export function remarkExecutableCode() {
       // If language is specified in meta, use it; otherwise default to python
       const language = attributes.language || 'python';
 
-      // Auto-generate ID if not provided
-      let id = attributes.id;
-      if (!id) {
-        codeBlockCounter++;
-        const filename = getFilename();
-        id = `${filename}-${codeBlockCounter}`;
-      }
+      // Always auto-generate ID (user should not control this)
+      codeBlockCounter++;
+      const filename = getFilename();
+      const id = `${filename}-${codeBlockCounter}`;
 
       const session = attributes.session || null;
-      const filename = attributes.filename || null;
+      const filenameAttr = attributes.filename || null;
       const evalCode = attributes.eval !== 'false'; // Default to true unless explicitly set to false
 
       // Escape special characters for JavaScript string literal
@@ -85,10 +113,10 @@ export function remarkExecutableCode() {
               name: 'session',
               value: session,
             },
-            filename && {
+            filenameAttr && {
               type: 'mdxJsxAttribute',
               name: 'filename',
-              value: filename,
+              value: filenameAttr,
             },
             !evalCode && {
               type: 'mdxJsxAttribute',
@@ -138,9 +166,10 @@ export function remarkExecutableCode() {
 
     // Add import statement if we found any executable code blocks
     if (hasExecutableCode) {
+      const importPath = getRelativeImportPath();
       tree.children.unshift({
         type: 'mdxjsEsm',
-        value: "import ExecutableCode from '../../../components/ExecutableCode.astro';",
+        value: `import ExecutableCode from '${importPath}';`,
         data: {
           estree: {
             type: 'Program',
@@ -156,8 +185,8 @@ export function remarkExecutableCode() {
                 ],
                 source: {
                   type: 'Literal',
-                  value: '../../../components/ExecutableCode.astro',
-                  raw: "'../../../components/ExecutableCode.astro'",
+                  value: importPath,
+                  raw: `'${importPath}'`,
                 },
               },
             ],

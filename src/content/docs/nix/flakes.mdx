@@ -1,0 +1,79 @@
+--- 
+title: Flakes 
+sidebar:
+  order: 6
+---
+
+Un flake es un árbol de archivos de sistema que contiene un archivo llamado ^flake.nix^ en el 
+root del directorio. ^flake.nix^ especifica algunos metadatos del flake como dependencias 
+(llamadas *inputs*) al igual que *outputs* (los valores de Nix como paquetes o módulos 
+que da el flake).
+
+## Representación como conjunto de atributos
+### Ejemplo 
+
+```nix 
+{
+  type = "github";
+  owner = "NixOS";
+  repo = "nixpkgs";
+}
+```
+El único atributo requerido es `type`. Los tipos soportados se enlistan abajo.
+
+## Sintaxis de URL 
+### Ejemplo 
+
+```code :language nix :eval false
+github:NixOS/nixpkgs
+```
+Estos se usan en la línea de comandos como una alternativa conveniente para la representación
+como conjunto de atributos. Por ejemplo, en el comando 
+
+```bash
+nix build github:NixOS/nixpgs#hello
+```
+`github:NixOS/nixpkgs` es una referencia de flake (mientras que `hello` es un atributo de 
+output). Tambióne se permiten en el atributo  `inputs` de un flake:
+
+```code :language nix :eval false
+inputs.nixpkgs.url = "github:NixOS/nixpgs";
+```
+esto equivale a 
+
+```code :language nix :eval false
+inputs.nixpkgs {
+  type = "github";
+  owner = "NixOS";
+  repo = "nixpkgs";
+};
+```
+## Sintaxis path
+
+Los flakes que corresponden a un path local se pueden referenciar por referencia directa al
+path, ya sea de forma absoluta o relativa. Para paths relativos, se tiene que empezar el path 
+con `./`.
+
+## Formato de flake 
+Como un ejemplo, aquí hay un `flake.nix` simple que depende del flake Nixpkgs y devuelve 
+un paquete 
+
+```nix 
+{
+  description = "A flake for building Hello World";
+
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-20.03";
+
+  outpust = { self, nixpkgs }: {
+    packages.x86_64-linux.default = 
+    with import nixpkgs { system = "x86_64-linux"; };
+    stdenv.mkDerivation {
+      name = "hello";
+      src = self;
+      buildPhase = "gcc -o hello ./hello.c";
+      installPhase = "mkdir -p $out/bin; install -t $out/bin hello$"; 
+    };
+  }
+}
+```
+

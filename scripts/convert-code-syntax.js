@@ -1,5 +1,5 @@
 import { readdir, readFile, writeFile } from 'fs/promises';
-import { join, dirname } from 'path';
+import { join, dirname, relative } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -62,6 +62,28 @@ function convertCodeBlocks(content) {
   return { converted, modified };
 }
 
+// Calculate relative import path from MDX file to component
+function getRelativeImportPath(filePath) {
+  // Get the directory of the MDX file
+  const fileDir = dirname(filePath);
+
+  // Target component path (absolute)
+  const componentPath = join(__dirname, '../src/components/ExecutableCode.astro');
+
+  // Calculate relative path
+  let relativePath = relative(fileDir, componentPath);
+
+  // Ensure the path uses forward slashes (for consistency across platforms)
+  relativePath = relativePath.replace(/\\/g, '/');
+
+  // Ensure the path starts with './' if it doesn't start with '../'
+  if (!relativePath.startsWith('.')) {
+    relativePath = './' + relativePath;
+  }
+
+  return relativePath;
+}
+
 // Process a single file
 async function processFile(filePath) {
   const content = await readFile(filePath, 'utf-8');
@@ -77,9 +99,10 @@ async function processFile(filePath) {
       const frontmatterEnd = content.indexOf('---', 3);
       if (frontmatterEnd !== -1) {
         const afterFrontmatter = frontmatterEnd + 3;
+        const importPath = getRelativeImportPath(filePath);
         finalContent =
           converted.substring(0, afterFrontmatter) +
-          "\nimport ExecutableCode from '../../../components/ExecutableCode.astro';\n" +
+          `\nimport ExecutableCode from '${importPath}';\n` +
           converted.substring(afterFrontmatter);
       }
     }

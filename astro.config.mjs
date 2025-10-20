@@ -65,11 +65,6 @@ export default defineConfig({
 					collapsed: true,
 					autogenerate: { directory: "nix" },
 				},
-				{
-					label: "Typst",
-					collapsed: true,
-					autogenerate: { directory: "typst" },
-				}
 			],
 		}),
 		mdx(),

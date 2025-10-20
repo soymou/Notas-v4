@@ -1,0 +1,100 @@
+---
+title: Conociendo a Lean
+sidebar: 
+  order: 1
+---
+
+## Evaluando expresiones
+
+Para pedirle a lean que evalúe una expresión, hay que escribir `#eval` primero, luego lean
+nos reportará el resultado.
+
+```code :language lean4 :eval true
+#eval 1 + 2
+```
+
+Lean sigue las leyes de precedencia y asociatividad para operadores aritméticos. Entonces 
+
+```code :language lean4 :eval true 
+#eval 1 + 2 * 5 
+```
+Mientras que la mayoría de notación matemática y lenguajes de programación usan paréntesis 
+para aplicar una función a sus argumentos, Lean simplemente escribe la función seguida 
+de sus argumentos 
+
+```code :language lean4 :eval true 
+#eval String.append "Hello " "Lean" 
+```
+
+Como Lean es un lenguaje funcional orientado a las expresiones, no hay enunciados
+condicionales, sino que hay expresiones condicionales 
+
+```code :language lean4 :eval true 
+#eval String.append "It is " (if 1 > 2 then "yes" else "no")
+ 
+```
+
+## Tipos
+
+Todo programa en Lean debe tener un tipo. En particular, toda expresión debe tener un tipo 
+antes de ser evaluada. Podemos proveer el tipo de una expresión con el operador dos puntos 
+
+```code :language lean4 :eval true 
+#eval (1 + 2 : Nat) 
+```
+
+Aquí **Nat** es el tipo de los números naturales, que son enteros sin signo de precisión 
+arbitraria.
+
+Para obtener el tipo de una expresión podemos usar `#check` en lugar de `#eval`.
+
+```code :language lean4 :eval true 
+#check (1 - 2 : Nat) 
+```
+
+## Funciones y definiciones
+
+En Lean, las definiciones se introducen usando la palabra clave **def** y el $:=$.
+
+```code :language lean4 :eval true :session funciones-uno 
+def lean : String := "Lean" 
+```
+Una vez que hemos definido un nombre, lo podemos usar 
+
+```code :language lean4 :eval true :session funciones-uno
+#eval String.append "Hola " lean
+```
+
+### Definiendo funciones 
+
+La forma más fácil de definir una función en Lean es poner los argumentos antes del tipo 
+de la definición separados por espacios.
+
+```code :language lean4 :eval true 
+def add1 (n : Nat) : Nat := n + 1
+
+#eval add1 7
+```
+
+Podemos definir funciones con varios argumentos
+
+```code :language lean4 :eval true 
+def maximum (n : Nat) (k : Nat) : Nat := 
+  if n < k then 
+    k 
+  else n
+
+#eval maximum 2 3
+```
+
+### Definiendo tipos 
+
+Si, por ejemplo `String` es muy largo, podemos definir 
+
+```code :language lean4 :eval true 
+def Str : Type := String
+
+def palabra : Str := "Hola"
+
+#check palabra
+```
