@@ -6,6 +6,8 @@ typstImports:
     - '#import "@preview/curryst:0.5.1": rule, prooftree'
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 Para completar nuestra especificación so la teoría de tipos dependiente, introducimos los 
 universos de la teoría de tipos. Los universos se pueden pensar como tipos que consisten 
 de tipos. En realidad, un universo consiste de un tipo $cal(U)$ equipado con una familia de 
@@ -39,3 +41,48 @@ para tipos. Un universo también viene equipado con una familia de tipos $cal(T)
 por $cal(U)$. Dado un elemento $X: cal(U)$, ,pensamos en el tipo $cal(T)(X)$ como 
 el tipo de elementos de $X$. La familia $cal(T)$ es llamada la **familia universal de tipos**.
 
+Una de las características distintivas de los universos es que son cerrados bajo todos los 
+tipos de constructores. Dado un universo $cal(U)$ con familia universal de tipos $cal(T)$, 
+¿cómo expresamos que $cal(U)$ es cerrado bajo $Sigma$-tipos, por ejemplo? Recordemos que 
+un $Sigma$-tipo se forma usando un tipo $A$ y una familia de tipos $B$ sobre $A$. Así, 
+si $A$ es un tipo en $cal(U)$ y $B$ es una familia de tipos sobre $A$, quisiéramos expresar 
+que el $Sigma$-tipo es también un tipo en $cal(U)$. Sin embargo, no podemos simplemente 
+afirmar que $Sigma_((x: A)) B(x)$ es un elemento del universo, pues la teoría de tipos 
+hace una distinción cuidados entre tipos y elementos.
+
+Expresamos que $cal(U)$ es cerrado bajo $Sigma$-tipos usando una nueva operación 
+$caron(Sigma)$, que toma dos argumentos. El primer argumento es un elemento $X: cal(U)$ y el 
+segundo argumento es una familia de tipos en $cal(U)$ indizada por los elementos de $X$, es 
+decir, una función $cal(T)(X) arrow cal(U)$. Así, decimos que $cal(U)$ es cerrado bajo 
+$Sigma$-tipos afirmando que $cal(U)$ viene equipado con una operación 
+
+$ caron(Sigma): Pi_((X: cal(U))) (cal(T)(X) arrow cal(U)) arrow cal(U)$
+
+Más aún, pedimos que el elemento $caron(Sigma)(X, Y): cal(U)$ satisfaga la igualdad juiciosa 
+
+$ cal(T)(caron(Sigma) (X, Y)) equiv Sigma_((x: cal(T)(X))) cal(T)(Y(x)). $
+
+Esta igualdad juiciosa afirma que el elemento $caron(Sigma)(X, Y)$ del universo $cal(U)$ 
+*representa* el $Sigma$-tipo $Sigma_((x: cal(T)(X))) cal(T)(Y(X))$.
+
+Similarmente asumiremos que los universos son cerrados bajo $Pi$-tipos y bajo las demás 
+maneras de formar tipos. Sin embargo, hay una restricción importante: sería inconsistente 
+asumir que un universo este contenido dentro de sí mismo. Una forma de pensar en esto es que 
+los universos son de *tipos pequeños* y no puede ser el caso que el universo sea pequeño 
+con respecto a sí mismo. En lugar de asumir que un universo se contiene a sí mismo, asumimos 
+que hay una gran cantidad de universos: los suficientes para que cada familia se pueda 
+obtener sustituyendo dentro de la familia universal de algún tipo.
+
+<div id="definicion-6-1-1">
+<Aside type="tip" title="Definición 6.1.1">
+
+Un **universo** en la teoría de tipos es un tipo $cal(U)$ en el contexto vacío, equipado con 
+una familia de tipos $cal(T)$ sobre $cal(U)$ llamada una **familia universal**, que es 
+cerrada bajo las operaciones de formación de tipos en el sentido de que viene equipada con 
+la siguiente estructura 
+
+1. $cal(U)$ es cerrada bajo $Pi$, en el sentido de que viene equipada con una función 
+    $ caron(Pi): Pi_((X: cal(U))) (cal(T)(X) arrow cal(U)) arrow cal(U) $
+    para la cual la 
+</Aside>
+</div>

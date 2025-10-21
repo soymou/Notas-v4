@@ -223,19 +223,87 @@ async function executePython(code) {
   }
 }
 
+// Split Lean code into statements intelligently
+function splitLeanStatements(code) {
+  const lines = code.split('\n');
+  const statements = [];
+  let currentStatement = [];
+  let inMultiLineStatement = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+
+    // Skip empty lines
+    if (trimmedLine.length === 0) {
+      continue;
+    }
+
+    // Check if this line starts a multi-line statement
+    // (def, theorem, example, inductive, structure, class, instance, etc.)
+    const startsStatement = /^(def|theorem|example|lemma|axiom|inductive|structure|class|instance|namespace|section|variable|open)\s/.test(trimmedLine);
+
+    // Check if this line is a command (#check, #eval, etc.)
+    const isCommand = /^#/.test(trimmedLine);
+
+    if (isCommand) {
+      // Commands are single-line statements
+      if (currentStatement.length > 0) {
+        statements.push(currentStatement.join('\n'));
+        currentStatement = [];
+      }
+      statements.push(line);
+      inMultiLineStatement = false;
+    } else if (startsStatement) {
+      // Save previous statement if exists
+      if (currentStatement.length > 0) {
+        statements.push(currentStatement.join('\n'));
+        currentStatement = [];
+      }
+      currentStatement.push(line);
+      inMultiLineStatement = true;
+    } else if (inMultiLineStatement) {
+      // Continue multi-line statement
+      currentStatement.push(line);
+
+      // Check if this line ends the statement (not indented or starts new statement)
+      const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
+      const endsStatement = nextLine.length === 0 || /^(def|theorem|example|lemma|#|axiom|inductive|structure|class|instance)/.test(nextLine);
+
+      if (endsStatement) {
+        statements.push(currentStatement.join('\n'));
+        currentStatement = [];
+        inMultiLineStatement = false;
+      }
+    } else {
+      // Standalone line (continuation or expression)
+      currentStatement.push(line);
+    }
+  }
+
+  // Add any remaining statement
+  if (currentStatement.length > 0) {
+    statements.push(currentStatement.join('\n'));
+  }
+
+  return statements.filter(s => s.trim().length > 0);
+}
+
 // Execute Lean4 code statement by statement
-async function executeLean4(code) {
+// skipStatements: number of statements from the beginning to skip in output (for session continuations)
+async function executeLean4(code, skipStatements = 0) {
   try {
     // Convert LaTeX symbols to Unicode
     const convertedCode = convertLatexToUnicode(code);
 
-    // Split code into statements (lines that aren't empty or just whitespace)
-    const statements = convertedCode.split('\n').filter(line => line.trim().length > 0);
+    // Split code into statements intelligently
+    const statements = splitLeanStatements(convertedCode);
 
-    // If there's only one statement, execute as before
-    if (statements.length === 1) {
+    // If there's only one statement and nothing to skip, execute as before
+    if (statements.length === 1 && skipStatements === 0) {
       const tmpFile = `/tmp/temp_${Date.now()}.lean`;
-      await writeFile(tmpFile, convertedCode);
+      const codeWithOptions = 'set_option linter.all false\n' + convertedCode;
+      await writeFile(tmpFile, codeWithOptions);
       const { stdout, stderr } = await execAsync(`lean ${tmpFile} 2>&1`);
       return (stderr || stdout || '').trim();
     }
@@ -245,14 +313,18 @@ async function executeLean4(code) {
     let accumulatedCode = '';
     let previousOutput = '';
 
+    // Prepend option to disable all linter warnings
+    const linterDisable = 'set_option linter.all false';
+
     for (let i = 0; i < statements.length; i++) {
       const statement = statements[i];
       // Add this statement to accumulated code
       accumulatedCode += (accumulatedCode ? '\n' : '') + statement;
 
-      // Execute the accumulated code
+      // Execute the accumulated code with linter disabled
       const tmpFile = `/tmp/temp_${Date.now()}.lean`;
-      await writeFile(tmpFile, accumulatedCode);
+      const codeWithOptions = linterDisable + '\n' + accumulatedCode;
+      await writeFile(tmpFile, codeWithOptions);
 
       try {
         const { stdout, stderr } = await execAsync(`lean ${tmpFile} 2>&1`);
@@ -260,30 +332,53 @@ async function executeLean4(code) {
 
         // Extract only the new output (difference from previous execution)
         let newOutput = null;
-        if (currentOutput && currentOutput !== previousOutput) {
-          // For the first statement or when output changes
-          if (i === 0) {
-            newOutput = currentOutput;
-          } else {
-            // Extract lines that are new (simple diff approach)
-            const prevLines = previousOutput.split('\n');
-            const currLines = currentOutput.split('\n');
+        if (i === 0) {
+          // First statement - use all output
+          newOutput = currentOutput || null;
+        } else if (currentOutput) {
+          // For statements after the first, we need to extract only relevant output
+          const prevLines = previousOutput.split('\n');
+          const currLines = currentOutput.split('\n');
 
-            // Find new lines (lines that weren't in previous output)
-            const newLines = currLines.filter((line, idx) => {
-              // Check if this line references the current statement's line number
-              const lineNumMatch = line.match(/:(\d+):/);
-              if (lineNumMatch) {
-                const lineNum = parseInt(lineNumMatch[1]);
-                // Current statement is at line i+1 (1-indexed)
-                return lineNum === i + 1;
+          const newLines = [];
+          let j = 0; // Index for current output
+          let k = 0; // Index for previous output
+
+          // Compare line by line
+          while (j < currLines.length) {
+            const currLine = currLines[j];
+
+            // Check if this line references a specific line number
+            const lineNumMatch = currLine.match(/\.lean:(\d+):/);
+
+            if (lineNumMatch) {
+              const lineNum = parseInt(lineNumMatch[1]);
+              // Only include if it references the current statement's line (i+2, because line 1 is set_option)
+              if (lineNum === i + 2) {
+                newLines.push(currLine);
+                // Also capture following lines that are part of the same message
+                j++;
+                while (j < currLines.length && !currLines[j].match(/\.lean:\d+:/) && !currLines[j].match(/^[a-zA-Z].*:.*:.*$/)) {
+                  newLines.push(currLines[j]);
+                  j++;
+                }
+                continue;
               }
-              // If no line number, check if line is different from previous
-              return !prevLines.includes(line);
-            });
+            }
 
-            newOutput = newLines.length > 0 ? newLines.join('\n') : null;
+            // For lines without line numbers (like #check output), check if it's new
+            if (k < prevLines.length && currLine === prevLines[k]) {
+              // Line exists in previous output, skip it
+              k++;
+            } else {
+              // This is a new line
+              newLines.push(currLine);
+            }
+
+            j++;
           }
+
+          newOutput = newLines.length > 0 ? newLines.join('\n').trim() : null;
         }
 
         results.push({
@@ -297,22 +392,53 @@ async function executeLean4(code) {
 
         // Extract only new errors
         let newOutput = null;
-        if (currentOutput && currentOutput !== previousOutput) {
-          if (i === 0) {
-            newOutput = currentOutput;
-          } else {
-            const prevLines = previousOutput.split('\n');
-            const currLines = currentOutput.split('\n');
-            const newLines = currLines.filter((line, idx) => {
-              const lineNumMatch = line.match(/:(\d+):/);
-              if (lineNumMatch) {
-                const lineNum = parseInt(lineNumMatch[1]);
-                return lineNum === i + 1;
+        if (i === 0) {
+          // First statement - use all output
+          newOutput = currentOutput || null;
+        } else if (currentOutput) {
+          // For statements after the first, we need to extract only relevant output
+          const prevLines = previousOutput.split('\n');
+          const currLines = currentOutput.split('\n');
+
+          const newLines = [];
+          let j = 0; // Index for current output
+          let k = 0; // Index for previous output
+
+          // Compare line by line
+          while (j < currLines.length) {
+            const currLine = currLines[j];
+
+            // Check if this line references a specific line number
+            const lineNumMatch = currLine.match(/\.lean:(\d+):/);
+
+            if (lineNumMatch) {
+              const lineNum = parseInt(lineNumMatch[1]);
+              // Only include if it references the current statement's line (i+2, because line 1 is set_option)
+              if (lineNum === i + 2) {
+                newLines.push(currLine);
+                // Also capture following lines that are part of the same message
+                j++;
+                while (j < currLines.length && !currLines[j].match(/\.lean:\d+:/) && !currLines[j].match(/^[a-zA-Z].*:.*:.*$/)) {
+                  newLines.push(currLines[j]);
+                  j++;
+                }
+                continue;
               }
-              return !prevLines.includes(line);
-            });
-            newOutput = newLines.length > 0 ? newLines.join('\n') : null;
+            }
+
+            // For lines without line numbers (like #check output), check if it's new
+            if (k < prevLines.length && currLine === prevLines[k]) {
+              // Line exists in previous output, skip it
+              k++;
+            } else {
+              // This is a new line
+              newLines.push(currLine);
+            }
+
+            j++;
           }
+
+          newOutput = newLines.length > 0 ? newLines.join('\n').trim() : null;
         }
 
         results.push({
@@ -324,8 +450,9 @@ async function executeLean4(code) {
       }
     }
 
-    // Return results as JSON
-    return JSON.stringify(results);
+    // Return results as JSON, skipping the first N statements if requested
+    const resultsToReturn = results.slice(skipStatements);
+    return JSON.stringify(resultsToReturn);
   } catch (error) {
     // Return error in the same format
     return JSON.stringify([{
@@ -363,14 +490,14 @@ async function executeNix(code) {
 }
 
 // Execute code based on language
-async function executeCode(language, code) {
+async function executeCode(language, code, skipStatements = 0) {
   switch (language.toLowerCase()) {
     case 'python':
     case 'py':
       return await executePython(code);
     case 'lean4':
     case 'lean':
-      return await executeLean4(code);
+      return await executeLean4(code, skipStatements);
     case 'rust':
     case 'rs':
       return await executeRust(code);
@@ -408,6 +535,7 @@ async function main() {
 
     // Clear sessions for this file
     const fileSessions = {};
+    const sessionStatementCounts = {}; // Track statement counts per session
 
     for (const block of blocks) {
       // Create prefixed ID with filename
@@ -416,21 +544,35 @@ async function main() {
       console.log(`  ⚙️  Executing block: ${block.id} → ${prefixedId} (${block.language})${block.session ? ` [session: ${block.session}]` : ''}`);
 
       let codeToExecute = block.code;
+      let skipStatements = 0;
 
       // Handle session accumulation
       if (block.session) {
         const sessionKey = `${file}::${block.session}::${block.language}`;
         if (!fileSessions[sessionKey]) {
           fileSessions[sessionKey] = [];
+          sessionStatementCounts[sessionKey] = 0;
         }
+
+        // Track how many statements were in previous blocks
+        skipStatements = sessionStatementCounts[sessionKey];
+
         fileSessions[sessionKey].push(block.code);
 
         // Concatenate all code in this session
         codeToExecute = fileSessions[sessionKey].join('\n\n');
-        console.log(`    📦 Session has ${fileSessions[sessionKey].length} block(s)`);
+        console.log(`    📦 Session has ${fileSessions[sessionKey].length} block(s), skipping first ${skipStatements} statement(s)`);
+
+        // Update statement count for this session (for Lean only)
+        if (block.language === 'lean4' || block.language === 'lean') {
+          const convertedCode = convertLatexToUnicode(block.code);
+          const statementsInThisBlock = splitLeanStatements(convertedCode).length;
+          sessionStatementCounts[sessionKey] += statementsInThisBlock;
+        }
       }
 
-      const output = await executeCode(block.language, codeToExecute);
+      // Pass skipStatements to executeCode for Lean
+      const output = await executeCode(block.language, codeToExecute, skipStatements);
       outputs[prefixedId] = output.trim();
       console.log(`  ✅ Output: ${output.trim().substring(0, 50)}...`);
     }

@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import remarkTypst from "./plugins/remark-typst.js";
 import { remarkExecutableCode } from "./src/plugins/remark-executable-code.js";
 import { remarkCodeOutput } from "./src/plugins/remark-code-output.js";
+import remarkLatexUnicode from "./src/plugins/remark-latex-unicode.js";
 import rehypeTypst from "./plugins/rehype-typst.js";
 import starlightThemeObsidian from 'starlight-theme-obsidian'
 import starlightUtils from '@lorenzo_lewis/starlight-utils';
@@ -15,6 +16,7 @@ export default defineConfig({
 	markdown: {
 		remarkPlugins: [
 			remarkTypst,
+			remarkLatexUnicode,
 			remarkExecutableCode,
 			remarkCodeOutput
 		],

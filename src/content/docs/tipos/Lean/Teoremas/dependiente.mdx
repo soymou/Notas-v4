@@ -119,6 +119,323 @@ En los fundamentos de Lean hay una jerarquía infinita de tipos. Podemos pensar 
 `Type 0` como el universo de tipos pequeños u ordinarios. `Type 1` es entonces un 
 universo de tipos todavía más grande, que contiene a `Type 0` como elemento y así
 sucesivamente. 
-La siguiente tabla resulta útil 
+
+Algunas operaciones necesitan ser polimorfas sobre universos de tipos. Por ejemplo, 
+`List \alpha` debe hacer sentido para cualquier tipo $alpha$, sin importar el universo en 
+el que $alpha$ habite. Esto explica el tipo de la función `List` :
+
+```code :language lean4 :eval true 
+#check List 
+```
+Aquí u es una variable que varía sobre todos los niveles de tipos. La salida del comando 
+`#check` significa que siempre que $alpha$ tiene tipo `Type u`, `List \alpha` también tiene 
+tipo `Type u`. La función `Prod` es también polimorfa 
+
+```code :language lean4 :eval true 
+#check Prod 
+```
+Para declarar constantes polimorfas, Lean permite declarar variables de universo 
+explícitamente usando el comando `universe`:
+
+```code :language lean4 :eval true 
+universe u 
+
+def F (\alpha : Type u) : Type u := Prod \alpha \alpha
+
+#check F
+```
+
+Podemos evitar el comando `universe` dando directamente parámetros de universo cuando 
+definimos `F`: 
+
+```code :language lean4 :eval true 
+def F.{u} (\alpha : Type u) : Type u := Prod \alpha \alpha 
+
+#check F
+```
+## Abstracción de funciones y evaluación
+
+Lean da una palabra clave `fun` (o $lambda$) para crear una función a partir de una 
+expresión de la siguiente manera:
+
+```code :language lean4 :eval true 
+#check fun (x : Nat) => x + 5
+
+#check \lambda (x : Nat) => x + 5
+```
+
+El tipo `Nat` pude ser inferido en este ejemplo 
+
+```code :language lean4 :eval true 
+#check fun x => x + 5
+
+#check \lambda x => x + 5
+```
+
+Podemos evaluar una función lambda pasando los parámetros requeridos:
+
+```code :language lean4 :eval true 
+#eval (\lambda x : Nat => x + 5) 10 
+```
+Crear una función a partir de una expresión es un proceso conocido como *lambda abstracción*.
+Supongamos que tenemos una variable $x: alpha$ y construimos una expresión $t: beta$, 
+entonces la expresión `fun (x : \alpha) => t` o, de forma equivalente, 
+`\lambda (x : \alpha) => t` es un objeto de tipo $alpha arrow beta$.
+Aquí tenemos algunos ejemplos 
+
+```code :language lean4 :eval true 
+#check fun x: Nat => fun y : Bool => if not y then x + 1 else x + 2 
+
+#check fun (x : Nat) (y : Bool) => if not y then x + 1 else x + 2
+
+#check fun x y => if not y then x + 1 else x + 2
+```
+
+Algunas operaciones de funciones comunes se pueden expresar en términos de lambda 
+abstracción:
+
+```code :language lean4 :eval true 
+def f (n : Nat) : String := toString n 
+def g (s : String) : Bool := s.length > 0
+
+#check fun x : Nat => x 
+
+#check fun x : Nat => true 
+
+#check fun x : Nat => g (f x)
+
+#check fun x => g (f x)
+```
+
+Podemos pasar funciones como parámetros:
+
+```code :language lean4 :eval true 
+#check fun (g : String \to Bool) (f : Nat \to String) (x : Nat) => g (f x) 
+```
+
+También podemos pasar tipos como parámetros 
+
+```code :language lean4 :eval true 
+#check fun (\alpha \beta \gamma : Type) (g : \beta \to \gamma) (f : \alpha \to \beta) (x : \alpha) => g (f x) 
+```
+
+## Definiciones 
+
+Recordemos que `def` nos da una manera de declarar nuevos objetos nombrados.
+
+```code :language lean4 :eval true 
+def double (x : Nat) : Nat :=
+  x + x
+```
+Aquí podemos pensar en `def` como una `fun` nombrada.
+
+## Definiciones locales
+
+Lean también permite introducir definiciones locales con la palabra clave `let`. La 
+expresión `let a := t1; t2` es definicionalmente igual a reemplazar todas las ocurrencias 
+de `a` en `t2` por `t1`. El `;` se puede omitir si se usa un salto de línea.
+
+Notemos que el significado de la expresión `let a := t1; t2` es muy similar al significado 
+de `fun a => t2`, pero no son lo mismo. 
+
+## Variables y secciones 
+
+Consideremos las siguientes definiciones: 
+
+```code :language lean4 :eval true 
+def compose (\alpha \beta \gamma : Type) (g : \beta \to \gamma) (f : \alpha \to \beta) (x : \alpha) : \gamma :=
+  g (f x)
+
+def doTwice (\alpha : Type) (h : \alpha \to \alpha) (x : \alpha) : \alpha := 
+  h (h x)
+
+def doThrice (\alpha : Type) (h : \alpha \to \alpha) (x : \alpha) : \alpha :=
+  h (h (h x))
+```
+
+Lean nos da un comando `variable` para hacer estas declaraciones más compactas 
+
+```code :language lean4 :eval true 
+variable (\alpha \beta \gamma : Type)
+
+def compose (g : \beta \to \gamma) (g : \alpha \to \beta) (x : \alpha) : \gamma := 
+  g (f x)
+
+def doTwice (h : \alpha \to \alpha) (x : \alpha) : \alpha := 
+  h (h x)
+
+def doThrice (h : \alpha \to \alpha) (x : \alpha) : \alpha := 
+  h (h (h x))
+```
+
+El comando `variable` instruye a Lean para que inserte las variables declaradas como ligadas
+en las definiciones que las usan por su nombre. La variable permanece en el entorno del 
+archivo en el que estamos trabajando. Para limitar los alcances, podemos usar `section`:
+
+```code :language lean4 :eval true 
+section useful 
+  variable (\alpha \beta \gamma : Type)
+  variable (g : \beta \to \gamma) (f : \alpha \to \beta) (h : \alpha \to \alpha)
+  variable (x : \alpha)  
+
+  def compose := g ( f x )
+  def doTwice := h (h x)
+  def doThrice := h (h (h x))
+end useful
+```
+No se necesitan nombrar las secciones.
+
+## Espacios de nombres 
+
+Lean nos da la habilidad de agrupar definiciones en espacios de nombres 
+
+```code :language lean4 :eval true 
+namespace Foo 
+  def a : Nat := 5
+  def f (x : Nat) : Nat := x + 7
+
+  def fa : Nat := f a
+  def ffa : Nat := f (f a)
+  
+  #check a
+end Foo 
+
+#check Foo.a
+
+open Foo 
+#check a 
+```
+
+## ¿Qué hace dependiente a la teoría de tipos dependientes?
+
+En pocas palabras, los tipos pueden depender de parámetros. Ya vimos esto, como con 
+`List` y `Prod`, también, por ejemplo, esta `Vec \alpha n`, el tipo de los vectores 
+de elementos de $alpha$ de longitud $n$.
+
+```code :language lean4 :eval true 
+def cons (\alpha : Type) (a : \alpha) (as : List \alpha) : List \alpha := 
+  List.cons a as 
+
+#check cons Nat 
+
+#check cons Bool 
+
+#check cons 
+```
+
+Esto es una instancia de un tipo función dependiente, o *tipo flecha dependiente*. 
+También tenemos productos dependiente o $Sigma$-tipos, se pueden escribir como 
+`\Sigma a : \alpha, \beta a`, donde `\beta : \alpha \to Type u`. 
+Podemos usar `\langle a, b \rangle` o  `Sigma.mk a b` para crear un par dependiente.
+
+```code :language lean4 :eval true
+universe u v
+
+def f (\alpha : Type u) (\beta : \alpha \to Type v) (a : \alpha) (b : \beta a) : (a : \alpha) \times \beta a := 
+  \langle a, b \rangle 
+
+def g (\alpha : Type u) (\beta : \alpha \to Type v) (a : \alpha) (b : \beta a) : \Sigma a : \alpha, \beta a := 
+  Sigma.mk a b
+
+def h1 (x : Nat) : Nat := 
+  (f Type (fun \alpha => \alpha) Nat x).2
+
+#eval h1 5
+
+def h2 (x : Nat) : Nat := 
+  (g Type (fun \alpha => \alpha) Nat x).2
+
+#eval h2 5
+```
+## Argumentos implícitos 
+
+Supongamos que tenemos una implementación de listas como 
+
+```code :language lean4 :eval true :session listas
+universe u
+def Lst (α : Type u) : Type u := List α
+def Lst.cons (α : Type u) (a : α) (as : Lst α) : Lst α := List.cons a as
+def Lst.nil (α : Type u) : Lst α := List.nil
+def Lst.append (α : Type u) (as bs : Lst α) : Lst α := List.append as bs
+
+#check Lst 
+
+#check Lst.cons 
+
+#check Lst.nil 
+
+#check Lst.append 
+
+```
+Entonces podemos construir listas de naturales como: 
+
+```code :language lean4 :eval true :session listas 
+
+#check Lst.cons Nat 0 (Lst.nil Nat)
+
+def as1 : Lst Nat := Lst.nil Nat 
+def bs1 : Lst Nat := Lst.cons Nat 5 (Lst.nil Nat)
+
+#check Lst.append Nat as1 bs1
+
+```
+
+Como los constructores son polimorfos sobre tipos, tenemos que insertar el tipo `Nat` como 
+un argumento repetidamente. Pero esta información es redundante, uno puede inferir el 
+argumento $alpha$ en `Lst.cons Nat 5 (Lst.nil Nat)` del hecho de que el segundo argumento,
+5, tiene tipo `Nat`. En Lean, podemos usar `_` para especificar que el sistema debe 
+llenar la información automáticamente. Esto es conocido como un argumento implícito.
+
+```code :language lean4 :eval true :session listas
+#check Lst.cons _ 0 (Lst.nil _)
+
+def as : Lst Nat := Lst.nil _
+def bs : Lst Nat := Lst.cons _ 5 (Lst.nil _)
+
+#check Lst.append _ as bs
+```
+
+Cuando una función toma un argumento que se puede inferir generalmente del contexto, Lean 
+permite especificar que dicho argumento debe, por defecto, dejarse implícito. Esto lo hacemos
+poniendo los argumentos entre llaves:
+
+```code :language lean4 :eval true 
+universe u 
+def Lst (\alpha : Type u) : Type u := List \alpha 
+
+def Lst.cons {\alpha : Type u} (a : \alpha) (as : Lst \alpha) : Lst \alpha := 
+  List.cons a as 
+
+def Lst.nil {\alpha : Type u} : Lst \alpha := List.nil
+def Lst.append {\alpha : Type u} (as bs : Lst \alpha) : Lst \alpha := List.append as bs
+```
+
+También podemos usar esto para definir funciones 
+
+```code :language lean4 :eval true 
+universe u 
+def ident {\alpha : Type u} (x : \alpha) := x
+
+#check ident 
+#check (ident)
+#check ident 1 
+#check ident "hello"
+#check @ident
+```
+Las variables también se pueden dejar implícitas 
+
+```code :language lean4 :eval true 
+universe u 
+
+section 
+  variable {\alpha : Type u}
+  variable (x : \alpha)
+  def ident := x
+end
+```
+A veces necesitamos que un argumento a una función sea explícito a pesar de que lo hayamos 
+definido como implícito, para eso podemos usar `@`, por ejemplo, si la función `foo` tiene 
+argumentos implícitos, los volvemos implícitos con `@foo`, `@foo` denota la misma función 
+pero con todos los argumentos hechos explícitos.
 
 
