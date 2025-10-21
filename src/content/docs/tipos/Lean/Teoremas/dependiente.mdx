@@ -3,7 +3,6 @@ title: Teoría de tipos dependiente
 sidebar:
   order: 2
 ---
-import ExecutableCode from '../../../../../components/ExecutableCode.astro';
 
 
 ## Teoría de tipos simple 
@@ -20,33 +19,26 @@ def n  : Nat  := 0
 def b1 : Bool := true -- b1 es un booleano
 def b2 : Bool := false
 ```
-Podemos mostrar sus tipos 
+Podemos mostrar sus tipos
 
-<ExecutableCode
-  language="lean4"
-  id="uno"
-  session="tipos-simples"
-  code={`/- Verificar tipos -/
-#check m 
-#check n 
+```code :language lean4 :eval true :session tipos-simples
+/- Verificar tipos -/
+#check m
+#check n
 #check n + 0
 #check m * (n + 0)
-#check b1 
+#check b1
 
-#check b1 && b2 -- && es el "y" booleano 
+#check b1 && b2 -- && es el "y" booleano
 #check b1 || b2 -- || es el "o" booleano
 #check true
 
 /- Evaluar -/
 
-#eval 5 * 4 
+#eval 5 * 4
 #eval m + 2
 #eval b1 && b2
-
-`}
-/>
-
-
+```
 
 La palabra clave `def` se usa para declarar nuevos símbolos constantes en el entorno. El 
 comando `#check` le pide a Lean que una constante reporte su tipo, los comandos 
