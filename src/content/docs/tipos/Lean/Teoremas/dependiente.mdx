@@ -1,0 +1,132 @@
+---
+title: Teoría de tipos dependiente
+sidebar:
+  order: 2
+---
+import ExecutableCode from '../../../../../components/ExecutableCode.astro';
+
+
+## Teoría de tipos simple 
+ 
+La teoría de tipos obtiene su nombre del hecho de que cada expresión tiene un tipo asociado.
+Por ejemplo, en un contexto dado, $x + theta$ puede denotar un número natural y $f$ una
+función.
+
+Aquí hay unos ejemplos de como se pueden declarar objetos en Lean y verificar sus tipos 
+
+```code :language lean4 :eval true :session tipos-simples
+def m  : Nat  := 1  -- m es un número natural 
+def n  : Nat  := 0
+def b1 : Bool := true -- b1 es un booleano
+def b2 : Bool := false
+```
+Podemos mostrar sus tipos 
+
+<ExecutableCode
+  language="lean4"
+  id="uno"
+  session="tipos-simples"
+  code={`/- Verificar tipos -/
+#check m 
+#check n 
+#check n + 0
+#check m * (n + 0)
+#check b1 
+
+#check b1 && b2 -- && es el "y" booleano 
+#check b1 || b2 -- || es el "o" booleano
+#check true
+
+/- Evaluar -/
+
+#eval 5 * 4 
+#eval m + 2
+#eval b1 && b2
+
+`}
+/>
+
+
+
+La palabra clave `def` se usa para declarar nuevos símbolos constantes en el entorno. El 
+comando `#check` le pide a Lean que una constante reporte su tipo, los comandos 
+auxiliares que le preguntan información al sistema comienzan con `#`. El comando `#eval` 
+le pide a Lean que evalúe una expresión.
+
+Lo que hace poderosa a la teoría de tipos es que podemos construir nuevos tipos a partir
+de otros. Por ejemplo, si $a$ y $b$ son tipos, $a arrow b$ denota el tipo de funciones de 
+$a$ a $b$ y $a times b$ denota el tipo de parejas que consisten de un elemento de $a$ 
+emparejado con un elemento de $b$, también conocido como el producto cartesiano.
+
+Algunos ejemplos 
+
+```code :language lean4 :eval true :session tipos-simples-2
+#check Nat \to Nat 
+
+#check Nat \times Nat
+
+#check Prod Nat Nat 
+
+#check Nat \to Nat \to Nat
+
+#check Nat.succ
+
+#check (0, 1)
+
+#check Nat.add 
+
+#check Nat.succ 2 
+
+#check (5, 9).fst 
+
+#eval (5,9).snd
+```
+
+## Tipos como objetos 
+
+Una forma en la que la teoría de tipos dependiente de Lean extiende la teoría de tipos simple 
+es que los tipos son ciudadanos de primera clase, es decir, que son objetos en sí mismos. 
+
+```code :language lean4 :eval true 
+#check Nat 
+
+#check Bool 
+
+#check Nat \to Bool 
+
+#check Nat \times Bool
+
+#check Nat \to Nat
+```
+
+También podemos declarar nuevas constantes de tipos 
+
+```code :language lean4 :eval true 
+def \alpha : Type := Nat 
+def \beta  : Type := Bool
+def F      : Type \to Type := List 
+def G      : Type \to Type \to Type := Prod
+
+#check \alpha
+#check F \alpha 
+#check G \alpha 
+#check G \alpha \beta 
+#check G \alpha Nat
+```
+
+Como toda expresión tiene un tipo en Lean, es natural preguntarse cual es el tipo de Type.
+
+```code :language lean4 :eval true 
+#check Type 
+#check Type 1 
+#check Type 2 
+#check Type 3
+```
+
+En los fundamentos de Lean hay una jerarquía infinita de tipos. Podemos pensar en 
+`Type 0` como el universo de tipos pequeños u ordinarios. `Type 1` es entonces un 
+universo de tipos todavía más grande, que contiene a `Type 0` como elemento y así
+sucesivamente. 
+La siguiente tabla resulta útil 
+
+

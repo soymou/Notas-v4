@@ -274,6 +274,21 @@ starlight-menu-button svg {
   line-height: 1.7;
 }
 
+/* Style for statement labels in output */
+.output-section .statement-label {
+  opacity: 0.5;
+  margin: 0.75rem 0 0.25rem 0;
+  font-style: italic;
+}
+
+.output-section .statement-label:first-child {
+  margin-top: 0;
+}
+
+.output-section .statement-label pre {
+  padding: 0.5rem 1.25rem !important;
+}
+
 /* Apply similar styling to all code blocks (expressive-code) */
 .expressive-code {
   margin: 1.5rem 0;

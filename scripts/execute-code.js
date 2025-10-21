@@ -7,6 +7,62 @@ import { fileURLToPath } from 'url';
 const execAsync = promisify(exec);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// LaTeX to Unicode conversion map for Lean
+const latexToUnicode = {
+  // Greek letters
+  '\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ', '\\epsilon': 'ε',
+  '\\zeta': 'ζ', '\\eta': 'η', '\\theta': 'θ', '\\iota': 'ι', '\\kappa': 'κ',
+  '\\lambda': 'λ', '\\mu': 'μ', '\\nu': 'ν', '\\xi': 'ξ', '\\pi': 'π',
+  '\\rho': 'ρ', '\\sigma': 'σ', '\\tau': 'τ', '\\upsilon': 'υ', '\\phi': 'φ',
+  '\\chi': 'χ', '\\psi': 'ψ', '\\omega': 'ω',
+  // Capital Greek letters
+  '\\Gamma': 'Γ', '\\Delta': 'Δ', '\\Theta': 'Θ', '\\Lambda': 'Λ', '\\Xi': 'Ξ',
+  '\\Pi': 'Π', '\\Sigma': 'Σ', '\\Upsilon': 'Υ', '\\Phi': 'Φ', '\\Psi': 'Ψ', '\\Omega': 'Ω',
+  // Mathematical operators
+  '\\times': '×', '\\div': '÷', '\\pm': '±', '\\mp': '∓',
+  '\\cdot': '·', '\\circ': '∘', '\\ast': '∗', '\\star': '⋆',
+  // Relations
+  '\\le': '≤', '\\ge': '≥', '\\leq': '≤', '\\geq': '≥',
+  '\\ne': '≠', '\\neq': '≠', '\\equiv': '≡', '\\approx': '≈',
+  '\\sim': '∼', '\\simeq': '≃', '\\cong': '≅', '\\propto': '∝',
+  // Arrows
+  '\\to': '→', '\\rightarrow': '→', '\\leftarrow': '←', '\\leftrightarrow': '↔',
+  '\\Rightarrow': '⇒', '\\Leftarrow': '⇐', '\\Leftrightarrow': '⇔',
+  '\\mapsto': '↦', '\\longrightarrow': '⟶', '\\longleftarrow': '⟵',
+  // Set theory
+  '\\in': '∈', '\\notin': '∉', '\\subset': '⊂', '\\supset': '⊃',
+  '\\subseteq': '⊆', '\\supseteq': '⊇', '\\cup': '∪', '\\cap': '∩',
+  '\\emptyset': '∅', '\\varnothing': '∅',
+  // Logic
+  '\\forall': '∀', '\\exists': '∃', '\\nexists': '∄',
+  '\\land': '∧', '\\lor': '∨', '\\lnot': '¬', '\\neg': '¬',
+  '\\top': '⊤', '\\bot': '⊥',
+  // Quantifiers and other
+  '\\infty': '∞', '\\partial': '∂', '\\nabla': '∇',
+  '\\sum': '∑', '\\prod': '∏', '\\int': '∫',
+  '\\angle': '∠', '\\perp': '⊥', '\\parallel': '∥',
+  // Brackets
+  '\\langle': '⟨', '\\rangle': '⟩', '\\lceil': '⌈', '\\rceil': '⌉',
+  '\\lfloor': '⌊', '\\rfloor': '⌋',
+  // Miscellaneous
+  '\\ell': 'ℓ', '\\hbar': 'ℏ', '\\wp': '℘',
+  '\\Re': 'ℜ', '\\Im': 'ℑ', '\\aleph': 'ℵ',
+  '\\ldots': '…', '\\cdots': '⋯', '\\vdots': '⋮', '\\ddots': '⋱',
+};
+
+// Convert LaTeX symbols to Unicode
+function convertLatexToUnicode(code) {
+  let result = code;
+  for (const [latex, unicode] of Object.entries(latexToUnicode)) {
+    // Match latex command followed by space, non-letter, or end of string
+    // We need to escape the backslash properly for regex
+    const escapedLatex = latex.replace(/\\/g, '\\\\');
+    const regex = new RegExp(escapedLatex + '(?![a-zA-Z])', 'g');
+    result = result.replace(regex, unicode);
+  }
+  return result;
+}
+
 // Find all MDX files
 async function findMdxFiles(dir) {
   const files = [];
@@ -167,18 +223,115 @@ async function executePython(code) {
   }
 }
 
-// Execute Lean4 code
+// Execute Lean4 code statement by statement
 async function executeLean4(code) {
   try {
-    // Create temporary file
-    const tmpFile = `/tmp/temp_${Date.now()}.lean`;
-    await writeFile(tmpFile, code);
-    const { stdout, stderr } = await execAsync(`lean ${tmpFile} 2>&1`);
-    // Lean outputs to stderr, return whichever has content
-    return (stderr || stdout || '').trim();
+    // Convert LaTeX symbols to Unicode
+    const convertedCode = convertLatexToUnicode(code);
+
+    // Split code into statements (lines that aren't empty or just whitespace)
+    const statements = convertedCode.split('\n').filter(line => line.trim().length > 0);
+
+    // If there's only one statement, execute as before
+    if (statements.length === 1) {
+      const tmpFile = `/tmp/temp_${Date.now()}.lean`;
+      await writeFile(tmpFile, convertedCode);
+      const { stdout, stderr } = await execAsync(`lean ${tmpFile} 2>&1`);
+      return (stderr || stdout || '').trim();
+    }
+
+    // Execute statements cumulatively and collect individual outputs
+    const results = [];
+    let accumulatedCode = '';
+    let previousOutput = '';
+
+    for (let i = 0; i < statements.length; i++) {
+      const statement = statements[i];
+      // Add this statement to accumulated code
+      accumulatedCode += (accumulatedCode ? '\n' : '') + statement;
+
+      // Execute the accumulated code
+      const tmpFile = `/tmp/temp_${Date.now()}.lean`;
+      await writeFile(tmpFile, accumulatedCode);
+
+      try {
+        const { stdout, stderr } = await execAsync(`lean ${tmpFile} 2>&1`);
+        const currentOutput = (stderr || stdout || '').trim();
+
+        // Extract only the new output (difference from previous execution)
+        let newOutput = null;
+        if (currentOutput && currentOutput !== previousOutput) {
+          // For the first statement or when output changes
+          if (i === 0) {
+            newOutput = currentOutput;
+          } else {
+            // Extract lines that are new (simple diff approach)
+            const prevLines = previousOutput.split('\n');
+            const currLines = currentOutput.split('\n');
+
+            // Find new lines (lines that weren't in previous output)
+            const newLines = currLines.filter((line, idx) => {
+              // Check if this line references the current statement's line number
+              const lineNumMatch = line.match(/:(\d+):/);
+              if (lineNumMatch) {
+                const lineNum = parseInt(lineNumMatch[1]);
+                // Current statement is at line i+1 (1-indexed)
+                return lineNum === i + 1;
+              }
+              // If no line number, check if line is different from previous
+              return !prevLines.includes(line);
+            });
+
+            newOutput = newLines.length > 0 ? newLines.join('\n') : null;
+          }
+        }
+
+        results.push({
+          statement: statement.trim(),
+          output: newOutput
+        });
+
+        previousOutput = currentOutput;
+      } catch (error) {
+        const currentOutput = (error.stderr || error.stdout || error.message).trim();
+
+        // Extract only new errors
+        let newOutput = null;
+        if (currentOutput && currentOutput !== previousOutput) {
+          if (i === 0) {
+            newOutput = currentOutput;
+          } else {
+            const prevLines = previousOutput.split('\n');
+            const currLines = currentOutput.split('\n');
+            const newLines = currLines.filter((line, idx) => {
+              const lineNumMatch = line.match(/:(\d+):/);
+              if (lineNumMatch) {
+                const lineNum = parseInt(lineNumMatch[1]);
+                return lineNum === i + 1;
+              }
+              return !prevLines.includes(line);
+            });
+            newOutput = newLines.length > 0 ? newLines.join('\n') : null;
+          }
+        }
+
+        results.push({
+          statement: statement.trim(),
+          output: newOutput
+        });
+
+        previousOutput = currentOutput;
+      }
+    }
+
+    // Return results as JSON
+    return JSON.stringify(results);
   } catch (error) {
-    // Return stderr if available, otherwise the error message
-    return (error.stderr || error.stdout || error.message).trim();
+    // Return error in the same format
+    return JSON.stringify([{
+      statement: code.trim(),
+      output: (error.stderr || error.stdout || error.message).trim()
+    }]);
   }
 }
 
