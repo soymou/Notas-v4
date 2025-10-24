@@ -262,3 +262,120 @@ Notemos que no postulamos ninguna relación entre universos. En general, se da e
 los universos $(cal(U) union.sq cal(V)) union.sq cal(W)$ y 
 $cal(U) union.sq (cal(V) union.sq cal(W))$ no están relacionados de ninguna manera.
 
+
+## Igualdad observacional de los números naturales
+
+Usando universos, podemos definir muchas relaciones sobre los números naturales. Damos 
+aquí el ejemplo de *igualdad observacional* en $NN$. La idea de la igualdad 
+observacional es que, si queremos probar que $m$ y $n$ son observacionalmente iguales, 
+podemos hacerlo viendo a $m$ y a $n$:
+
+1. Si $m$ y $n$ son ambos $0_NN$, entonces son observacionalmente iguales. 
+2. Si uno de ellos es $0_NN$ y el otro es un sucesor, entonces no son observacionalmente
+  iguales.
+3. Si $m$ y $n$ son sucesores, digamos $m equiv "succ" _NN (m')$ y 
+  $n equiv "succ" _NN (n')$, entonces $n$ y $m$ son observacionalmente iguales si y sólo 
+  si sus predecesores, $m'$ y $n'$ son observacionalmente iguales.
+
+Así, la igualdad observacional es una relación definida inductivamente, que nos da un 
+algoritmo para verificar la igualdad en $NN$. En efecto, se pude usar para mostrar que 
+la igualdad entre números naturales es *decidible*, es decir, existe un programa que 
+decide si dos números naturales dados $m$ y $n$ son iguales.
+
+<div id="definicion-6-3-1">
+<Aside type="tip" title="Definición 6.3.1">
+Definimos la **igualdad observacional** en $NN$ como una relación binaria 
+$"Eq" _NN : NN arrow (NN arrow cal(U)_0)$ que satisface 
+
+```typst 
+#table(
+  stroke: none, 
+  columns: 2, 
+  $"Eq" _NN (0_NN, 0_NN) equiv bold(1)$,
+  $"Eq" _NN ("succ" _NN (n), 0 _NN) equiv emptyset$,
+  $"Eq" _NN (0_NN, "succ" _NN (n) equiv emptyset)$,
+  $"Eq" _NN ("succ" _NN (n), "succ" _NN (m)) equiv "Eq" _NN (n, m).$
+)
+```
+*Construcción* Definimos $"Eq" _NN $ por inducción doble sobre $NN$. Para la primera 
+aplicación de inducción, es suficiente dar 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1, 
+  $E_0 : NN arrow cal(U)_0$,
+  $E_S : NN arrow ((NN arrow cal(U)_0) arrow (NN arrow cal(U)_0))$ 
+)
+```
+Definimos $E_0$ por inducción, tomando $E_(00) := bold(1)$ y $E_(0 S)(n, X, m) := emptyset$.
+La familia $E_0$ resultante satisface 
+ 
+```typst 
+#table(
+  stroke: none,
+  columns: 1, 
+  $E_0 (0_NN) equiv bold(1)$,
+  $E_0 ("succ" _NN (n)) equiv emptyset.$
+)
+```
+Definimos $E_S$ por inducción, tomando $E_(S 0) := emptyset$ y 
+$E_(S S) (n, X, m) := X(m)$. La familia  $E_S$ resultante satisface 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1, 
+  $E_S (n, X, 0_NN) equiv emptyset$,
+  $E_S (n, X, "succ" _NN (m)) equiv X(m).$
+)
+```
+Por lo tanto, por la regla de computación para la primera inducción, tenemos que la 
+igualdad juiciosa 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1,
+  $"Eq" _NN (0_NN, m) equiv E_0(m)$,
+  $"Eq" _NN ("succ" _NN (n), m) equiv E_S (n, "Eq" _NN (n), m)$
+)
+```
+se mantiene, de lo que las igualdades juiciosas en el enunciado de la definición se siguen.
+
+</Aside>
+</div>
+
+La igualdad observacional de los números naturales es importante pues se usa para probar 
+igualdades y negaciones de igualdades. La proposición [6.3.3](#proposicion-6-3-3) no 
+permite hacer eso.
+
+<div id="lema-6-3-2">
+<Aside type="tip" title="Lema 6.3.2">
+La igualdad observacional en $NN$ es una relación reflexiva, es decir, tenemos 
+
+$ "refl-Eq"_ NN : Pi_((n : NN)) "Eq" _NN (n.n). $
+
+*Demostración* La función $"refl-Eq" _NN$ se define por inducción sobre $n$, tomando 
+
+```typst 
+#table(
+  stroke: none, 
+  columns: 1,
+  $"refl-Eq" _NN (0_NN) := star$,
+  $"refl-Eq" _NN ("succ"_ NN (n)) := "refl-Eq" _NN (n).$
+)
+```
+</Aside>
+</div>
+
+
+
+
+
+
+
+
+
+
+
