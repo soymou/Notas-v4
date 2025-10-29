@@ -1,0 +1,102 @@
+---
+title: Productos 
+sidebar: 
+  order: 2
+---
+
+Dados dos tipos $A, B: cal(U)$ introducimos el tipo $A times B : cal(U)$ al que llamamos su 
+**producto cartesiano**. También introducimos un tipo que es el neutro respecto del producto 
+llamado el **tipo unidad** $bold(1): cal(U)$. 
+
+La manera de construir parejas es evidente, dado $a : A$ y $b : B$, podemos formar 
+$(a, b) : A times B$. Similarmente, hay una sola forma de construir elementos de $bold(1)$,
+a saber, $star : bold(1)$. 
+
+Ahora, ¿cómo podemos usar las parejas? Primero consideremos la definición de una función 
+no dependiente $f : A times B arrow C$. Como esperamos que los elementos de $A times B$ 
+sean pares, esperamos poder definir una de estas funciones diciendo cómo se comportan en 
+las parejas $(a, b)$. Podemos hacer esto dando una función $g : A arrow B arrow C$. Así,
+introducimos una regla (la regla de eliminación para productos) que dice que 
+dada una función $g : A arrow B arrow C$, podemos definir una función 
+$f : A times B arrow C$ como 
+
+$ f (a, b) = g(a)(b). $
+
+Como un ejemplo, podemos derivar las funciones proyección 
+
+$ "pr" _1 : A times B arrow A $
+$ "pr" _2 : A times B arrow B $
+
+mediante las ecuaciones 
+
+$ "pr" _1 ((a,b)) :equiv a $
+$ "pr" _2 ((a,b)) :equiv b $
+
+En lugar de invocar este principio de definición de funciones cada vez que vamos a definir 
+una función podemos definir una función 
+
+$ "rec" _(A times B) : product_(C : cal(U)) (A arrow B arrow C) arrow A times B arrow C $
+
+mediante la ecuación 
+
+$ "rec" _(A times B) (C, g, (a,b)) : equiv g(a)(b). $
+
+Luego, en lugar de definir $"pr" _1$ y $"pr" _2$ directamente mediante una ecuación, 
+podemos definir 
+
+$ "pr" _1 : equiv "rec" _(A times B) (A, lambda a. lambda b. a) $
+$ "pr" _2 : equiv "rec" _(A times B) (B, lambda a. lambda b. b) $
+
+A la función $"rec" _(A times B)$ le llamamos el **recursor** para tipos producto.
+
+También tenemos un recursor para el tipo unidad: 
+
+$ "rec" _(bold(1)) : product_(C : cal(U)) C arrow bold(1) arrow C $
+
+definido mediante le ecuación 
+
+$ "rec" _(bold(1)) (C, c, star) : equiv c. $
+
+Para poder definir funciones dependientes sobre un tipo producto, necesitamos generalizar 
+el recursor. Dada una familia de tipos $C : A times B arrow cal(U) $, podemos definir una 
+función $f : Pi_((x : A times B)) C(x)$ dando una función 
+$g : Pi_((x : A)) Pi_((y : B)) C((x, y))$ y una ecuación 
+
+$ f((x, y)) : equiv g(a)(b). $
+
+Por ejemplo, de esta forma podemos demostrar que cada elemento de un tipo producto 
+$A times B$ es una pareja. Específicamente, podemos construir una función 
+
+La habilidad de definir funciones dependientes de esta forma significa que para probar una 
+propiedad para todos los elementos de un producto, es suficiente probarlo para sus
+elementos canónicos, las parejas ordenadas. Si aplicamos esto en el caso universal 
+obtenemos una función llamada la **inducción** para tipos productos: dados $A, B : cal(U)$
+tenemos 
+
+$ "ind" _(A times B) : product_(C : A times B arrow cal(U)) (product_(x : A) product_(y : B)C((x,y))) 
+arrow product_(x : A times B) C(x) $
+
+definida mediante la ecuación 
+
+$ "ind" _(A times B) (C, g, (x, y)) : equiv g(a)(b). $
+
+También tenemos una función inducción para el tipo unidad:
+
+$ "ind" _(bold(1)) : product_(C : bold(1) cal(U)) C(star) arrow product_(x : 1) C(x) $
+
+definida mediante la ecuación 
+
+$ "ind" _(bold(1)) (C, c, star) : equiv c. $
+
+
+
+
+
+
+
+
+
+
+
+
+

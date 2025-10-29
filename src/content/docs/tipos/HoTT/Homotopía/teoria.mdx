@@ -1,0 +1,58 @@
+---
+title: Teoría homotópica de tipos 
+sidebar:
+  order: 1
+---
+
+La idea central de la teoría homotópica de tipos es que los tipos se pueden pensar como 
+espacios en la teoría de homotopía o grupoides de alta dimensión en teoría de categorías.
+
+En la teoría de homotopía, un espacio $X$ es un conjunto de puntos equipado con una 
+topología y una trayectoria entre dos puntos $x$ y $y$ es representada mediante una función 
+continua $p : [0, 1] arrow X$, donde $p(0) = x$ y $p(1) = y$. Esta función nos da un punto 
+en $X$ para cada momento del tiempo. Para muchos propósitos, la igualdad estricta entre 
+trayectorias nos restringe demasiado, así que es mejor considerar una noción de igualdad 
+más relajada llamada *homotopía*. Una homotopía entre un par de funciones continuas 
+$f : X_1 arrow X_2$ y $g : X_1 arrow X_2$ es una función continua 
+$H : X_1 times [0, 1] arrow X_2$ que cumple que $H(x, 0) = f$ y $H(x, 1) = g$. En el caso 
+particular de las trayectorias, una homotopía entre dos trayectorias $p$ y $q$ entre 
+$x$ y $y$ es una función continua $H: [0, 1] times [0, 1] arrow X$ tal que 
+$H(s, 0) = p(s)$ y $H(s, 1) = q(s)$ para cada $s in [0, 1]$. En este caso, pedimos también 
+que $H(0, t) = x$ y $H(1, t) = y$ para cada $t in [0, 1]$, una homotopía de este estilo 
+es llamada *relativa a los extremos*.
+
+La homotopía es una relación de equivalencia y las operaciones como la concatenación, los 
+inversos, etc. la preservan. Más aún, las clases de equivalencias de ciclos en un punto 
+$x_0$ (trayectorias entre un mismo punto) forman un grupo conocido como el 
+*grupo fundamental*. Este grupo es un invariante algebráico del espacio, que se puede usar
+para investigar si dos espacios son *homotópicamente equivalentes* (hay funciones continuas 
+entre ellos cuyas composiciones son homotópicas a las identidades), pues espacios 
+equivalentes tienen grupos fundamentales isomorfos.
+
+Como las homotopías son, en sí mismas, una especie de camino 2-dimensional, hay una noción
+de *homotopías entre homotopías* 3-dimensionales y así sucesivamente, Esta torre 
+infinita de puntos, homotopías, homotopías entre homotopías, etc. es una instancia de 
+una estructura algebráica llamada $infinity$-grupoide (débil). Un $infinity$-grupoide 
+consiste de una colección de objetos, una colección de *morfismos* entre objetos, 
+*morfismos entre morfismos* y así sucesivamente, equipados con cierta estructura algebráica
+compleja; un morfismo de nivel $k$ es llamado un $k$-*morfismo*. Los morfismos en cada nivel
+tienen identidad, composición e inversión, que son débiles en el sentido de que 
+satisfacen las leyes de los grupoides (asociatividad de la composición, las identidades son 
+unidades para la composición y los inversos se cancelan) sólo salvo morfismos del siguiente 
+nivel y esta debilidad da lugar a mayor estructura.
+
+Todo espacio topológico $X$ tiene un *$infinity$-grupoide fundamental* cuyos $k$-morfismos 
+son las trayectorias $k$-dimensionales en $X$. La debilidad del $infinity$-grupoide 
+se corresponde directamente con que las trayectorias forman un grupo sólo salvo 
+homotopías, con las $(k+1)$-trayectorias sirviendo como las homotopías entre 
+$k$-trayectorias.
+
+Ahora, en la teoría homotópica de tipos, cada tipo tiene la estructura de un 
+$infinity$-grupoide. Una diferencia importante entre la teoría de homotopía y la teoría 
+homotópica de tipos es que da una descripción *sintética* de los espacios, los puntos, 
+trayectorias y las trayectorias entre trayectorias son nociones básicas, indivisibles 
+y primitivas. 
+
+Una de las cosas más impresionantes de la teoría homotópica de tipos es que todas las 
+construcciones básicas y axiomas surgen automáticamente del principio de inducción para 
+tipos identidad.

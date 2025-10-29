@@ -1,0 +1,55 @@
+---
+title: Pares dependientes
+sidebar: 
+  order: 3
+---
+
+Así como generalizamos las funciones a funciones dependientes haciendo que el tipo del 
+co-dominio pudiera depender del valor del dominio, podemos generalizar los tipos productos 
+para que el tipo de la segunda coordenada pueda depender del valor de la primera. Estos 
+son llamados los **tipos par dependiente** o *$Sigma$-tipos*, pues corresponden a una suma 
+indizada.
+
+Dado un tipo $A : cal(U)$ y una familia $B : A arrow cal(U)$, el tipo par dependiente 
+se escribe como $Sigma_(x : A) B(x) : cal(U)$.
+
+La forma de construir elementos de un tipo par dependiente es por medio del emparejamiento,
+tenemos que $(a, b) : Sigma_(a : A) B(x)$ siempre que $a : A$ y $b : B(a)$. Si $B$ es 
+constante, el tipo par dependiente es el producto cartesiano de siempre:
+
+$ (sum_(x : A) B) equiv A times B. $
+
+El principio de recursión dice que para definir una función 
+$f : (Sigma_((x : A)) B(x)) arrow C $ necesitamos dar una función 
+$g : Pi_((x : A)) B(x) arrow C$ y luego podemos definir a $f$ mediante la ecuación 
+
+$ f((a, b)) : equiv g(a)(b).  $
+
+El principio de inducción dice que, dada una familia de tipos 
+$C : (Sigma_(x : A) B(x)) arrow cal(U)$ y una función 
+
+$ g : product_(x : A) product_(y : B(x)) C ((a,b)) $
+
+podemos derivar una función 
+
+$ f : product_(p : sigma_((x : A)) B(x)) C(p) $
+
+mediante le ecuación 
+
+$f ((a, b)) : equiv g(a)(b). $
+
+Podemos definir el recursor y la inducción como 
+
+$ "rec" _(Sigma_((x : A)) B(x)) : product_(C : cal(U)) (product_(x : A) B(x) arrow C) arrow 
+(sum_(x : A) B(x)) arrow C $
+
+$ "ind" _(Sigma_((x : A)) B(x)) : product_(C : (Sigma_((x : A)) B(x)) arrow cal(U))
+(product_(x : A) product_(y : B(x)) C((x, y))) arrow product_(p : Sigma_((x : A)) B(x)) C(p) $
+
+mediante las ecuaciones 
+
+$ "rec" _(Sigma_((x : A) B(x))) (C, g, (a, b)) : equiv g(a)(b), $
+$ "ind" _(Sigma_((x : A) B(x))) (C, g, (a, b)) : equiv g(a)(b). $
+
+
+

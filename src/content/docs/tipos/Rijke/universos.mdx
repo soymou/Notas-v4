@@ -370,8 +370,31 @@ $ "refl-Eq"_ NN : Pi_((n : NN)) "Eq" _NN (n.n). $
 </div>
 
 
+<div id="proposicion-6-3-3">
+<Aside type="tip" title="Proposición 6.3.3">
+
+Para cualesquiera dos números naturales $m$ y $n$ se tiene que 
+
+$ (m = n) arrow.r.l "Eq" _NN (m, n) $
 
 
+
+```typst
+#import "@preview/commute:0.3.0": node, arr, commutative-diagram
+
+#align(center)[#commutative-diagram(
+  node((0, 0), $X$),
+  node((0, 1), $Y$),
+  node((1, 0), $X \/ "ker"(f)$, "quot"),
+  arr($X$, $Y$, $f$),
+  arr("quot", (0, 1), $tilde(f)$, label-pos: right, "dashed", "inj"),
+  arr($X$, "quot", $pi$),
+)]
+```
+</Aside>
+</div>
+
+TODO!
 
 
 

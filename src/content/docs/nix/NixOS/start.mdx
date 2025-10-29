@@ -1,0 +1,74 @@
+---
+title: Empezando con NixOS
+sidebar:
+  order: 1
+---
+
+La configuración por defecto para NixOS está en `/etc/nixos/configuration.nix`. Este 
+archivo contiene toda la configuración declarativa del sistema, incluyendo configuraciones 
+de la zona horaria, lenguaje, teclado, redes, usuarios, sistema de archivos y opciones de 
+booteo.
+
+Para modificar el sistema de manera reproducible (lo cual es recomendado), necesitamos 
+modificar manualmente este archivo y luego ejecutar `sudo nixos-rebuild switch` para 
+aplicar las modificaciones. Este comando genera un nuevo entorno del sistema basado en 
+la configuración modificada, configura el nuevo entorno como el entorno por defecto y 
+preserva la configuración anterior en las opciones de booteo de grub/systemd-boot. Esto 
+asegura que siempre podamos regresar al entorno anterior, incluso si el nuevo deja de 
+bootear.
+
+Mientas que `/etc/nixos/configuration.nix` es el método clásico para configurar NixOS, 
+depende de fuentes de datos configuradas por `nix-channel` y no tiene bloque de versiones, 
+lo que hace difícil la reproducibilidad del sistema. Un mejor acercamiento es usar Flakes,
+que dan reproducibilidad y mejor manejo de configuración.
+
+En esta sección aprenderemos a manejar NixOS con el método clásico.
+
+# Configurando el sistema usando  `/etc/nixos/configuration.nix`
+
+Para ilustrar como usar `/etc/nixos/configuration.nix`, consideremos un ejemplo donde 
+habilitamos SSH y añadimos un usuario llamado `ryan` al sistema. Podemos lograrlo de 
+esta manera 
+
+```code :language nix :eval false 
+{ config, pkgs, ... } :
+
+{
+  imports = [
+    ./hardware-configuration.nix 
+  ];
+
+  # Añadir el usuario ryan 
+  
+  users.user.ryan = {
+    isNormalUser = true;
+    description = "ryan";
+    extraGroups = [ "networkmanager" "wheel" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 <some-public-key> ryan@ryan-pc"
+    ];
+    packages = with pkgs; [
+      firefox 
+    ];
+  };
+  
+  services.openssh = {
+    enable = true;
+    settings = {
+      X11Forwarding = true;
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+    };
+    openFirewall = true;
+  };
+}
+```
+En este configuración declaramos nuestra intención de habilitar el servicio openssh, 
+añadimos una llave pública de SSH para el usuario `ryan` y deshabilitamos el login con 
+contraseña.
+
+Para usar la configuración modificada, corremos `sudo nixos-rebuild switch`. Este comando 
+aplicará los cambios, generará un nuevo entorno del sistema y lo configura como por defecto.
+Ahora podemos hacer login al sistema usando SSH con las llaves configuradas.
+
+
