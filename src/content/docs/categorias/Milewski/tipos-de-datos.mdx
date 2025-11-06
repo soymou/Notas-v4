@@ -1,0 +1,241 @@
+---
+title: Tipos de datos algebráicos simples
+sidebar:
+  order: 2
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Los productos y co-productos son dos formas básicas de combinar tipos. Resulta que muchas 
+de las estructuras de datos de la programación de todos los días se pueden construir usando
+estos dos mecanismos.
+
+## Tipos producto 
+
+La implementación canónica del producto de dos tipos en un lenguaje de programación es 
+el emparejamiento. 
+Los pares no son estrictamente conmutativos: un par `(Int, Bool)` no puede ser substituido 
+por un par `(Bool, Int)`, aunque contengan la misma información. Sin embargo, son 
+conmutativos salvo isomorfismos, el isomorfismo es la función `swap`, que es su propia 
+inversa:
+
+```haskell
+swap :: (a, b) -> (b, a
+swap (x, y) = (y, x)
+```
+Podemos combinar una cantidad arbitraria de tipos en un producto poniendo parejas dentro 
+de parejas, pero hay una forma más fácil, las parejas anidadas son equivalentes a las 
+`tuples`. Es la consecuencia de que las diferentes formas de anidar parejas sean isomorfas.
+
+Si queremos combinar tres tipos en un producto `a, b` y `c`, podemos hacerlo de dos formas
+
+`((a, b), c)`
+
+o 
+
+`(a, (b, c))`
+
+Estos tipos son distintos, no podemos pasarle uno a una función que espera el otro, pero 
+sus elementos están en una correspondencia bi-unívoca. Hay una función que mapera 
+unos a otros 
+
+```haskell 
+alpha :: ((a, b), c) -> (a, (b, c))
+alpha ((x, y), z) = (x, (y, z))
+```
+
+y esta función es invertible
+
+```haskell 
+alpha_inv :: (a, (b, c)) -> ((a, b), c)
+alpha_inv (x, (y, z)) = ((x, y), z)
+```
+de modo que es un isomorfismo.
+
+Esto corresponde al hecho de que, en una categoría $bold(C)$ con productos, si tenemos 
+objetos $A, B$ y $C$ sucede que 
+
+$ A times (B times C) tilde.equiv (A times B) times C $
+
+Podemos mostrar que el tipo unidad $()$ es la unidad del producto de la misma manera en la 
+que el $1$ es la unidad de la multiplicación. El tipo 
+
+`(a, ())`
+
+es isomorfo a `a`. Aquí está el isomorfismo 
+
+```code :language haskell :eval false 
+rho :: (a, ()) -> a 
+rho (x, ()) = x
+
+rho_inv :: a -> (a, ())
+rho_inv x = (x, ())
+```
+
+Hay una manera más general de definir tipos producto en Haskell. Usa constructores nombrados
+con múltiples argumentos. Un par, por ejemplo, se puede definir como 
+
+```code :language haskell :eval false 
+data Pair a b = P a b 
+```
+
+Aquí, `Pair a b` es el nombre del tipo parametrizado por otros dos tipos `a` y `b` y 
+`P` es el nombre del constructor. Definimos un tipo par pasando dos tipos al constructor 
+del tipo `Pair`. Podemos construir un valor de este tipo pasando dos valores de tipos 
+apropiados al constructor `P`. Por ejemplo, definamos el valor de `stmt` cono  un par 
+de `String` y `Bool`:
+
+```code :language haskell :eval false 
+stmt :: Pair String Bool 
+stmt = P "Este enunciado es" False
+```
+La primera línea es la declaración de tipo. Usa el constructor del tipo `Pair` con 
+`String` y `Bool` remplazando `a` y  `b` en la definición genérica de `Pair`. 
+La segunda línea define el valor de `stmt` pasando valores concretos al constructor de 
+datos `P`. Los constructores de tipos se usan para eso, construir tipos, mientras que los 
+de datos, evidentemente, construyen datos.
+
+Como los espacios de nombres para los constructores de tipos y datos están separados en 
+Haskell, podemos usar el mismo nombre para ambos, por ejemplo: 
+
+```code :language haskell :eval false 
+data Pair a b = Pair a b 
+```
+
+Programar con tuplas y constructores de múltiples argumentos se puede volver complicado,
+Haskell nos da un tipo producto con campos nombrados llamados records.
+
+## Records 
+
+Veamos un ejemplo simple. Queremos describir los elementos químicos usando dos strings 
+y un entero, un string para el nombre, uno para el símbolo y un entero para 
+el número atómico. Podríamos usar un tuple y recordar qué componente representa qué.
+Pero aún mejor, podemos definir un record:
+
+```code :language haskell :eval false 
+data Element = Element {
+  name :: String, 
+  symbol :: String, 
+  atomicNumber :: Int
+} 
+```
+Las dos representaciones son isomorfas:
+
+```code :language haskell :eval false 
+tupleToElem :: (String, String, Int) -> Element 
+
+tupleToElem (n, s, a) = Element {
+  name = n,
+  symbol = s,
+  atomicNumber = a
+}
+
+elemToTuple :: Element -> (String, String, Int)
+elemToTuple e = (name e, symbol e, atomicNumber e)
+```
+
+Notemos que los nombres de los campos de un record también sirven como funciones para 
+acceder a esos campos. Por ejemplo, `atomicNumber e` obtiene el campo de `e` que 
+corresponde a `atomicNumber`. Usamos a `atomicNumber` como una función del tipo 
+
+```code :language haskell :eval false 
+atomicNumber :: Element -> Int 
+```
+
+## Tipos suma 
+
+Así como el tipo producto en las categorías da lugar a los tipos producto, el co-producto 
+da lugar a los tipos suma. La implementación canónica de un tipo suma en Haskell es:
+
+```code :language haskell :eval false 
+data Either a b = Left a | Right b 
+```
+Y como las parejas, los `Either` son conmutativos (salvo isomorfismo), pueden anidarse 
+y el orden de anidación es irrelevante (salvo isomorfismo). Así, podemos definir el 
+el equivalente de la ternas para sumas:
+
+```code :language haskell :eval false 
+data OneOfThree a b c = Sinistral a | Medial b | Dextral a 
+```
+y así sucesivamente.
+
+Podemos pensar en `Either` como la suma y `Void` como el cero. Por ejemplo 
+
+```code :language haskell :eval false 
+Either a Void 
+```
+es isomorfo a `a`, pues no hay ninguna manera de construir una versión derecha de este 
+tipo. Los únicos habitantes de `Either a Void` son los que se construyen usando el 
+constructor `Left`. Así, simbólicamente, `a + 0 = a`.
+
+Los tipos suma son muy comunes en Haskell.
+
+Un ejemplo de tipo suma son las listas:
+
+```code :language haskell :eval false 
+List a = Nil | Cons a (List a) 
+```
+Podríamos definir una función sobre listas como: 
+
+```code :language haskell :eval false 
+maybeTail :: List a -> Maybe (List a)
+
+maybeTail Nil = Nothing
+maybeTail (Cons _ t) = Just t
+```
+
+donde el tipo `Maybe` se define como:
+
+```code :language haskell :eval false 
+Maybe a = Nothing | Just a 
+```
+
+## Álgebra de tipos 
+
+Recapitulemos lo que hemos visto hasta ahora. Hemos visto dos estructuras de monoide 
+debajo del sistema de tipos: Tenemos los tipos suma con `Void` como su elemento neutro 
+y los tipos producto con `()` como su elemento neutro. 
+
+Veamos que tan lejos podemos llevar esta analogía. Por ejemplo, ¿el producto con 0 da 0?
+En otras palabras, ¿es un tipo producto con un componente `Void` isomorfo a `Void`?
+
+Para crear un par necesitamos dos valores y como no hay valores de tipo `Void`, el producto
+con `Void` debe estar vacío y, por tanto, debe ser isomorfo a `Void`.
+
+Otra cosa que liga la adición y la multiplicación es la ley distributiva: 
+
+`a * (b + c) = a * b + a * c`
+
+¿También se mantiene para tipos productos y sumas? Sí, salvo isomorfismos. El lado 
+izquierdo corresponde al tipo 
+
+`(a, Either b c)`
+
+y el derecho a 
+
+`Either (a, b) (a, c)`
+
+Aquí esta la función que los convierte en una dirección 
+
+```code :language haskell :eval false 
+prodToSum :: (a, Either b c) -> Either (a, b) (a, c)
+prodToSum (x, e) = 
+  case e of 
+    Left y -> Left (x, y)
+    Right z -> Right (x, z)
+```
+y la otra dirección 
+
+```code :language haskell :eval false 
+sumToProd :: Either (a, b) (a, c) -> (a, Either b c)
+sumToProd e = 
+  case e of 
+    Left (x, y) -> (x, Left y)
+    Right (x, y) -> (x, Right z)
+```
+
+El enunciado `case` se usa para hacer pattern matching dentro de funciones. Cada patrón 
+está seguido de una flecha y la expresión que se debe evaluar cuando se hace match al 
+patrón. 
