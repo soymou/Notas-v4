@@ -1,0 +1,109 @@
+---
+title: La combinación de los flakes y el sistema de módulos de Nixpkgs
+sidebar: 
+  order: 5
+---
+
+## El sistema de módulos de Nixpkgs explicado 
+
+Aquí está una estructura simplificada de un módulo de Nixpkgs
+
+```code :language nix :eval false 
+{ lib, config, options, pkgs, ... } :
+
+{
+  imports = [
+    ./xxx.nix 
+  ];
+  for.bar.enable = true;
+}
+```
+
+La definición es en realidad una función Nix y tiene 5 parámetros automáticamente generados,
+inyectados y sin declaración que provee el sistema de módulos: 
+
+1. `lib`: Aun biblioteca de funciones incluida con nixpkgs que ofrece funciones prácticas 
+  para operar expresiones Nix.
+
+2. `config`: Un conjunto de todos los valores de opciones en el entorno actual, que se usan 
+  de forma extensa en la sección subsecuente del sistema de módulos.
+3. `options`: Un conjunto de todas las opciones definidas en todos los módulos del entorno 
+  actual.
+4. `pkgs`: Una colección que contiene todos los paquetes de nixpkgs junto con algunas 
+  funciones útiles.
+5. `modulesPath`: Un parámetro sólo disponible en NixOS que apunta a 
+  `nixpgks/nixos/modules`.
+
+## Pasando parámetros a sub-módulos 
+Si necesitamos pasar otros parámetros a sub-módulos, necesitamos usar algunos métodos 
+especiales para especificar manualmente estos parámetros.
+
+El sistema de módulos de Nixpkgs nos da dos formas de pasar estos parámetros:
+
+1. El parámetro `specialArgs` de la función `nixpkgs.lib.nixosSystem`.
+2. Usando la opción `_module.args` en cualquier módulo para pasar parámetros.
+
+En pocas palabras, `specialArgs` y `_module.args` ambas requieren un conjunto de atributos 
+puesto como su valor y sirven el mismo propósito, pasar todos los parámetros del conjunto 
+de atributos a todos los sub-módulos. 
+
+Supongamos que queremos pasar cierta dependencia para usarla en un sub-módulo. Podemos 
+usar `specialArgs` para pasar `inputs` a todos los sub-módulos:
+
+```code :language nix :eval false 
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    another-input.url = "github:username/repo-name/branch-name";
+  };
+  
+  outputs = inputs@{ self, nixpkgs, another-input, ... }: {
+    nixosConfiguration.my-nixos = nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit inputs; };
+      modules = [
+        ./configuration.nix
+      ];
+    }; 
+  };
+} 
+```
+
+## Instalando software de otros Flakes 
+
+Usaremos el editor Helix como ejemplo:
+
+```code :language nix :eval false 
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    
+    helix.url = "github:helix-editor/helix/master";
+  };
+  
+  outputs = inputs@{ self, nixpkgs, ... } : {
+    nixosConfiguration.my-nixos = nixpkgs.lib.nixosSystem {
+      specialArgs = { inherit inputs; };
+      modules = [
+        ./configuration.nix 
+      ];
+    };  
+  };
+} 
+```
+Luego, podemos referencias estos inputs en `configuration.nix`:
+
+```code :language nix :eval false 
+{ config, pkgs, inputs, ... }: 
+
+{
+  environment.systemPackages = with pkgs; [
+    git 
+    vim 
+    wget 
+    inputs.helix.packages."${pkgs.system}".helix 
+  ];
+}
+```
+
+
+

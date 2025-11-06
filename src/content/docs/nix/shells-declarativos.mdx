@@ -1,0 +1,107 @@
+---
+title: Shells declarativos
+sidebar:
+  order: 2
+---
+import { Aside } from '@astrojs/starlight/components';
+
+## Entrando a un shell temporal
+
+Supongamos que queremos un ambiente donde `cowsay` y `lolcat` están disponibles. 
+La manera más simple es hacerlo mediante el comando `nix-shell -p`:
+
+```bash
+$ nix-shell -p cowsay lolcat
+```
+Este comando funciona, pero tiene algunas desventajas:
+
+- Tenemos que escribir `-p cowsay lolcat` cada vez que entramos a la shell. 
+- No permite más personalización del ambiente de shell
+
+Una mejor solución es crear nuestro ambiente mediante un archivo `shell.nix`.
+
+## Un archivo `shell.nix` básico
+
+Creemos un archivo llamado `shell.nix` con este contenido:
+
+```code :language nix :filename shell.nix :eval false
+let
+  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/tarball/nixos-24.05";
+  pkgs = import nixpkgs { config = {}; overlays = []; };
+in
+
+pkgs.mkShellNoCC {
+  packages = with pkgs; [
+    cowsay
+    lolcat
+  ];
+}
+```
+<Aside title="Explicación">
+Pusimos explícitamente `config` y `overlays` para prevenir que sean sobre-escritos por 
+configuración global.
+
+`m̀kShellNoCC` es un a función que toma un conjunto de atributos. Aquí le dimos el
+atributo `packages` con una lista que contiene dos items del conjunto de atributos 
+`pkgs`. 
+</Aside>
+
+Podemos entrar al ambiente corriendo `nix-shell` en el mismo directorio que 
+`shell.nix`:
+
+```bash 
+$ nix-shell
+[nix-shell]$ cowsay hello | lolcat
+```
+`nix-shell` por defecto busca un archivo llamado `shell.nix` en el directorio actual
+y crea un ambiente de shell a partir de la expresión de Nix en este archivo.
+Los paquetes definidos en el atributo `packages` estarán disponibles en el `$PATH`..
+
+## Variables de entorno
+
+Puede que queramos exportar ciertas variables de ambiente al entrar a un ambiente de
+shell.
+Podemos definir `GREETING` para que se pueda usar en ambiente de shell:
+
+```code :language nix :eval false :filename shell.nix
+let
+  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/tarball/nixos-24.05";
+  pkgs = import nixpkgs { config = {}; overlays = []; };
+in
+
+pkgs.mkShellNoCC {
+  packages = with pkgs; [
+    cowsay
+    lolcat
+  ];
+  
+  GREETING = "Hello, Nix!";
+}
+```
+Cualquier nombre de atributo que se pase a `mkShellNoCC` que no está reservado y que 
+tenga un valor que se puede coercionar a un string se vuelve una variable en entorno.
+
+## Comandos de arranque
+Puede que queramos correr ciertos comandos antes de entrar al entorno. Estos comandos
+se pueden colocar en el atributo `shellHook` de `mkShellNoCC`.
+
+```code :language nix :eval false :filename shell.nix
+let
+  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/tarball/nixos-24.05";
+  pkgs = import nixpkgs { config = {}; overlays = []; };
+in
+
+pkgs.mkShellNoCC {
+  packages = with pkgs; [
+    cowsay
+    lolcat
+  ];
+  
+  GREETING = "Hello, Nix!";
+  
+  shellHook = ''
+    echo $GREETING | cowsay | lolcat 
+  '';
+}
+```
+

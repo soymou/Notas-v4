@@ -1,0 +1,404 @@
+---
+title: Universos
+sidebar: 
+  order: 8
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Para completar nuestra especificación so la teoría de tipos dependiente, introducimos los 
+universos de la teoría de tipos. Los universos se pueden pensar como tipos que consisten 
+de tipos. En realidad, un universo consiste de un tipo $cal(U)$ equipado con una familia de 
+tipos $cal(T)$ sobre $cal(U)$. Para cada $X: cal(U)$ pensamos a $X$ como una *codificación*
+del tipo $cal(T)(X)$. La familia de tipos $cal(T)$ es llamada una *familia universal de tipos.
+Hay varias razones para equipar a la teoría de tipos con universos. Una razón importante es 
+que nos permite definir nuevas familias de tipos sobre tipos inductivos, usando su 
+principio de inducción. Usamos esta manera de definir familias de tipos para definir muchas 
+relaciones familiares sobre $NN$, como las relaciones de orden $lt.eq$ y $lt$.
+
+También introducimos la relación $"Eq" _NN$ llamada la *igualdad observacional* en $NN$.
+Esta relación de equivalencia se puede usar para mostrar que $0_NN eq.not 1_NN$.
+
+La idea de introducir la igualdad observacional para un tipo en particular es que nos 
+debe poder ayudar a pensar cobre el tipo identidad. El tipo identidad fue introducido 
+de manera genérica y uniforme. Sin embargo, en casos específicos, tenemos una idea clara de 
+cómo *debe ser* la relación de igualdad. En el caso de los números naturales, por ejemplo, 
+usaremos la igualdad observacional $"Eq" _NN$ para caracterizar al tipo identidad de 
+$NN$. Caracterizar tipos identidad es uno de los temas principales de la teoría homotópica 
+de tipos.
+
+Una segunda razón para introducir universos es que nos permite definir muchos tipos de tipos 
+equipados con estructura. Uno de los ejemplos más importantes es el tipo de los grupos, que 
+es el tipo de tipos equipado con las operaciones de grupo que satisfacen las leyes de grupos 
+y para los cuales el tipo subyacente es un conjunto.
+
+## especificación de los universos de la teoría de tipos 
+
+Un universo consiste de un tipo $cal(U)$ cuyos elementos pueden pensarse como "códigos" 
+para tipos. Un universo también viene equipado con una familia de tipos $cal(T)$ indizada 
+por $cal(U)$. Dado un elemento $X: cal(U)$, ,pensamos en el tipo $cal(T)(X)$ como 
+el tipo de elementos de $X$. La familia $cal(T)$ es llamada la **familia universal de tipos**.
+
+Una de las características distintivas de los universos es que son cerrados bajo todos los 
+tipos de constructores. Dado un universo $cal(U)$ con familia universal de tipos $cal(T)$, 
+¿cómo expresamos que $cal(U)$ es cerrado bajo $Sigma$-tipos, por ejemplo? Recordemos que 
+un $Sigma$-tipo se forma usando un tipo $A$ y una familia de tipos $B$ sobre $A$. Así, 
+si $A$ es un tipo en $cal(U)$ y $B$ es una familia de tipos sobre $A$, quisiéramos expresar 
+que el $Sigma$-tipo es también un tipo en $cal(U)$. Sin embargo, no podemos simplemente 
+afirmar que $Sigma_((x: A)) B(x)$ es un elemento del universo, pues la teoría de tipos 
+hace una distinción cuidados entre tipos y elementos.
+
+Expresamos que $cal(U)$ es cerrado bajo $Sigma$-tipos usando una nueva operación 
+$caron(Sigma)$, que toma dos argumentos. El primer argumento es un elemento $X: cal(U)$ y el 
+segundo argumento es una familia de tipos en $cal(U)$ indizada por los elementos de $X$, es 
+decir, una función $cal(T)(X) arrow cal(U)$. Así, decimos que $cal(U)$ es cerrado bajo 
+$Sigma$-tipos afirmando que $cal(U)$ viene equipado con una operación 
+
+$ caron(Sigma): Pi_((X: cal(U))) (cal(T)(X) arrow cal(U)) arrow cal(U)$
+
+Más aún, pedimos que el elemento $caron(Sigma)(X, Y): cal(U)$ satisfaga la igualdad juiciosa 
+
+$ cal(T)(caron(Sigma) (X, Y)) equiv Sigma_((x: cal(T)(X))) cal(T)(Y(x)). $
+
+Esta igualdad juiciosa afirma que el elemento $caron(Sigma)(X, Y)$ del universo $cal(U)$ 
+*representa* el $Sigma$-tipo $Sigma_((x: cal(T)(X))) cal(T)(Y(X))$.
+
+Similarmente asumiremos que los universos son cerrados bajo $Pi$-tipos y bajo las demás 
+maneras de formar tipos. Sin embargo, hay una restricción importante: sería inconsistente 
+asumir que un universo este contenido dentro de sí mismo. Una forma de pensar en esto es que 
+los universos son de *tipos pequeños* y no puede ser el caso que el universo sea pequeño 
+con respecto a sí mismo. En lugar de asumir que un universo se contiene a sí mismo, asumimos 
+que hay una gran cantidad de universos: los suficientes para que cada familia se pueda 
+obtener sustituyendo dentro de la familia universal de algún tipo.
+
+<div id="definicion-6-1-1">
+<Aside type="tip" title="Definición 6.1.1">
+
+Un **universo** en la teoría de tipos es un tipo $cal(U)$ en el contexto vacío, equipado con 
+una familia de tipos $cal(T)$ sobre $cal(U)$ llamada una **familia universal**, que es 
+cerrada bajo las operaciones de formación de tipos en el sentido de que viene equipada con 
+la siguiente estructura 
+
+1. $cal(U)$ es cerrada bajo $Pi$, en el sentido de que viene equipado con una función 
+    $ caron(Pi): Pi_((X: cal(U))) (cal(T)(X) arrow cal(U)) arrow cal(U) $
+    para la cual la igualdad juiciosa 
+    $ cal(T)(caron(Pi)(X, Y)) equiv Pi_((x : cal(T)(X))) cal(T)(Y(X)). $
+    se mantiene, para cada $X: cal(U)$ y $Y : cal(T)(X) arrow cal(U)$.
+
+2. $cal(U)$ es cerrado bajo $Sigma$ en el sentido de que viene equipado con una función 
+    $ caron(Sigma) : Pi_((X : cal(U))) (cal(T)(X) arrow cal(U)) arrow cal(U) $
+    para la cual la igualdad juiciosa 
+    $ cal(T)(caron(Sigma)(X, Y)) equiv Sigma_(x: cal(T)(X)) cal(T)(Y(X)) $
+    se mantiene para cada $X: cal(U)$ y $Y : cal(T)(X) arrow cal(U)$.
+
+3. $cal(U)$ es cerrado bajo tipos identidad, en el sentido de que viene equipado con una
+    función 
+    $ caron(I) : Pi_((X: cal(U))) cal(T)(X) arrow (cal(T)(X) arrow cal(U)) $
+    para la cual la igualdad juiciosa 
+    $ cal(T)(caron(I)(X, x, y)) equiv (x = y) $
+    se mantiene para cada $X: cal(U)$ y $x, y: cal(T)(X)$.
+
+4. $cal(U)$ es cerrado bajo co-productos, en el sentido de que viene equipado con una 
+    función 
+    $ caron(+): cal(U) arrow (cal(U) arrow cal(U)) $
+    que satisface $cal(T)(X caron(+) Y) equiv cal(T)(X) + cal(T)(Y)$.
+
+5. $cal(U)$ contiene elementos $caron(emptyset), caron(bold(1)), caron(NN): cal(U)$ que 
+    satisfacen las igualdades juiciosas 
+    ```typst 
+    #table(
+      stroke: none,
+      columns: 1, 
+      $cal(T)(caron(emptyset)) equiv emptyset$,
+      $cal(T)(caron(bold(1))) equiv bold(1)$,
+      $cal(T)(caron(NN)) equiv NN.$
+    )
+    ```
+
+</Aside>
+</div>
+
+Consideremos un universo $cal(U)$ y un tipo $A$ en un contexto $Gamma$. Decimos que 
+$A$ es un tipo en $cal(U)$, o que el universo $cal(U)$ **contiene** a $A$, si $cal(U)$
+viene equipado con un elemento $caron(A) : cal(U)$ en el contexto $Gamma$, para el cual 
+el juicio 
+$ Gamma tack.r cal(T)(caron(A)) equiv A "type" $
+se mantiene. Si $A$ es un tipo en $cal(U)$, usualmente escribimos $A$ en lugar de $caron(A)$
+y $A$ en lugar de $cal(T)(caron(A))$.
+
+<div id="observacion-6-1-2">
+<Aside type="note" title="Observación 6.1.2">
+Como los tipos función ordinarios se definieron como un caso especial de función 
+dependiente, no necesitamos también asumir que los universos son cerrados bajo tipos 
+funciones ordinarias. Similarmente, como los universos son cerrados bajo tipos pares 
+dependientes, también lo son bajo productos cartesianos.
+</Aside>
+</div>
+
+## Asumiendo suficientes universos 
+La mayoría del tiempo será suficiente asumir un universo $cal(U)$ y de hecho recomendamos 
+que se asuma en este texto que hay un universo $cal(U)$. Sin embargo, a veces quisiéramos 
+considerar al universo $cal(U)$ como un tipo en algún universo. En estas situaciones no 
+podemos usar un sólo universo, pues suponer que $cal(U)$ es elemento de sí mismo nos lleva 
+a inconsistencias como al paradoja de Russell.
+
+La paradoja de Russel es el argumento famoso de que no hay un conjunto de todos los 
+conjuntos. Si hubiera un conjunto de todos los conjuntos $S$, entonces podríamos considerar 
+el subconjunto de Russell 
+
+$ R := brace.l x in S | x in.not x brace.r. $
+
+Russell después observó que $R in R$ si y sólo si $R in.not R$, así que llegamos a una 
+contradicción. Una variante del mismo argumento nos lleva a una conclusión similar si 
+asumimos que existe un universo $cal(U)$ que contiene un elemento $caron(cal(U)) : cal(U)$
+tal que $cal(T)(caron(cal(U))) equiv cal(U)$. Para prevenir estas paradojas, Russell y 
+Whitehead formularon la teoría de tipos ramificada en su libro *Principia Mathematica*. 
+La teoría de tipos ramificada es un precursor de la teoría de tipos de Martin Löf que 
+estamos estudiando.
+Aunque un universo no es un elemento de sí mismo, es aún conveniente que cada tipo, 
+incluyendo cada universo, sea un elemento de algún universo. Así, asumiremos que hay 
+suficientes universos: 
+
+<div id="postulado-6-2-1">
+<Aside type="tip" title="Postulado 6.2.1">
+Asumimos que hay **suficientes universos**, es decir, que toda lista finita de tipos en un 
+contexto 
+    
+$ Gamma_1 tack.r A_1 "type" dots Gamma_n tack.r A_n "type", $
+
+hay un universo $cal(U)$ que tiene como elementos a cada $A_i$ en el sentido de que $cal(U)$
+viene equipado con 
+
+$ Gamma_i tack.r caron(A_i) : cal(U) $
+
+para el cual el juicio
+
+$ Gamma_i tack.r cal(T)(caron(A)_i) equiv A_i "type" $
+se mantiene.
+</Aside>
+</div>
+
+Con esta suposición raramente necesitaremos trabajar con más de un universo al mismo tiempo.
+Usando esta suposición de que para cada lista finita de tipos en un contexto hay un universo 
+que contiene a esos tipos, obtenemos muchos universos específicos.
+
+<div id="definicion-6-2-2">
+<Aside type="tip" title="Definición 6.2.2">
+El **universo base** $cal(U)_0$ es el universo que obtenemos mediante el postulado 
+[6.2.1](#postulado-6-2-1) con la lista vacía de tipos en un contexto.
+</Aside>
+</div>
+
+En otras palabras, el universo base es un universo que es cerrado bajo todas las maneras de 
+formar tipos, pero no tiene como elemento a ningún otro tipo específico.
+
+<div id="definicioin-6-2-3">
+<Aside type="tip" title="Definición 6.2.3">
+El **universo sucesor** de un universo $cal(U)$ es un universo $cal(U)^+$ que se obtiene 
+utilizando el postulado [6.2.1](#postulado-6-2-1) con la lista finita 
+
+```typst 
+#table(
+    stroke:none,
+    columns: 1,
+    $tack.r cal(U) "type"$,
+    $X: cal(U) tack.r cal(T)(X) "type".$
+)
+```
+</Aside>
+</div>
+
+<div id="observacion-6-2-4">
+<Aside type="note" title="Observación 6.2.4">
+El universo sucesor $cal(U)^+$ de $cal(U)$ contiene un tipo $cal(U)$ al igual que cada tipo 
+en $cal(U)$ en el siguiente sentido 
+
+```typst 
+#table(
+  stroke: none,
+  align: center,
+  columns: 2, 
+  $tack.r caron(cal(U))$,
+  $tack.r cal(T)^+ (caron(cal(U))) equiv cal(U) "type"$,
+  $X: cal(U) tack.r caron(cal(T))(X): cal(U)+$,
+  $X: cal(U) tack.r cal(T)^+ (caron(cal(T))(X)) equiv cal(T)(X) "type".$
+)
+```
+</Aside>
+</div>
+
+En particular, obtenemos una función $i : cal(U) arrow cal(U)^+$ que incluye los tipo de 
+$cal(U)$ dentro de $cal(U)^+$, dada por 
+
+$ i := lambda X. caron(T)(X). $
+
+Usando universos sucesores podemos crear una torre infinita 
+
+$ cal(U), cal(U)^+, cal(U)^(++), dots $
+
+de universos, empezando con el universo $cal(U)$, en el que cada universo es elemento del 
+siguiente. Sin embargo, estas torres no son exhaustivas, en el sentido de que no todo tipo 
+está contenido en un universo de esta torre.
+
+<div id="definicion-6-2-5">
+<Aside type="tip" title="Definición 6.2.5">
+La **unión** de dos universos $cal(U)$ y $cal(V)$ es el universo $cal(U) union.sq cal(V)$
+que obtenemos al usar el postulado [6.2.1](#postulado-6-2-1) con los dos tipos 
+$ X: cal(U) tack.r cal(T)_(cal(U)) (X) "type" $
+$ Y: cal(V) tack.r cal(T)_(cal(V)) (Y) "type". $
+</Aside>
+</div>
+
+<div id="observacion-6-2-6">
+<Aside type="note" title="Observación 6.2.6">
+Como la unión $cal(U) union.sq cal(V)$ contiene todos los tipos en $cal(U)$ y $cal(V)$, hay 
+funciones 
+$ i: cal(U) arrow cal(U) union.sq cal(V) $
+$ j: cal(V) arrow cal(U) union.sq cal(V) $
+</Aside>
+</div>
+
+Notemos que no postulamos ninguna relación entre universos. En general, se da el caso que 
+los universos $(cal(U) union.sq cal(V)) union.sq cal(W)$ y 
+$cal(U) union.sq (cal(V) union.sq cal(W))$ no están relacionados de ninguna manera.
+
+
+## Igualdad observacional de los números naturales
+
+Usando universos, podemos definir muchas relaciones sobre los números naturales. Damos 
+aquí el ejemplo de *igualdad observacional* en $NN$. La idea de la igualdad 
+observacional es que, si queremos probar que $m$ y $n$ son observacionalmente iguales, 
+podemos hacerlo viendo a $m$ y a $n$:
+
+1. Si $m$ y $n$ son ambos $0_NN$, entonces son observacionalmente iguales. 
+2. Si uno de ellos es $0_NN$ y el otro es un sucesor, entonces no son observacionalmente
+  iguales.
+3. Si $m$ y $n$ son sucesores, digamos $m equiv "succ" _NN (m')$ y 
+  $n equiv "succ" _NN (n')$, entonces $n$ y $m$ son observacionalmente iguales si y sólo 
+  si sus predecesores, $m'$ y $n'$ son observacionalmente iguales.
+
+Así, la igualdad observacional es una relación definida inductivamente, que nos da un 
+algoritmo para verificar la igualdad en $NN$. En efecto, se pude usar para mostrar que 
+la igualdad entre números naturales es *decidible*, es decir, existe un programa que 
+decide si dos números naturales dados $m$ y $n$ son iguales.
+
+<div id="definicion-6-3-1">
+<Aside type="tip" title="Definición 6.3.1">
+Definimos la **igualdad observacional** en $NN$ como una relación binaria 
+$"Eq" _NN : NN arrow (NN arrow cal(U)_0)$ que satisface 
+
+```typst 
+#table(
+  stroke: none, 
+  columns: 2, 
+  $"Eq" _NN (0_NN, 0_NN) equiv bold(1)$,
+  $"Eq" _NN ("succ" _NN (n), 0 _NN) equiv emptyset$,
+  $"Eq" _NN (0_NN, "succ" _NN (n) equiv emptyset)$,
+  $"Eq" _NN ("succ" _NN (n), "succ" _NN (m)) equiv "Eq" _NN (n, m).$
+)
+```
+*Construcción* Definimos $"Eq" _NN $ por inducción doble sobre $NN$. Para la primera 
+aplicación de inducción, es suficiente dar 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1, 
+  $E_0 : NN arrow cal(U)_0$,
+  $E_S : NN arrow ((NN arrow cal(U)_0) arrow (NN arrow cal(U)_0))$ 
+)
+```
+Definimos $E_0$ por inducción, tomando $E_(00) := bold(1)$ y $E_(0 S)(n, X, m) := emptyset$.
+La familia $E_0$ resultante satisface 
+ 
+```typst 
+#table(
+  stroke: none,
+  columns: 1, 
+  $E_0 (0_NN) equiv bold(1)$,
+  $E_0 ("succ" _NN (n)) equiv emptyset.$
+)
+```
+Definimos $E_S$ por inducción, tomando $E_(S 0) := emptyset$ y 
+$E_(S S) (n, X, m) := X(m)$. La familia  $E_S$ resultante satisface 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1, 
+  $E_S (n, X, 0_NN) equiv emptyset$,
+  $E_S (n, X, "succ" _NN (m)) equiv X(m).$
+)
+```
+Por lo tanto, por la regla de computación para la primera inducción, tenemos que la 
+igualdad juiciosa 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1,
+  $"Eq" _NN (0_NN, m) equiv E_0(m)$,
+  $"Eq" _NN ("succ" _NN (n), m) equiv E_S (n, "Eq" _NN (n), m)$
+)
+```
+se mantiene, de lo que las igualdades juiciosas en el enunciado de la definición se siguen.
+
+</Aside>
+</div>
+
+La igualdad observacional de los números naturales es importante pues se usa para probar 
+igualdades y negaciones de igualdades. La proposición [6.3.3](#proposicion-6-3-3) no 
+permite hacer eso.
+
+<div id="lema-6-3-2">
+<Aside type="tip" title="Lema 6.3.2">
+La igualdad observacional en $NN$ es una relación reflexiva, es decir, tenemos 
+
+$ "refl-Eq"_ NN : Pi_((n : NN)) "Eq" _NN (n.n). $
+
+*Demostración* La función $"refl-Eq" _NN$ se define por inducción sobre $n$, tomando 
+
+```typst 
+#table(
+  stroke: none, 
+  columns: 1,
+  $"refl-Eq" _NN (0_NN) := star$,
+  $"refl-Eq" _NN ("succ"_ NN (n)) := "refl-Eq" _NN (n).$
+)
+```
+</Aside>
+</div>
+
+
+<div id="proposicion-6-3-3">
+<Aside type="tip" title="Proposición 6.3.3">
+
+Para cualesquiera dos números naturales $m$ y $n$ se tiene que 
+
+$ (m = n) arrow.r.l "Eq" _NN (m, n) $
+
+
+
+```typst
+#import "@preview/commute:0.3.0": node, arr, commutative-diagram
+
+#align(center)[#commutative-diagram(
+  node((0, 0), $X$),
+  node((0, 1), $Y$),
+  node((1, 0), $X \/ "ker"(f)$, "quot"),
+  arr($X$, $Y$, $f$),
+  arr("quot", (0, 1), $tilde(f)$, label-pos: right, "dashed", "inj"),
+  arr($X$, "quot", $pi$),
+)]
+```
+</Aside>
+</div>
+
+TODO!
+
+
+
+
+
+
+

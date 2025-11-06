@@ -1,0 +1,94 @@
+import vitePluginTypst from "./vite.js";
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { renderToHTMLish } from "./typst.js";
+import { fileURLToPath } from "url";
+import { createResolver, watchDirectory } from "astro-integration-kit";
+import { defaultTarget, detectTarget } from "./prelude.js";
+import { setAstroConfig, setConfig } from "./store.js";
+import logger from "./logger.js";
+function getRenderer() {
+    const isDebug = !!process.env.ASTRO_TYPST;
+    const serverEntrypoint = (isDebug ? "" : "astro-typst/") + "dist/renderer/index.js";
+    logger.debug(`\x1b[42mYou are running the demo of \x1b[33mastro-typst\x1b[42m, not importing the package from elsewhere.\x1b[0m
+\x1b[32mThis mode is good for test, debug, and build the demo site.\x1b[0m
+Server entry point: ${serverEntrypoint}`);
+    return {
+        name: "astro:jsx",
+        serverEntrypoint,
+    };
+}
+export const getContainerRenderer = getRenderer;
+const { resolve: resolver } = createResolver(import.meta.url);
+export default function typstIntegration(config = {
+    options: {
+        remPx: 16
+    },
+    target: defaultTarget,
+}) {
+    return {
+        name: 'typst',
+        hooks: {
+            "astro:config:setup": (options) => {
+                setConfig(config);
+                setAstroConfig(options.config);
+                const { addRenderer, addContentEntryType, addPageExtension, updateConfig } = options;
+                watchDirectory(options, resolver());
+                addRenderer(getRenderer());
+                addPageExtension('.typ');
+                addContentEntryType({
+                    extensions: ['.typ'],
+                    async getEntryInfo({ fileUrl, contents }) {
+                        const mainFilePath = fileURLToPath(fileUrl);
+                        const isHtml = await detectTarget(fileUrl.pathname, config.target) === "html";
+                        let { getFrontmatter } = await renderToHTMLish({
+                            mainFilePath,
+                        }, config?.options, isHtml);
+                        const frontmatterResult = getFrontmatter?.();
+                        return {
+                            data: frontmatterResult || {},
+                            body: contents,
+                            // @ts-ignore
+                            slug: frontmatterResult?.slug,
+                            rawData: contents,
+                        };
+                    },
+                    // Typ cannot import scripts and styles
+                    handlePropagation: false,
+                    contentModuleTypes: `
+declare module 'astro:content' {
+  interface Render {
+    '.typ': Promise<{
+      Content: import('astro').MarkdownInstance<{}>['Content'];
+    }>;
+  }
+}
+`
+                });
+                updateConfig({
+                    vite: {
+                        build: {
+                            rollupOptions: {
+                                external: [
+                                    "@myriaddreamin/typst-ts-node-compiler",
+                                ],
+                            }
+                        },
+                        // @ts-ignore
+                        plugins: [nodeResolve(), vitePluginTypst(config)],
+                    },
+                });
+            },
+            "astro:config:done": ({ config, injectTypes }) => {
+                injectTypes({
+                    filename: "astro-typst.d.ts",
+                    content: `declare module '*.typ' {
+    const component: () => any;
+    export default component;
+}`,
+                });
+                setAstroConfig(config);
+            }
+        }
+    };
+}
+//# sourceMappingURL=integration.js.map

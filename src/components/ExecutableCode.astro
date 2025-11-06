@@ -1,0 +1,179 @@
+---
+import { codeToHtml } from 'shiki';
+
+interface Props {
+  language: string;
+  code: string;
+  output?: string;
+  showOutput?: boolean;
+  id?: string;
+  session?: string;
+  filename?: string;
+  eval?: string;
+}
+
+const { language, code, output: manualOutput, showOutput = true, id, session, filename, eval: evalProp } = Astro.props;
+const shouldEval = evalProp !== 'false';
+
+// LaTeX to Unicode conversion map for Lean
+const latexToUnicode: Record<string, string> = {
+  // Greek letters
+  '\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ', '\\epsilon': 'ε',
+  '\\zeta': 'ζ', '\\eta': 'η', '\\theta': 'θ', '\\iota': 'ι', '\\kappa': 'κ',
+  '\\lambda': 'λ', '\\mu': 'μ', '\\nu': 'ν', '\\xi': 'ξ', '\\pi': 'π',
+  '\\rho': 'ρ', '\\sigma': 'σ', '\\tau': 'τ', '\\upsilon': 'υ', '\\phi': 'φ',
+  '\\chi': 'χ', '\\psi': 'ψ', '\\omega': 'ω',
+  // Capital Greek letters
+  '\\Gamma': 'Γ', '\\Delta': 'Δ', '\\Theta': 'Θ', '\\Lambda': 'Λ', '\\Xi': 'Ξ',
+  '\\Pi': 'Π', '\\Sigma': 'Σ', '\\Upsilon': 'Υ', '\\Phi': 'Φ', '\\Psi': 'Ψ', '\\Omega': 'Ω',
+  // Mathematical operators
+  '\\times': '×', '\\div': '÷', '\\pm': '±', '\\mp': '∓',
+  '\\cdot': '·', '\\circ': '∘', '\\ast': '∗', '\\star': '⋆',
+  // Relations
+  '\\le': '≤', '\\ge': '≥', '\\leq': '≤', '\\geq': '≥',
+  '\\ne': '≠', '\\neq': '≠', '\\equiv': '≡', '\\approx': '≈',
+  '\\sim': '∼', '\\simeq': '≃', '\\cong': '≅', '\\propto': '∝',
+  // Arrows
+  '\\to': '→', '\\rightarrow': '→', '\\leftarrow': '←', '\\leftrightarrow': '↔',
+  '\\Rightarrow': '⇒', '\\Leftarrow': '⇐', '\\Leftrightarrow': '⇔',
+  '\\mapsto': '↦', '\\longrightarrow': '⟶', '\\longleftarrow': '⟵',
+  // Set theory
+  '\\in': '∈', '\\notin': '∉', '\\subset': '⊂', '\\supset': '⊃',
+  '\\subseteq': '⊆', '\\supseteq': '⊇', '\\cup': '∪', '\\cap': '∩',
+  '\\emptyset': '∅', '\\varnothing': '∅',
+  // Logic
+  '\\forall': '∀', '\\exists': '∃', '\\nexists': '∄',
+  '\\land': '∧', '\\lor': '∨', '\\lnot': '¬', '\\neg': '¬',
+  '\\top': '⊤', '\\bot': '⊥',
+  // Quantifiers and other
+  '\\infty': '∞', '\\partial': '∂', '\\nabla': '∇',
+  '\\sum': '∑', '\\prod': '∏', '\\int': '∫',
+  '\\angle': '∠', '\\perp': '⊥', '\\parallel': '∥',
+  // Brackets
+  '\\langle': '⟨', '\\rangle': '⟩', '\\lceil': '⌈', '\\rceil': '⌉',
+  '\\lfloor': '⌊', '\\rfloor': '⌋',
+  // Miscellaneous
+  '\\ell': 'ℓ', '\\hbar': 'ℏ', '\\wp': '℘',
+  '\\Re': 'ℜ', '\\Im': 'ℑ', '\\aleph': 'ℵ',
+  '\\ldots': '…', '\\cdots': '⋯', '\\vdots': '⋮', '\\ddots': '⋱',
+};
+
+// Convert LaTeX symbols to Unicode
+function convertLatexToUnicode(code: string): string {
+  let result = code;
+  for (const [latex, unicode] of Object.entries(latexToUnicode)) {
+    // Match latex command followed by space, non-letter, or end of string
+    const escapedLatex = latex.replace(/\\/g, '\\\\');
+    const regex = new RegExp(escapedLatex + '(?![a-zA-Z])', 'g');
+    result = result.replace(regex, unicode);
+  }
+  return result;
+}
+
+// Strip leading and trailing newlines from code
+let cleanCode = code.replace(/^\n+|\n+$/g, '').trim();
+
+// Convert LaTeX to Unicode for Lean code
+const isLean = language === 'lean4' || language === 'lean';
+if (isLean) {
+  cleanCode = convertLatexToUnicode(cleanCode);
+}
+
+// Load outputs from JSON if id is provided and eval is true
+let autoOutput = null;
+if (id && !manualOutput && shouldEval) {
+  try {
+    // Get filename from Astro.url - try both the last segment and 'index'
+    const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1] || 'index';
+
+    const outputs = await import('../code-outputs.json');
+
+    // Try with last segment first, then try with 'index'
+    let prefixedId = `${lastSegment}::${id}`;
+    autoOutput = outputs.default[prefixedId];
+
+    if (!autoOutput && lastSegment !== 'index') {
+      prefixedId = `index::${id}`;
+      autoOutput = outputs.default[prefixedId];
+    }
+  } catch (e) {
+    // File doesn't exist yet, that's okay
+  }
+}
+
+const finalOutput = manualOutput || autoOutput;
+const cleanOutput = finalOutput ? finalOutput.replace(/^\n+|\n+$/g, '').trim() : null;
+
+// Check if output is in statement/output pair format (for Lean)
+let statementOutputPairs = null;
+
+if (isLean && cleanOutput) {
+  try {
+    const parsed = JSON.parse(cleanOutput);
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].statement) {
+      statementOutputPairs = parsed;
+    }
+  } catch (e) {
+    // Not JSON, treat as regular output
+  }
+}
+
+const highlightedCode = await codeToHtml(cleanCode, {
+  lang: language,
+  theme: 'github-dark'
+});
+
+const highlightedOutput = cleanOutput && !statementOutputPairs ? await codeToHtml(cleanOutput, {
+  lang: 'text',
+  theme: 'github-dark'
+}) : null;
+
+// Build combined output with statement labels and outputs
+let combinedOutputHTML = null;
+if (statementOutputPairs) {
+  const outputParts = [];
+  for (const pair of statementOutputPairs) {
+    if (pair.output) {
+      // Highlight statement in dimmed color
+      const statementHTML = await codeToHtml(pair.statement, {
+        lang: language,
+        theme: 'github-dark'
+      });
+
+      // Highlight output
+      const outputHTML = await codeToHtml(pair.output, {
+        lang: 'text',
+        theme: 'github-dark'
+      });
+
+      // Add statement with special class for dimming
+      outputParts.push(`<div class="statement-label">${statementHTML}</div>`);
+      outputParts.push(outputHTML);
+    }
+  }
+
+  if (outputParts.length > 0) {
+    combinedOutputHTML = outputParts.join('');
+  }
+}
+---
+
+<div class="executable-code-block">
+  <div class="code-section">
+    <div class="code-header">
+      <span class="language-label">{language}</span>
+      {filename && <span class="filename-label">{filename}</span>}
+    </div>
+    <div set:html={highlightedCode} />
+  </div>
+
+  {showOutput && shouldEval && (combinedOutputHTML || (finalOutput && !statementOutputPairs)) && (
+    <div class="output-section">
+      <div class="output-header">
+        <span class="output-label">Output</span>
+      </div>
+      <div set:html={combinedOutputHTML || highlightedOutput} />
+    </div>
+  )}
+</div>

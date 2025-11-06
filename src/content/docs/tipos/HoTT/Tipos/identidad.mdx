@@ -1,0 +1,117 @@
+---
+title: Tipos identidad
+sidebar:
+  order: 4
+---
+import { Aside } from '@astrojs/starlight/components';
+
+De acuerdo con la concepción de las proposiciones como tipos, la proposición de que dos 
+elementos del mismo tipo $a, b: A$ son iguales, debe corresponder a algún tipo. Como esta 
+proposición depende tanto de $a$ como de $b$, estos **tipos identidad** deben ser 
+familias de tipos dependientes de dos copias de $A$.
+
+Podemos escribir esta familia como $"Id" _A : A arrow A arrow cal(U)$, de modo que 
+$"Id" _A (a, b)$ es el tipo que representa la proposición de la igualdad entre $a$ y 
+$b$. También usaremos la notación $a attach(=, br: A) b$ o simplemente $a = b$ para }
+hablar de $"Id" _A (a, b)$. Si tenemos un elemento de $a attach(=, br: A) b$, diremos que 
+$a$ y $b$ son **iguales** o **proposicionalmente iguales**.
+
+Podemos pensar al tipo $a = b$ como el tipo de las *identificaciones* de $a$ y $b$.
+La regla de formación dice que, dado un tipo $A : cal(U)$ y dos elementos $a, b : A$, 
+podemos formar el tipo $(a attach(=, br: A) b) : cal(U)$ en el mismo universo.
+La forma básica de construir un elemento de $a = b$ es saber que $a$ y $b$ son lo mismo.
+Así, la regla de introducción es una función dependiente 
+
+$ "refl" : product_(a : A) (a attach(=, br: A) a) $
+
+llamada reflexividad, que dice que cada elemento de $A$ es igual a sí mismo. Podemos pensar 
+a $"refl" _a$ como la trayectoria constante en el punto $a$.
+
+En particular, si $a$ y $b$ son juiciosamente iguales, $a equiv b$, tenemos un elemento 
+$"refl" _a : a attach(=, br: A) b$. Esto está bien tipado, pues $a equiv b$ implica que 
+también el tipo $a attach(=, br: A) b$ es juiciosamente igual al tipo 
+$a attach(=, br: A) a$, que es el tipo de $"refl" _a$.
+
+El principio de inducción para tipos identidad es muy sutil, así que consideraremos primero 
+una consecuencia de éste, el principio que dice que iguales se pueden sustituir por }
+iguales.
+
+<div id="indiscernibilidad-de-los-identicos">
+<Aside type="tip" title="Indiscernibilidad de los idénticos">
+
+Para cada familia 
+
+$ C: A arrow cal(U) $
+
+hay una función 
+
+$ f : product_(x,y : A) product_(p : x attach(=, br: A) y) C(x) arrow C(y) $
+
+tal que 
+
+$ f(x, x, "refl" _x) : equiv "Id" _(C(x)) $
+
+</Aside>
+</div>
+
+Esto dice que toda familia de tipos $C$ preserva la igualdad, en el sentido de que aplicar
+$C$ a elementos iguales de $A$ resulta en una función entre los tipos resultantes. 
+
+La indiscernibilidad de los idénticos se puede pesar como el principio de recursión para
+el tipo identidad. Así como $"rec" _NN$ da una función $NN arrow C$, la indiscernibilidad 
+de los idénticos nos da una función de $x attach(=, br: A) y$ a ciertas relaciones 
+binarias reflexivas sobre $A$ a saber, aquellas de la forma $C(x) arrow C(y)$ para 
+algún predicado unario $C(x)$. 
+
+El principio de inducción para el tipo identidad es llamado inducción de trayectorias, en 
+vista de la interpretación homotópica que explicaremos más adelante. 
+
+<div id="induccion-de-trayectorias">
+<Aside type="tip" title="Inducción de trayectorias">
+
+Dada una familia 
+
+$ C : product_(x, y : A) (x attach(=, br: A) y) arrow cal(U) $
+
+y una función 
+
+$ c : product_(x : A) C(x, x, "refl" _x), $
+
+hay una función 
+
+$ f : product_(x, y : A) product_(p : (x attach(=, br: A) y)) C(x, y, p) $
+
+tal que 
+
+$ f(x, x, "refl" _x ) : equiv c(x) $
+
+o, en una línea
+
+$ "ind"_(attach(=, br: A)) : 
+product_(C : product_(x, y : A) (x attach(=, br: A) y) arrow cal(U))
+(product_(x : A) C(x, x, "refl" _x)) arrow 
+product_(x, y : A) product_(p : x attach(=, br: A) y) C(x, y, p) $
+
+junto con la igualdad 
+
+$ "ind"_(attach(=, br: A)) (C, c, x, x, "refl" _x) : equiv c(x) $
+</Aside>
+</div>
+
+Notemos que la inducción sobre trayectorias nos permite definir ciertas funciones que 
+exhiben un comportamiento computacional adecuado. Para entender mejor este principio, 
+consideremos el caso en que $C$ no depende de $p$. Entonces tenemos que 
+$C : A arrow A arrow cal(U)$, que se puede considerar como un predicado que depende de 
+dos elementos de $A$. Nos interesa saber cuándo la proposición $C(x, y)$ es verdadera 
+para un par de elementos $x, y : A$. En este caso, la hipótesis de la inducción sobre 
+trayectorias nos dice que si sabemos que $C(x, x)$ se cumple para cada $x : A$, entonces 
+sabemos que $C(x, y)$ se cumple siempre que $x = y$.
+
+La forma general del principio permite que $C$ también dependa de $p: x = y$: para 
+demostrar una propiedad para todos los elementos $x, y : A$ y trayectorias $p : x = y$
+entre ellos, basta considerar el caso en que los elementos son $x$ y la trayectoria es 
+$"refl" _x : x = x$.
+
+La función $"ind" _(attach(=, br: A))$ es tradicionalmente llamada $J$.
+
+

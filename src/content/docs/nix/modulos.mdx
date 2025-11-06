@@ -1,0 +1,62 @@
+--- 
+title: Módulos
+sidebar: 
+  order: 5
+---
+
+¿Qué es un módulo?
+- Un módulo es una función que toma un conjunto de atributos y devuelve un conjunto de 
+  atributos.
+- Puede declarar opeionces, que dicen qué atributos se aceptan el el outcome.
+- Puede definir valores, para opicones declaradas por sí mismo u otros módulos.
+- Cuando se evalúa por el sistema de módulos, produce un conjunto de atributos.
+
+## Declarando opciones 
+Las opciones se declaran bajo el atributo `options` con `lib.mkOption`.
+
+```code :language nix :eval false
+{ lib, ... }: 
+{
+  options = {
+    name = lib.mkOption { type = lib.types.str; };
+  };
+}
+``` 
+El atributo `type` en el arugmento a `lib.mkOption` especifica qué valorees son válidos para 
+la opción. Hay varios tipos disponibles bajo
+[`lib.types`](https://nixos.org/manual/nixos/stable/#sec-option-types-basic) 
+Aquí, hemos declarado una opcion `name` de tipo `str`: El sistema de módulos espera 
+un string cuando un valor es definido.
+Ahora le queremos dar un valor.
+
+## Definiendo valores 
+Las opciones son configuradas o definidas bajo el atributo `config`
+
+```code :language nix :eval false
+{ ... }: 
+{
+  config = {
+    name = "Emilio";
+  };
+}
+```
+En nuestra declaración de opciones, creamos una opción `name` de tipo `string`. Aquí le hemos 
+dado un valor a esta misma opción.
+
+Las opciones y declaraciones no necesitan estar en el mismo archivo. 
+
+## Evaluando módulos 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

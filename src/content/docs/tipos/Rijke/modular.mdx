@@ -1,0 +1,222 @@
+---
+title: Aritmética modular vía la intepretacion de Curry-Howard
+sidebar:
+  order: 9
+typstImports: 
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Hemos descrito completamente la teoría de tipos dependientes de Martin-Löf. Es momento de 
+empezar a desarrollar matemáticas en ella y la teoría de tipos dependiente de Martin-Löf 
+es excelente para matemáticas elementales, como la teoría de números básica, algo de 
+álgebra y combinatoria. La idea fundamental usada para desarrollar la matemática en la 
+teoría de tipos dependiente es la interpretación de Curry-Howard. Esta es una traducción 
+de la lógica a la teoría de tipos, que usaremos para expresar conceptos como divisibilidad,
+las relaciones de congruencia y demás.
+
+También vamos a introducir la familia $"Fin"$ de tipos finitos estándar, indizada por 
+$NN$ y mostraremos como cada $"Fin" _(k + 1)$ puede equiparse con una estructura de 
+grupo de enteros módulo $k + 1$.
+
+## La interpretación Curry-Howard
+
+La *interpretación Curry-Howard* es una interpretación de la lógica dentro de la teoría de 
+tipos. Recordemos que en la teoría de tipos no hay una separación entre el esquema lógico
+y la teoría general de las colecciones de objetos matemáticos como sucede en la teoría 
+de conjuntos de Zermelo-Fraenkel. Estos dos aspectos de la matemática están unificados 
+en la teoría de tipos. La idea de la interpretación de Curry-Howard es entonces expresar 
+proposiciones como tipos y pensar a los elementos de estos tipos como sus demostraciones.
+Ilustramos esto mediante un ejemplo.
+
+<div id="ejemplo-7-1-1">
+<Aside type="note" title="Ejemplo 7.1.1">
+
+Se dice que un número natural $d$ divide a un número natural $n$ si existe un número 
+natural $k$ tal que $d dot k = n$. Para representar el predicado de divisibilidad en la 
+teoría de tipos, necesitamos definir un tipo 
+
+$ d | n, $
+
+cuyos elementos sean pruebas de que $d$ divide a $n$. En otras palabras, $d|n$ debe ser 
+el tipo que consiste de números naturales $k$ equipados con una identificación 
+$d dot k = n$. En general, el tipo de $x : A$ equipado con $y : B(x)$ se representa 
+por el tipo $Sigma_((x : A)) B(x)$. La interpretación del cuantificador existencial
+$exists$ en la teoría de tipos vía la correspondencia Curry-Howard es con los $Sigma$-tipos.
+
+</Aside>
+</div>
+
+<div id="definicion-7-1-2">
+<Aside type="tip" title="Definición 7.1.2">
+Consideremos dos números $d$ y $n$. Decimos que $d$ **divide** a $n$ si hay un elemento 
+de tipo 
+
+$ d | n := Sigma_((k : NN)) d dot k = n. $
+
+</Aside>
+</div>
+
+<div id="observacion-7-1-3">
+<Aside type="note" title="Observación 7.1.3">
+La definición en la teoría de tipos de la relación de divisibilidad usando $Sigma$-tipos 
+tiene dos consecuencias importantes:
+
+1. La forma principal para mostrar que $d | n$ se mantiene es construir un par $(k, p)$
+  que consiste de un número natural $k$ y una identificación $p : d dot k = n$.
+2. La forma principal de usar un hipótesis $H : d | n$ en una prueba es proceder por 
+  $Sigma$-inducción sobre la variable $H$. Luego podemos asumir que tenemos un número
+natural $k$ y una identificación $p: d dot k = n$, para proceder con la prueba.
+
+</Aside>
+</div>
+
+<div id="ejemplo-7-1-4">
+<Aside type="note" title="Ejemplo 7.1.4">
+De la misma forma en la que la cuantificación existencial $exists$ se traduce en los 
+$Sigma$-tipos vía la correspondencia de Curry-Howard, la traducción del cuantificador
+universal $forall$ en la teoría de tipos se corresponde con los $Pi$-tipos mediante la 
+correspondencia de Curry-Howard. Por ejemplo, la afirmación de que todo número natural 
+es divisible por $1$ se expresa en la teoría de tipos como 
+
+$ Pi_((x : NN)) 1 | x. $
+
+En otras palabras, para demostrar que cada número natural $x : NN$ es divisible por $1$ 
+tenemos que construir una función dependiente 
+
+$ lambda x. p(x) : Pi_((x : NN)) 1 | x. $
+
+Hacemos estro construyendo un elemento 
+
+$ p(x) : Sigma_((k : NN)) 1 dot k = x $
+
+indizada por $x : NN$. Un elemento $p(x)$ así se construye como un par $(x, q(x))$, donde
+la identificación $q(x) : 1 dot x = x$ se obtiene de la ley de unidad izquierda para la 
+multiplicación en $NN$. 
+
+De manera similar, la prueba en la teoría de tipos de que todo número natural $k$ divide 
+a $0$, es el par $(0, p)$ que consiste de un número natural $0$ y una identificación 
+$p : k dot 0 = 0$ que se obtiene por la regla de aniquilación derecha de la multiplicación
+en $NN$.
+
+</Aside>
+</div>
+
+En la siguiente proposición veremos como se puede usar una hipótesis de tipo $d | x$.
+
+<div id="proposicion-7-1-5">
+<Aside type="tip" title="Proposición 7.1.5">
+Consideremos tres números naturales $d, x$ y $y$. Si $d$ divide a cualquiera dos de los 
+tres números $x, y$ y $x + y$, entonces también divide al tercero.
+
+*Demostración* Sólo mostraremos que si $d$ divide a $x$ y $y$, entonces también divide 
+a $x + y$. 
+Supongamos que $d$ divide a $x$ y a $y$. Por hipótesis, tenemos elementos 
+
+$ H: Sigma_((k : NN)) d dot k = n quad quad K : Sigma_((k : NN)) d dot k = y. $
+
+Como $H$ y $K$ son $Sigma$-tipos, procederemos por $Sigma$-inducción sobre $H$ y $K$.
+Así, asumimos un número natural $k : NN$ equipado con una identificación $p : d dot k = n$
+y un número natural $l : NN$ equipado con una identificación $q : d dot l = y$. 
+Nuestra meta es construir una identificación 
+
+$ d dot (k + l) = x + y. $
+
+Construimos esta identificación como una concatenación $alpha dot (beta dot gamma)$, donde
+los tipos de $alpha, beta$ y $gamma$ son:
+
+$ d dot (k + l) =^(alpha) d dot k + d dot l =^(beta) x + d dot l =^(gamma) x + y. $
+
+La identificación $alpha$ se obtiene del hecho de que la multiplicación en $NN$ se 
+distribuye sobre la suma. Las identificaciones $beta$ y $gamma$ se construyen usando 
+la acción sobre trayectorias de una función 
+
+$ beta := "ap" _((lambda t. t + d dot l)) (p) $
+
+y
+
+$ gamma := "ap" _((lambda t. x + t))(q) $
+
+Para concluir la prueba de que $d | x + y$, notemos que hemos construido un par 
+
+$ (k + l, alpha dot (beta dot gamma)): Sigma_((k : NN)) d dot k = x + y $
+
+</Aside>
+</div>
+
+La interpretación de Curry-Howard de la lógica en la teoría de tipos involucra 
+interpretaciones de la disyunción, conjunción, implicación e igualdad.
+
+Por ejemplo, las reglas de introducción y eliminación para la disyunción son:
+
+```typst 
+#table(
+  stroke: none,
+  columns: 3,
+  prooftree(
+    rule(
+      $P or Q$,
+      $P$ 
+    )
+  ),
+  prooftree(
+    rule(
+      $P or Q$,
+      $Q$
+    )
+  ),
+  prooftree(
+    rule(
+      $P or Q arrow.double R$,
+      $P arrow.double R$,
+      $Q arrow.double R$
+    )
+  )
+)
+```
+Las dos reglas de introducción afirman que $P or Q$ es verdadera cuando $P$ o $Q$ son 
+verdaderas. Estas reglas son análogas a las reglas de introducción para el co-producto,
+que aseguran que hay funciones $"inl": A arrow A + B$ y $"inr": B arrow A + B$. 
+El principio de eliminación no dependiente para co-productos nos da una función 
+
+$ (A arrow C) arrow ((B arrow C) arrow (A + B arrow C)) $
+
+para cualquier tipo $C$, que es análogo a la regla de eliminación para la disyunción.
+
+Para interpretar la conjunción en la teoría de tipos observamos que las reglas de 
+introducción y eliminación para la conjunción son 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 3,
+  prooftree(
+    rule(
+      $P and Q$,
+      $P$,
+      $Q$
+    ) 
+  ),
+  
+  prooftree(
+    rule(
+      $P$,
+      $P and Q$
+    )
+  ),
+
+  prooftree(
+    rule(
+      $Q$,
+      $P and Q$
+    ) 
+  )
+)
+```
+
+
+
+
+
+
+

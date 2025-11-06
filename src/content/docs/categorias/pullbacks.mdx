@@ -1,0 +1,157 @@
+---
+title: Pullbacks
+sidebar: 
+    order: 2
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+La noción de pullback, como la de producto, es una que surge comúnmente en la matemática y
+la lógica. Es una generalización de la intersección y de la imagen inversa.
+
+Comenzamos con una definición 
+
+
+<div id="definicion-5-4">
+<Aside type="tip" title="Definición 5.4">
+
+En cualquier categoría $bold(C)$, dadas dos flechas $f$ y $g$ tales que $"cod"(f) = "cod"(g)$,
+
+```typst 
+#commutative-diagram(
+  node((0,1), $B$),
+  node((1,0), $A$),
+  node((1,1), $C$),
+  arr($A$, $C$, $f$),
+  arr($B$, $C$, $g$)
+)
+```
+
+el pullback de $f$ y $g$ consiste de flechas 
+
+```typst 
+#commutative-diagram(
+  node((0,0), $P$),
+  node((0,1), $B$),
+  node((1,0), $A$),
+  arr($P$, $B$, $p_2$),
+  arr($P$, $A$, $p_1$)
+)
+```
+
+de modo que $f compose p_1 = g compose p_2$ y es universal con esta propiedad. Es decir,
+dada $z_1 : Z arrow A$ y $z_2: Z arrow B$ con $f compose z_1 = g compose z_2$, existe una 
+única $u : Z arrow P$ con $z_1 = p_1 compose u$ y $z_2 = p_2 compose u$. Esto está ilustrado
+en el siguiente diagrama:
+
+```typst 
+#commutative-diagram(
+  node((0,0), $Z$),
+  node((1,1), $P$),
+  node((1,2), $B$),
+  node((2,1), $A$),
+  node((2,2), $C$),
+  arr($Z$, $P$, $u$, "dotted"),
+  arr($Z$, $B$, $z_2$),
+  arr($Z$, $A$, $z_1$),
+  arr($P$, $A$, $p_1$),
+  arr($P$, $B$, $p_2$),
+  arr($A$, $C$, $f$),
+  arr($B$, $C$, $g$)
+)
+```
+</Aside>
+</div>
+Los pullbacks son únicos salvo isomorfismos pues están dados mediante una propiedad 
+universal. 
+En términos de elementos generalizados, cualquier $z in A times_C B$, se puede escribir 
+de manera única como $z = angle.l z_1, z_2 angle.r$. Esto hace que 
+
+$ A times_C B = brace.l angle.l z_1, z_2 angle.r in A times B | f compose z_1 = g compose z _2 brace.r $
+
+parezca un sub-objeto de $A times B$, determinado como un equalizador de $f compose pi_1$ y 
+$g compose pi_2$. De hecho, es así.
+
+<div id="proposicion-5-5">
+<Aside type="tip" title="Proposición 5.5">
+En una categoría con productos y equalizadores, dada una esquina de flechas 
+
+```typst 
+#commutative-diagram(
+  node((0,1), $B$),
+  node((1,0), $A$),
+  node((1,1), $C$),
+  arr($B$, $C$, $g$),
+  arr($A$, $C$, $f$)
+)
+```
+
+consideremos el diagrama
+
+```typst 
+#commutative-diagram(
+  node((0,0), $Z$),
+  node((1,1), $P$),
+  node((1,2), $B$),
+  node((2,1), $A$),
+  node((2,2), $C$),
+  arr($Z$, $P$, $e$),
+  arr($Z$, $B$, $p_2$),
+  arr($Z$, $A$, $p_1$),
+  arr($P$, $A$, $pi_1$),
+  arr($P$, $B$, $pi_2$),
+  arr($A$, $C$, $f$),
+  arr($B$, $C$, $g$)
+)
+```
+en el que $e$ es un equalizador de $f compose pi_1$ y $g compose pi_2$ y 
+$p_1 = pi_1 compose e$ y $p_2 = pi_2 compose e$. Entonces $E$, $p_1$ y $p_2$ forman un 
+pullback de $f$ y $g$. Recíprocamente, si $E$, $p_1$ y $p_2$ son dados como un pullback, 
+entonces, la flecha 
+
+$ e = angle.l p_1, p_2 angle.r : E arrow A times B $
+
+es un equalizador de $f compose pi_1$ y $g compose pi_2$.
+
+*Demostración* Tomemos 
+```typst 
+#commutative-diagram(
+  node((0,0), $Z$),
+  node((0,1), $B$),
+  node((1,0), $A$),
+  arr($Z$, $B$, $z_2$),
+  arr($Z$, $A$, $z_1$)
+)
+```
+
+con $f compose z_1 = g compose z_2$. Tenemos que 
+$angle.l z_1, z_2 angle.r : Z arrow A times B$, de modo que 
+
+$ f compose pi_1 compose angle.l z_1, z_2 angle.r = g compose pi_2 compose angle.l z_1, z_2 angle.r. $
+
+Por lo tanto, hay una $u : Z arrow E$ al equalizador con
+$e compose u = angle.l z_1, z_2 angle.r$. Entonces 
+
+$ p_1 compose u = pi_1 compose e compose u = pi_1 compose angle.l z_1, z_2 angle.r = z_1 $
+
+y 
+
+$ p_2 compose u = pi_2 compose e compose u = pi_2 compose angle.l z_1, z_2 angle.r = z_2. $
+
+Si también $u' : Z arrow E$ tiene $p_i u' = z_i$, $i = 1,2$. Entonces 
+$pi_i e u' = z_i$, de modo que $e u' = angle.l z_1, z_2 angle.r = e compose u$, por lo que 
+$u' = u$ puesto que $e$ es mono. El recíproco es similar.
+
+</Aside>
+</div>
+
+<div id="coroloario-5-6">
+<Aside type="tip" title="Corolario 5.6">
+Si una categoría $bold(C)$ tiene productos binarios y equializadores, entonces tiene 
+pullbacks.
+</Aside>
+</div>
+
+

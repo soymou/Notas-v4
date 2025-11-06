@@ -1,0 +1,31 @@
+---
+title: Tipos función dependiente
+sidebar: 
+  order: 1
+---
+
+En la teoría de tipos generalmente usamos una versión más general de las funciones, a las 
+que llamamos funciones dependientes o $Pi$-tipos. Los elementos de un $Pi$-tipo son 
+funciones cuyo co-dominio puede variar dependiendo del valor del dominio al que se le 
+aplica la función dependiente. El nombre $Pi$-tipo se usa pues también se pueden pensar 
+como productos cartesianos sobre un cierto tipo.
+
+Dado un tipo $A : cal(U)$ y una familia $B : A arrow cal(U)$, podemos construir el tipo 
+de funciones dependientes $Pi_((x: A)) B(x) : cal(U)$. 
+
+Si $B$ es una familia constante, entonces el tipo producto dependiente no es más que el 
+tipo función ordinario: 
+
+$ Pi_((x : A)) B = A arrow B. $
+
+Podemos introducir una función dependiente mediante definición explícita: para definir 
+$f : Pi_((x : A)) B(x)$, donde $f$ es el nombre de la función dependiente, necesitamos una 
+expresión $Phi : B(x)$ que posiblemente involucra a la variable $x : A$, y escribimos 
+
+$f(x) : equiv Phi, " para " x : A.$
+
+De manera alternativa, podemos usar $lambda$-abstracción 
+
+$ lambda x. Phi : product_((x : A)) B(x). $
+
+

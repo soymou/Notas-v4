@@ -1,0 +1,81 @@
+---
+title: Límites
+sidebar: 
+  order: 3
+
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Los productos, objetos terminales, pullbacks y equalizadores son casos especiales de la 
+noción más general de límite.
+
+<div id="definicion-5-15">
+<Aside type="tip" title="Definción 5.15">
+Sean $bold(J)$ y $bold(C)$ categorías. Un diagrama de tipo $bold(J)$ en $bold(C)$ es un 
+functor 
+
+$ D : bold(J) arrow bold(C). $
+
+Escribimos a los objetos de la categoría de índices $bold(J)$ con minúsculas $i, j, dots$
+y a los valores del functor $D : bold(J) arrow bold(C)$ como $D_i, D_j, dots$.
+
+Un *cono* para un diagrama $D$ consiste de un objeto $C$ en $bold(C)$ y una familia de 
+flechas en $bold(C)$,
+
+$ c_j : C arrow D_J $
+
+una para cada objeto $j in J$, de tal manera que para cada flecha $alpha : i arrow j$ en 
+$bold(J)$, el siguiente triángulo conmuta 
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $C$),
+  node((0, 1), $D_j$),
+  node((1, 0), $D_i$),
+  arr($C$, $D_j$, $c_j$),
+  arr($C$, $D_i$, $c_i$),
+  arr($D_i$, $D_j$,$D_alpha$)
+)
+```
+Un *morfismo* de conos 
+
+$ theta : (C, c_j) arrow (C', c'_j) $  
+
+es una flecha $theta$ en $bold(C)$ que hace que cada triángulo 
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $C$),
+  node((0, 1), $C'$),
+  node((1, 1), $D_j$), 
+  arr($C$, $D_j$, $c_j$),
+  arr($C'$, $D_j$, $c'_j$),
+  arr($C$, $C'$, $theta$)
+)
+```
+conmute.
+
+</Aside>
+</div>
+
+Así, hay una categoría 
+
+$ bold("Cone")(D) $
+
+de conos de $D$, donde los objetos son conos y los morfismos son morfismos de conos.
+
+<div id="defincion-5-16">
+<Aside type="tip" title="Definición 5.16">
+Un *límite* para un diagrama $D : bold(J) arrow bold(C)$ es un objeto terminal en 
+$bold("Cone") (D)$. Un *límite finito* es un límite para un diagrama sobre una categoría 
+finita de índices.
+Denotamos un límite en la forma 
+
+$ p_i : lim_(arrow.long.l_j) D_j arrow D_i $
+</Aside>
+</div>
+
+Las nociones de conos y límites se dualizan a las nociones de co-conos y co-límites.

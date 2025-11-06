@@ -1,0 +1,596 @@
+---
+title: Tipos identidad
+sidebar:
+    order: 7
+typstImports: 
+    - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+import { Aside } from '@astrojs/starlight/components';
+    
+Desde la perspectiva de los tipos como proposiciones donde las demostraciones son relevantes, ¡cómo deberíamos pensar
+la *igualdad* en la teoría de tipos? Dado un tipo $a$, y dos elementos $x,y: A$, la igualdad $x=y$ debe ser de nuevo
+un tipo. En efecto, queremos *usar* la teoría de tipos para demostrar igualdades. La teoría de tipos dependiente nos
+da un lugar adecuado para esto: el tipo identidad $x=y$ depende de $x, y: A$
+
+Entonces, si $x=y$ va a ser un tipo, ¿cómo deberíamos pensar sobre los elementos de $x=y$? Un elemento $p: x = y$
+es un observador de que $x$ y $y$ son elementos iguales de tipo $A$. En otras palabras, $p: x = y$ es una 
+*identificación* de $x$ y $y$. En el mundo donde las demostraciones son relevantes, podría haber muchos elementos 
+de tipo $x = y$, es decir, muchas identificaciones de $x$ y $y$. Y como $x = y$ es un tipo, podemos formar el tipo 
+$p = q$ para cualesquiera dos identificaciones $p, q: x = y$. Es decir, como $x = y$ es un tipo, en la teoría de 
+tipos también podemos probar cosas sobre las identificaciones y podemos usar la teoría de tipos para realizar 
+construcciones sobre ellas. Como veremos más adelante, a cada tipo le podemos dar estructura de grupoide.
+
+Claramente, el tipo igualdad no debe ser un tipo cualquiera que dependa de $x, y: A$. Entonces, ¿cómo formamos
+el tipo igualada y qué maneras hay de usar las identificaciones en la teoría de tipos? La respuesta a ambas preguntas
+es que formaremos el tipo igualdad como un *tipo inductivo*, generado por un sólo elemento reflexivo, que será una 
+identificación que identifica a $x$ consigo mismo. El principio de inducción nos dará una manera de realizar 
+construcciones sobre estas identificaciones, como concatenarlas, invertirlas y demás. Así, el tipo identidad 
+está equipado con un elemento reflexivo y posee la estructura que se genera por el principio de inducción y la 
+teoría de tipos. Esta construcción es elegante, hermosamente simple y muy lejos de ser trivial.
+
+La situación en la que dos elementos se pueden identificar en más de una manera es análoga a la situación en la 
+teoría de *homotopia*, donde dos puntos de un espacio pueden conectares por más de una trayectoria. En efecto, para 
+cualesquiera dons puntos $x$ y $y$ en un espacio, hay un espacio de *homotopías* entre ellos.
+
+## La definición inductiva de los tipos identidad
+
+<div id="definicion 5.1.1">
+<Aside type="tip" title="Definición 5.1.1">
+Consideremos un tipo $A$ y sea $a: A$. Entonces definimos el **tipo identidad**  de $A$ en $a$ como la familia 
+inductiva de tipos $a attach(a, br: A) x$ indizada por $x: A$, de la cual el constructor es 
+$ "refl"_a : a attach(=, br: A) a. $
+El principio de inducción para el tipo identidad postula que para cualquier familia de tipos $P(x, p)$ indizada 
+por $x: A$ y $p: a attach(=, br: A) x$, hay una función
+$ "ind-eq"_a : P(a, "refl"_a) arrow Pi_((x: A)) Pi_((p: a attach(=, br: A) x)) P(x, p) $
+que satisface $"ind-eq"_a (u, a, "refl"_a) equiv u$, dada $u: P(a, "refl"_a)$.
+
+Un elemento de tipo $a attach(=, br: A) x$ es también llamado una **identificación** de $a$ con $x$ o una 
+**trayectoria** de $a$ a $x$. El principio de inducción para los tipos identidad es a veces llamado 
+**eliminación de identificaciones** o **inducción de trayectorias**. También escribimos $"Id"_A$ para el tipo 
+identidad en $A$ y escribimos $a = x$ para el tipo de identificaciones de $a$ con $x$, omitiendo la referencia al 
+espacio ambiente $A$.
+</Aside>
+</div>
+
+<div id="observacion 5.1.2">
+<Aside type="note" title="Observación 5.1.2">
+Vemos que el tipo identidad no es un tipo inductivo cualquiera, como $NN, emptyset$ y $bold(1)$ por ejemplo, sino 
+una *familia* inductiva de tipos. Aunque tenemos un tipo $a attach(=, br: A) x$ para cada $x: A$, el constructor sólo
+nos da un elemento $"refl"_a: a attach(=, br: A) a$, que identifica a $a$ consigo mismo. El principio de inducción
+entonces dice que para probar algo sobre todas las identificaciones de $a$ con algún $x: A$, es suficiente probarlo 
+para $"refl"_a$ solamente. Veremos más adelante que este principio de inducción es suficientemente fuerte para 
+derivar muchos hechos familiares sobre la igualdad, por ejemplo, que es una relación de equivalencia y que todas 
+las funciones la preservan.
+
+</Aside>
+</div>
+
+
+<div id="observacion 5.1.3">
+<Aside type="tip" title="Observacíón 5.1.3">
+Como los tipos identidad requieren que nos acostumbremos a ellos, damos sus reglas formales. El tipo identidad es 
+formado por la regla de formación
+
+```typst
+#prooftree(
+    rule(
+       $Gamma, x: A tack.r a attach(=, br: A) x "type"$,
+       $Gamma tack.r a: A $
+    )
+)
+```
+El constructor del tipo identidad está dado por la regla de introducción:
+```typst
+#prooftree(
+    rule(
+       $Gamma tack.r "refl"_a : a attach(=, br: A) a$,
+       $Gamma tack.r a: A$
+    )
+)
+```
+
+El principio de inducción está dado por al regla de eliminación:
+
+```typst
+#prooftree(
+    rule(
+        $Gamma tack.r "ind-eq"_a : P(a, "refl"_a) arrow Pi_((x: A)) Pi_((p: a attach(=, br: A) x)) P(x, p)$,
+        $Gamma tack.r a: A$,
+        $Gamma, x: A, p: a attach(=, br: A) x tack.r P(x, p) "type"$,
+    )
+)
+```
+Y finalmente, la regla de computación es:
+
+```typst
+#prooftree(
+    rule(
+       $Gamma, u: P(a, "refl"_a) tack.r "ind-eq"_a (u, a, "refl"_a) equiv u: P(a, "refl"_a)$,
+       $Gamma tack.r a: A$,
+       $Gamma, x: A, p: a attach(=, br: A) x tack.r P(x, p) "type"$
+    )
+)
+```
+</Aside>
+</div>
+
+<div id="observacion 5.1.4">
+<Aside type="note" title="Observación 5.1.4">
+
+Uno podría preguntarse si es posible formar el tipo identidad en un tipo *variable* de tipo $A$, en lugar de un 
+elemento. Esto es ciertamente posible: como podemos formar el tipo identidad en cualquier contexto, podemos 
+formar el tipo identidad en una variable $x: A$ como sigue:
+
+```typst 
+#prooftree(
+    rule(
+       $Gamma, x: A, y: A tack.r x attach(=, br: A) y "type"$,
+       $Gamma, x: A tack.r x: A$
+    )
+)
+```
+De esta manera, obtenemos el tipo identidad "binario". Su constructor es también indizado por $x: A$. Tenemos 
+la siguiente regla de introducción 
+```typst
+#prooftree(
+    rule(
+       $Gamma, x: A tack.r "refl"_x : x attach(=, br: A) x$,
+       $Gamma, x: A tack.r x: A$
+    )
+)
+```
+y similarmente tenemos reglas de eliminación y computación.
+</Aside>
+</div>
+
+
+## La estructura de grupoide de los tipos
+
+Mostraremos que las identificaciones pueden ser *concatenadas* e *invertidas*, lo que corresponde a la transitividad
+y simetría del tipo identidad.
+
+<div id="definicion 5.2.1">
+<Aside type="note" title="Definición 5.2.1">
+Sea $A$ un tipo. Definimos la operación de **concatenación**
+$ "concat": Pi_((x, y, z: A)) (x = y) arrow ((y = z) arrow (x = z)) $
+Escribiremos $p dot q$ para $"concat"(p, q)$.
+
+*Construcción* Primero construimos una función
+$ f(x) : Pi_((y: A)) (x = y) arrow Pi_((z: A)) (y = z) arrow (x = z) $
+para cada $x: A$. Por el principio de inducción para tipos identidad, basta construir 
+$ f(x, x, "refl"_x): Pi_((z: A)) (x = z) arrow (z = z). $
+Aquí, tenemos la función $lambda z. "id"_ ((x = Z))$. La función $f(x)$ que obtenemos vía eliminación de identidades 
+está explícitamente definida como 
+$ f(x) := "ind-eq"_(x) (lambda z. "id") : Pi_((y: A)) (x = y) arrow Pi_((z: A)) (y = z) arrow (x = z). $
+
+Para terminar la construcción de concat, usamos el ejercicio 4.2 para cambiar el orden de la tercera y cuarta variable
+de $f$, es decir, definimos 
+$ "concat"_ (x, y, z) (p, q) := f(x, y, p, z, q) $ 
+</Aside>
+</div>
+
+<div id="definicion-5-2-2">
+<Aside type="tip" title="Definición 5.2.2">
+Sea $A$ un tipo. Definimos la **operación de inversión**
+$ "inv": Pi_((x, y: A)) (x = y) arrow (y = x) $
+
+La mayoría de las veces escribimos $p^(-1)$ en lugar de $"inv"(p)$.
+
+*Construcción* Por el principio de inducción para tipos identidad, es suficiente construir 
+$ "inv" ("refl" _x): x = x $
+para cada $x: A$. Así, tomamos $"inv"("refl") _x := "refl" _x$.
+</Aside>
+</div>
+
+La siguiente pregunta es si las operaciones de concatenación e inversión sobre identificaciones se comportan como 
+esperamos. Más concretamente: ¿es la concatenación de identificaciones asociativa?, ¿satisface las leyes de 
+unidad?, ¿es el inverso de una identificación inverso por ambos lados?
+
+Por ejemplo, en el caso de la asociatividad, estamos comparando las identificaciones 
+$ (p dot q) dot r " y " p dot (q dot r) $
+para cualesquiera $p: x = y$, $q: y = z$ y $r: z = w$ en un tipo $A$. Las reglas de computación para el tipo 
+identidad no son lo suficientemente fuertes para probar que $(p dot q) dot r$ y $p dot (q dot r)$ son juiciosamente
+iguales. Sin embargo, $(p dot q) dot r$ y $p dot (q dot r)$ son elementos del mismo tipo, ambos son identificaciones 
+de tipo $x = w$. Como el tipo identidad es un tipo como cualquier otro, podemos preguntarnos si hay una 
+*identificación*
+$ (p dot q) dot r = p dot (q dot r). $
+Esta es una idea muy útil: aunque a veces es imposible mostrar que dos elementos del mismo tipo son iguales en juicio,
+puede ser posible que esos elementos puedan ser *identificados*. En efecto, identificamos dos elementos construyendo
+un elemento del tipo identidad y podemos usar toda la teoría de tipos a nuestra disposición para construir dicho 
+elemento. De esta manera, podemos mostrar, por ejemplo, que la adición en los números naturales o en los enteros
+es asociativa y satisface las leyes de la unidad. Aquí mostraremos que la concatenación de identificaciones es 
+asociativa y satisface las leyes de la unidad.
+
+<div id="definicion-5-2-3">
+<Aside type="tip" title="Definición 5.2.3">
+Sea $A$ un tipo y consideremos tres identificaciones consecutivas 
+$ x =^p y =^q z =^r w $
+en $A$. Definimos el *asociador* 
+$ "assoc(p, q, r)": (p dot q) dot r = p dot (q dot r) $
+
+*Construcción* Por el principio de inducción para tipos identidad, es suficiente probar que
+$ Pi_((z: A)) Pi_((q: x = z)) Pi_((w: A)) Pi_((r: z=w)) ("refl" _x dot q) dot r  = "refl" _x dot (q dot r) $
+Sea $q: x = z$ y $r: z = w$. Notemos que por la regla de computación para tipos identidad, tenemos una igualdad 
+juiciosa $"refl" _x dot q equiv q$. Entonces concluimos que 
+$ ("refl" _x dot q) dot r equiv q dot r $
+Similarmente, tenemos la igualdad juiciosa $"refl" _x dot (q dot r) equiv q dot r$. Así, vemos que el lado 
+izquierdo y el lado derecho en 
+$ ("refl" _x dot q) dot r = "refl" _x dot (q dot r) $
+son juiciosamente iguales, de modo que simplemente podemos definir $"assoc"("refl" _x, q, r) := "refl" _(q dot r)$.
+</Aside>
+</div>
+
+<div id="definicion-5-2-4">
+<Aside type="tip" title="Definición 5.2.4">
+Sea $A$ un tipo. Definimos las operaciones de *leyes de unidad* derecha e izquierda, que asignan a cada $p: x = y$
+las identificaciones
+$ "left-unit"(p) : "refl" _x dot p = p $
+$ "right-unit"(p) : p dot "refl" _x. $
+respectivamente.
+
+*Construcción* Por eliminación de identificaciones, es suficiente construir 
+$ "left-unit"("refl" _x): "refl" _x dot "refl" _x = "refl" _x $
+$ "right-unit"("refl" _x): "refl" _x dot "refl" _x = "refl" _x. $
+en ambos casos, tomamos $"refl" _("refl" _x)$.
+</Aside>
+</div>
+
+<div id="definicion-5-2-5">
+<Aside type="tip" title="Definición 5.2.5">
+Sea $A$ un tipo. Definimos las *leyes de inversión* derechas e izquierdas 
+$ "left-inv"(p): p^(-1) dot p = "refl" _y $
+$ "right-inv"(p): p dot p^(-1) = "refl" _x $
+
+*Construcción* Por eliminación de identificaciones, es suficiente probar 
+$ "left-inv"("refl" _x): "refl"^(-1) _(x) dot "refl" _x = "refl" _x $
+$ "right-inv"("refl" _x): "refl" _x dot "refl"^(-1) _x = "refl" _x $
+Usando las reglas de computación vemos que 
+$ "refl"^(-1) _x dot "refl" _x equiv "refl" _x dot "refl" _x equiv "refl" _x, $
+de modo que definimos $"left-inv" ("refl" _x) := "refl" _("refl" _x)$. Similarmente, se sigue de las reglas de 
+computación que 
+$ "refl" _x dot "refl"^(-1) _x equiv "refl"^(-1) _x equiv "refl" _x $
+Así que definimos $"right-inv" ("refl" _x) := "refl" _("refl" _x)$.
+</Aside>
+</div>
+
+<div id="observacion-5-2-6">
+<Aside type="note" title="Observación 5.2.6">
+Hemos visto que el asociador, las leyes de la unidad y las leyes de la inversión todas se demuestran 
+construyendo una identificación de identificaciones. Y, por supuesto, no hay nada que nos detenga de considerar
+identificaciones de esas identificaciones. Podemos ir tan arriba como queramos en la torre de los *tipos identidad*,
+que se obtiene tomando tipos identidad de forma iterada.
+Los tipos identidad iterados dan tipos en la teoría homotópica de tipos que tienen una estructura muy intricada.
+Una forma importante de estudiar esta estructura es mediante los grupos de homotopía de los tipos, algo que poco a 
+poco iremos construyendo.
+</Aside>
+</div>
+
+## La acción de las funciones sobre las identificaciones
+Usando el principio de inducción de los tipos identidad, podemos mostrar que toda función preserva las 
+identificaciones. En otras palabras, toda función manda elementos identificados a objetos identificados. Notemos
+que esta es una forma de continuidad para funciones en la teoría de tipos: si hay una identificación que 
+identifica dos puntos $x$ y $y$ de un tipo $A$, entonces también hay una identificación entre los valores 
+$f(x)$ y $f(y)$ en el co-dominio de $f$.
+
+<div id ="definicion-5-3-1">
+<Aside type="tip" title="Definción 5.3.1">
+Sea $f: A arrow B$ una función. Definimos la **acción sobre trayectorias** de $f$ como una 
+operación 
+$ "ap"_f : Pi_((x, y: A)) (x = y) arrow (f(x) = f(y)). $
+
+Además, hay operaciones 
+
+$ "ap-id"_A : Pi_((x, y: A)) Pi_((p: x = y)) "ap"_("id"_A) (p) $
+
+$ "ap-comp" (f, g) : Pi_((x, y: A)) Pi_((p: x = y)) "ap" _g ("ap" _f (p)) = "ap" _(g compose f) (p) $
+
+*Construcción* Primero definimos $"ap"_f$ por el principio de inducción para tipos identidad,
+tomando 
+$ "ap_f" ("refl"_x) := "refl"_(f(x)). $
+
+Luego, construimos $"ap-id"_A$ por el principio de inducción para tipos identidad, tomando 
+$ "ap-id"_A ("refl"_x) := "refl"_("refl"_x). $
+
+Finalmente, construimos $"ap-comp" (f, g)$ por el principio de inducción para tipos 
+identidad, tomando 
+$ "ap-comp" (f, g, "refl"_x) := "refl"_("refl"_(g(f(x)))) $
+
+</Aside>
+</div>
+
+<div id="definicion-5-3-2">
+<Aside type="tip" title="Definción 5.3.2">
+Sea $f: A arrow B$ una función. Entonces hay identificaciones
+$ "ap-refl" (f, x) : "ap"_f ("refl"_x) = "refl"_(f(x)) $
+$ "ap-inv" (f, p): "ap"_f (p^(-1)) = "ap"_f (p)^(-1) $
+$ "ap-concat" (f, p, q): "ap"_f (p dot q) = "ap"_f (p) dot "ap"_f (q) $
+para cada $p: x = y$ y $q: x = y$.
+
+*Construcción* Para construir $"ap-refl" (f, x)$ simplemente observamos que 
+$"ap"_f ("refl"_x) equiv "refl"_(f(x))$, así que tomamos 
+
+$ "ap-refl" (f, x) := "refl"_("refl"_(f(x))). $
+
+Construimos $"ap-inv (f, p)"$ por eliminación de identificaciones sobre $p$, tomando 
+$ "ap-inv" (f, "refl"_x) := "refl"_("ap"_f ("refl")) $
+
+Finalmente, construimos $"ap-concat" (f, p, q)$ por eliminación de identificaciones sobre 
+$p$, tomando 
+
+$ "ap-concat" (f, "refl"_x, q) := "refl"_("ap"_f (q)). $
+</Aside>
+</div>
+
+## Transporte
+
+Los tipos dependientes tambíen bienen con una acción sobre las identificaciones, las
+funciones de *transporte*. Dada una identificación $p: x = y$ en el tipo base $A$, podemos 
+transportar cualquier elemento $b: B(x)$ a la fibra $B(y)$.
+
+<div id="definicion-5-4-1">
+<Aside type="tip" title="Definición 5.4.1">
+Sea $A$ un tipo y $B$ una familia de tipos sobre $A$. Construiremos una operación de 
+*transporte* 
+
+$ "tr"_B: Pi_((x, y: A)) (x = y) arrow (B(x) arrow B(y)) $
+
+*Construcción* Construimos $"tr"_B (p)$ por inducción sobre $p: x attach(=, br: A) y$, 
+tomando $ "tr"_B ("refl"_x):= "id"_(B(x)). $
+</Aside>
+</div>
+
+Así, vemos que la teoría de tipos no puede distinguir entre elementos identificados $x$ y 
+$y,$ pues para cada familia de tipos $B$ sobre $A$, se obtiene un elemento de $B(y)$ a 
+partir de los elementos de $B(x)$.
+
+Como una aplicación de la función de transporte, podemos construir la acción *dependiente*
+sobre trayectorias de una función dependiente $f: Pi_((x: A)) B(x)$. Notemos que para
+una función dependiente $f$ de este tipo y una identificación $p: x attach(=, br: A) y$, 
+no hace sentido comparar directamente a $f(x)$ y $f(y)$, pues el tipo de $f(x)$ es $B(x)$,
+mientras que el tipo de $f(y)$ es $B(y)$, que puede no ser el mismo tipo. Sin embargo, 
+podemos primero *transportar* $f(x)$ a lo largo de $p$, de modo que obtengamos el elemento
+$"tr"_B (p, f(x))$ que es de tipo $B(y)$. Ahora podemos preguntarnos si sucede que 
+$"tr"_B (p, f(x)) = f(y)$. La acción dependiente sobre trayectorias de $f$ establece esta 
+identificación.
+
+<div id="definicion-5-4-2">
+<Aside type="tip" title="Definición 5.4.2">
+Dada una función dependiente $f: Pi_((a: A)) B(a)$ y una identificación $p: x = y$ en $A$,
+podemos construir una identificación 
+
+$ "apd"_f (p): "tr"_B (p, f(x)) = f(y). $
+
+*Construcción* La identificación $"apd"_f (p)$ se construye por el principio de inducción 
+para tipos identidad. Así, es suficiente construir una identificación 
+
+$ "apd"_f ("refl"_x): "tr"_B ("refl"_x, f(x)) = f(x). $
+
+Como transportar a lo largo de $"refl"_x$ es la función identidad en $B(x)$, simplemente 
+  tomamos $"apd"_f ("refl"_x) := "refl"_(f(x))$.
+</Aside>
+</div>
+
+## La unicidad de refl
+
+El tipo indentidad es una *familia* inductiva de tipos. Esto tiene unas implicaciones
+sutiles pero importantes. Por ejemplo, mientras que el tipo $a = x$ indizado por $x: A$
+es indutivamente generado por $"refl"_a$, el tipo #$a = a$ *no* está inductivamente 
+generado por $"refl"_a$. Así que no podemos usar el ptincipio de de inducción de los tipos 
+identidad para mostrar que $p = "refl"_a$ para cualquier $p: a = a$. El obstáculo que 
+no nos permite aplicar el principio de inducción para tipos identidad en este caso es que 
+el extremo $p: a = a$ no es libre.
+
+Sin embargo, el tipo $a = x$ está genereado por un solo elemento $"refl"_a : a = a$, así que 
+es natural preguantarse en qué sentido es la identificación $"refl"$ única. Una
+identificación con un elemento $a$ está especificada dando primero el extremo $x$ con el que 
+se busca identificar a $a$ y luego dando la identificación $p: a = x$. Entonces lo que 
+es único es el par $(a, "refl"_a)$ en el tipo de todos los pares
+
+$ (x, p): Sigma_((x: A)) a = x $
+
+Probamos este hecho en la siguiente proposición.
+
+<div id="proposicion-5-5-1">
+<Aside type="tip" title="Proposición 5.5.1">
+Consideremos un elemento $a: A$. Entonces hay una identificación 
+
+$ (a, "refl"_a) = y $
+en el tipo $Sigma_((x: A)) a = x$, para cualquier $y: Sigma_((x: A)) a = x$.
+
+*Demostración* Por $Sigma$-inducción, basta probar que hay una identificación 
+
+$ (a, "refl"_a) = (x, p) $
+
+para cada $x: A$ y $p: a = x$. Procedemos mediante el principio de inducción para tipos 
+identidad. Así, basta probar que 
+
+$ (a, "refl"_a) = (a, "refl"_a) $
+
+lo cual se obtiene mediante reflexividad.
+</Aside>
+</div>
+
+La proposición [5.5.1](#proposicion-5-5-1) muestra que, salvo identificaciones, hay un sólo 
+elemento en el $Sigma$-tipo del tipo identidad. A estos tipos les llamamos contraibles.
+
+
+## Las leyes de adición en ℕ
+
+Ahora que hemos introducido el tipo indentidad, podemos empezar a probar ecuaciones.
+Probaremos que hay identificaciones 
+
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  $0 + n = n$,
+  $m + 0 = m$,
+  $"succ" _NN (m) + n = "succ" _NN (m + n)$,
+  $m + "succ" _NN (n) = "succ" _NN (m + n)$,
+  $(m + n) + k = m + (n + k)$,
+  $m + n = n + m$
+)
+```
+Las leyes de la unidad, asociatividad y conmutatividad son, por supuesto, familiares. Las 
+leyes del sucesor serán útiles para probar la conmutatividad. En el ejecrcicio 5.5 se nos 
+pedirá probar las leyes de la multiplicación en $NN$. De nuevo, habrá *leyes del sucesor*
+como parte del ejercicio, pues son pasos intermedios útiles en las leyes más complicadas.
+
+Recordemos que la adición en los números naturales está definida de tal manera que 
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  $m + 0 equiv  m$,
+  $m + "succ" _NN (n) = "succ" _NN (m + n)$
+)
+```
+
+Estas dos igualdades juiciosas es todo lo que sabemos hasta ahora sobre la funcíon 
+$m, n mapsto m + n$ en $NN$. En consecuancia, tenemos que encontrar maneras de aplicar estas 
+dos igualdades juiciosas en nuestras pruebas de las leyes de la adición. Por supuesto, las 
+igualdades juiciosas coinciden con dos de las leyes de la adición. Para las leyes restantes, 
+necesitaremos proceder por inducción en $NN$.
+
+<div id="proposicion-5-6-1">
+<Aside type="tip" title="Proposición 5.6.1">
+
+Para cada número natural $n$, hay identificaciones 
+$ "left-unit-law-add" _NN (n): 0 + n = n $
+$ "right-unit-law-add" _NN (n): n + 0 = n. $
+
+*Demostración* Podemos definir 
+
+$ "right-unit-law-add" _NN (n) := "refl"_n, $
+
+Pues la regla de computación para la adición nos da que $n + 0 equiv 0$.
+Falta definir la ley de unidad izquierda. Procedemos por inducción sobre $n$. En le caso 
+base, necesistamos probar que $0 + 0 = 0$, lo cual se sigue por reflexividad. Para el paso 
+inductivo, asumimos que tenemos una identificación $p: 0 + n = n$. Nuestra meta es mostrar 
+que $0 + "succ" _NN (n) = "succ" _NN (n)$. Sin emabrgo, es suficient construir una 
+identificación 
+
+$ "succ" _NN (0 + n) = "succ" _NN (n), $
+
+pues, por la regla de computación para la adición, tenemos que 
+$0 + "succ" _NN (n) equiv "succ" _NN (0 + n)$. Ahora usamos la acción sobre trayectorias 
+de $"succ" _NN: NN arrow NN$ para obtener 
+
+$ "ap"_("succ"_NN (p)): "succ" _NN (0 + n) = "succ" _NN (n). $
+
+De este modo, la ley de unidad izquierda se define por 
+
+$ "left-unit-law-add" _NN (n) := "ind" _NN ("refl" _0, lambda p."ap" _("succ" _NN) (p)) $
+
+</Aside>
+</div>
+
+<div id="proposicion-5-6-2">
+<Aside type="tip" title="Porposición 5.6.2">
+
+Para cualesquiera números naturales $m$ y $n$, hay identificaciones 
+
+$ "left-successor-law-add" _NN (m, n): "succ" _NN (m) + n = "succ" _NN (m + n) $
+$ "right-successor-law-add" _NN (m, n): m + "succ" _NN (n) = "succ" _NN (m + n) $
+
+*Demostración* Podemos definir 
+
+$ "right-successor-law-add" _NN (m, n) := "refl" _("succ" _NN (m + n)) $
+
+pues tenemos la igualdad juiciosa $m + "succ" _NN (n) equiv "succ" _NN (m + n)$ por las 
+reglas de computación para $"add" _NN$.
+
+La ley del sucesor izquierdo se construye por inducción sobre $n$. En el caso base, tenemos
+que construir una identificación $"succ" _NN (m) + 0 = "succ" _NN (m + 0)$, que es obtenida 
+mediante reflexividad. Para el paso inductivo, supongamos que tenemos una identificación 
+$p: "succ" _NN (m) + n = "succ" _NN (m + n)$. Nuestra meta es demostrar que 
+
+$ "succ" _NN (m) + "succ" _NN (n) = "succ" _NN (m + "succ" _NN (n)). $
+
+Notemos que tenemos las igualdades juiciosas 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1,
+  $"succ" _NN (m) + "succ" _NN (n) equiv "succ" _NN ("succ" _NN (m) + n)$,
+  $"succ" _NN (m + "succ" _NN (n)) equiv "succ" _NN ("succ" _NN (m + n))$
+)
+```
+Así que basta construir una identificación 
+
+$ "succ" _NN ("succ" _NN (m) + n) = "succ" _NN ("succ" _NN (m + n)). $
+
+Esta identificación está dada por $"ap"_("succ"_ NN (p))$.
+
+</Aside>
+</div>
+
+<div id="proposicion-5-6-3">
+<Aside type="tip" title="Proposición 5.6.3">
+
+La adición de los números naturales es asociativa, es decir, para cualesquiera tres números 
+naturales $m, n$ y $k$, hay una identificación 
+
+$ "associative-add" _NN (m, n, k) : (m + n) + k = m + (n + k). $
+
+*Demostración* Construimos $"associative-add" _NN (m, n, k)$ por inducción sobre $k$. En el 
+caso base, tenemos las igualdades juiciosas 
+
+$ (m + n) + 0 equiv m + n equiv m + (n + 0). $
+
+Así que definimos $"associative-add" _NN (m, n, 0) := "refl" _(m + n)$.
+
+Para el paso inductivo,j sea $p: (m + n) + k = m + (n + k)$. Nuestra meta es mostrar que 
+
+$ (m + n) + "succ" _NN (k) = m + (n + "succ" _NN (k)). $
+
+Notemos que tenemos las igualdades juiciosas 
+
+$ 
+  (m  + n) + "succ" _NN (k) &equiv "succ" _NN ((m + n) + k) \\
+  m + (n + "succ" _NN (k))  &equiv  m + ("succ" _NN (n + k)) \\
+                            &equiv "succ" _NN (m + (n + k)) 
+$ 
+
+Así que es suficiente construir una identificación 
+
+$ "succ" _NN ((m + n) + k) = "succ" _NN (m + (n + k)),  $
+
+que ya tenemos por $"ap" _("succ" _NN ) (p)$
+
+</Aside>
+</div>
+
+<div id="proposicion-5-6-4">
+<Aside type="tip" title="Proposición 5.6.4">
+
+La adición sobre los números naturales es conmutativa, es decir, para cualesquiera números 
+naturales $n$ y $m$ hay una identificación 
+
+$ "commutative-add" _NN (m, n): m + n = n + m. $
+
+*Demostración* Construimos $"commutative-add" _NN (m, n)$ por inducción sobre $m$. En el 
+caso base, tenemos que mostrar que $0 + n = n + 0$, lo cual es cierto por las leyes de la 
+unidad para $n$ demostradas en la proposición [5.6.1](#proposicion-5-6-1).
+
+Para el paso inductivo, sea $p: m + n = n + m$. Nuestra meta es construir una identificación
+$"succ" _NN (m) + n = n + "succ" _NN (m)$. Ahora, es claro porqué probamos las leyes del 
+sucesor primero:
+$ 
+  "succ" _NN (m) + n &= "succ" _NN (m + n) \\
+                     &= "succ" _NN (n + m) \\
+                     &= n + "succ" _NN (m).
+$
+
+La primera identificación se obtuvo de la proposición [5.6.2](#proposicion-5-6-2), y la 
+segunda identificación es la identificación $"ap" _("succ" _NN) (p)$.
+
+</Aside>
+</div>
+
+
+
+
+
+
