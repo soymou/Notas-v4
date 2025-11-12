@@ -62,6 +62,11 @@ export default defineConfig({
 					collapsed: true,
 					autogenerate: { directory: "categorias" },
 				},
+        {
+          label: "Lógica categórica",
+          collapsed: true,
+          autogenerate: { directory: "logica-categorica" },
+        },
 				{
 					label: "Nix",
 					collapsed: true,

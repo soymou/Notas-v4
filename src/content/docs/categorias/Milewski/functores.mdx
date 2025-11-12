@@ -88,3 +88,59 @@ Esta definición dice que el tipo `a` es de la clase `Eq` si soporta el operador
 
 Si queremos decirle a Haskell que un tipo particular es `Eq`, tenemos que declararlo como 
 una instancia de esta clase y proveer una implementación de `(==)`
+
+## El functor lista
+
+Cualquier tipo parametrizado por otro es un candidato para se un functor. Los 
+contenedores genéricos están parametrizados por el tipo de los elementos que guardan, 
+así que veamos un contenedor básico, la lista:
+
+`data List a = Nil | Cons a (List a)`
+
+Tenemos el constructor para tipos `List`, que es un mapeo de cualquier tipo al tipo 
+`List a`. Para mostrar que `List` es un functor, tenemos que definir el levantamiento 
+de funciones: Dada una función `a -> b`, definimos una función 
+`List a -> List b`:
+
+`fmap :: (a -> b) -> (List a -> List b)`
+
+Una función que actúa sobre una `List` debe considerar dos casos, que corresponden a los 
+dos constructores. El caso `Nil` es trivial, basta regresar `Nil`. El caso `Cons` es un 
+poco más delicado, pues involucra algo de recursión.
+
+`fmap f (Cons x t) = Cons ( x t) (fmap f t)`
+
+Juntándolo todo, tenemos la declaración de instancia para el functor `List`:
+
+```code :language haskell :eval false 
+instance Functor List where 
+  fmap _ Nil = Nil 
+  fmap f (Cons x t) = Cons (f x) (fmap f t)
+```
+
+## El functor Reader 
+
+En Haskell, un tipo función se construye usando el constructor `(->)` que toma dos tipos:
+el tipo argumento y el tipo resultante. Ya lo hemos visto en forma in-fija `a -> b`, pero 
+también se puede usar como prefijo cuando la envolvemos entre paréntesis:
+
+`(->) a b`
+
+Así como las funciones regulares, los tipos funciones de más de un argumento se pueden 
+aplicar parcialmente. Así, cuando damos sólo un tipo a la flecha, todavía espera otro,
+así es como `(->) a` es un constructor de tipos. Para mostrar que este constructor de 
+tipos es en realidad un functor, hay que mostrar que podemos levantar las funciones. Así, 
+buscamos definir 
+
+`fmap :: (b -> c) -> (a -> b) -> (a -> c)`
+
+Es decir, dada una función `f :: b -> c` y una función `g :: a -> b`, queremos construir 
+una función `a -> c`. No hace falta romperse la cabeza, sólo hay que componer. Así, 
+nuestra implementación de `fmap` es: 
+
+```code :language haskell :eval false 
+instance Functor (-> a) where 
+  fmap f g = f . g
+```
+
+Este functor es conocido como el functor Reader.

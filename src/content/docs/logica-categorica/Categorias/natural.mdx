@@ -1,0 +1,62 @@
+---
+title: Transformaciones naturales
+sidebar: 
+  order: 1
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<div id="definicion-2-1">
+<Aside type="tip" title="Definción 2.1">
+Dados dos functores $F, G : cal(A) arrow cal(B)$, una *transformación natural* 
+$t : F arrow G$ es una familia de flechas $t(A): F(A) arrow G(A)$ en $cal(B)$, una flecha 
+para cada objeto $A$ de $cal(A)$, tal que el siguiente cuadrado conmuta para cada 
+flecha $f : A arrow B$ en $cal(A)$:
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $F(A)$),
+  node((0, 1), $G(A)$),
+  node((1, 0), $F(B)$),
+  node((1, 1), $G(B)$),
+  arr($F(A)$, $G(A)$, $t(A)$),
+  arr($F(B)$, $G(B)$, $t(B)$),
+  arr($F(A)$, $F(B)$, $F(f)$),
+  arr($G(A)$, $G(B)$, $G(f)$)
+)
+```
+es decir, tal que 
+
+$ G(f) compose t(A) = t(B) compose F(f). $
+
+</Aside>
+</div>
+
+Dadas dos categorías $cal(A)$ y $cal(B)$, la *categoría de functores* $cal(B)^(cal(A))$
+tiene functores $F : cal(A) arrow cal(B)$ como objetos y transformaciones naturales como 
+flechas. 
+
+<div id="proposicion-2-3">
+<Aside type="tip" title="Proposición 2.3">
+Para cualesquiera categorías $cal(A), cal(B)$ y $cal(C)$,
+$ 
+    cal(A)^1 tilde.equiv cal(A), quad
+    cal(C)^(cal(A) times cal(B)) tilde.equiv (cal(C)^(cal(B)))^(cal(A)), quad
+    (cal(A) times cal(B))^(cal(C)) tilde.equiv cal(A)^(cal(C)) times cal(B)^(cal(C))
+$
+</Aside>
+</div>
+
+Si $cal(A)$ es una categoría localmente pequeña, entonces hay un functor 
+$"Hom"_(cal(A)): cal(A)^("op") times cal(A) arrow "Sets"$. Para un objeto $(A, B)$ de 
+$cal(A)^("op") times cal(A)$, el valor de este functor es $"Hom"_(cal(A)) (A, B)$ como 
+sugiere la notación. Para una flecha $(g, h): (A, B) arrow (A', B')$ de 
+$cal(A)^("op") times cal(A)$, donde $g: A' arrow A$ y $h: B arrow B'$ en $cal(A)$,
+$"Hom"_(cal(A)) (g, h)$ manda $f in "Hom"_(cal(A)) (A, B)$ a 
+$h compose f compose g in "Hom"_(cal(A)) (A', B')$.
+
+
+
+
