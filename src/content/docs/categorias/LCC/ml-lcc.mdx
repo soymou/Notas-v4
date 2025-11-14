@@ -60,7 +60,9 @@ Para objetos $A$ y $B$, $A times B$ (en $C(bold(M))$) está dado por $A times B$
 "sí mismas". Las ecuaciones requeridas se siguen fácilmente de ($Sigma$ red) y 
 ($Sigma$ exp).
 
-**Pullbacks** Dadas $t : A arrow B$ y $s : C arrow B$, el pullback $P$ de $s$ a lo largo 
+**Pullbacks** 
+
+Dadas $t : A arrow B$ y $s : C arrow B$, el pullback $P$ de $s$ a lo largo 
 de $t$ 
 
 ```typst 
@@ -89,6 +91,59 @@ $lambda (x : X). (f(x), (g(x), rho(x)))$. Claramente $p compose h = f$ y $q comp
 y, usando la ($I$ regla) para ver que $rho(x)$ es el único término posible de tipo 
 $t(f(x)) attach(=, br: B) s(g(x))$, $h$ es única con esta propiedad.
 
+
+**Equalizadores**
+
+Dados $s, t : A arrow B$, el equalizador de $s$ y $t$ está dado por 
+$Sigma_((x : A)) s(x) attach(=, br: B) t(x)$, la inclusión está dada por la proyección 
+(que sea un monomorfismo se sigue de la $I$ regla).
+
+**Exponentes**
+
+$B^A$ definido como $A arrow B$ hace a $C(bold(M))$ cartesiana cerrada.
+
+Dada $t : A times C arrow B$, definimos 
+$hat(t) = lambda (y : C). lambda (x : A). t((x, y)) : C arrow B^A$. Dada 
+$s : C arrow B^A$, definimos 
+$tilde(s) = lambda (s: A times B) s(pi'(z)) (pi(z)) : A times C arrow B$. 
+Estas operaciones son inversas la una de la otra. Notemos que esta es la correspondencia
+usual, por ejemplo: $"ev": A times B ^A arrow B$ es simplemente 
+$lambda (z : A times B^A) pi'(z) (pi(z))$, de modo que $"ev"((a, f)) = f(a)$.
+
+</Aside>
+</div>
+
+<div id="teorema-3-2">
+<Aside type="tip" title="Teorema 3.2">
+$C(bold(M))$ es localmente cartesiana cerrada.
+
+*Demostración* Para ver que $C(bold(M))$ es localmente cartesiana cerrada, debemos 
+verificar que las categorías de rebanada $C(bold(M))\\/A$ son cartesianas cerradas o, 
+de forma equivalente, que $C(bold(M))$ es una hiper-doctrina. 
+
+<div id="definicion-3-2-1">
+<Aside type="note" title="Definición 3.2.1">
+$P(bold(M))$ es la categoría $C(bold(M))$-indizada definida por:
+
+1. Para un objeto $A$ de $C(bold(M))$, $P(bold(M))(A)$ es la categoría cuyos objetos son 
+   tipos $B[x]$ que sólo dependen de $x : A$ y cuyos morfismos son términos 
+   $t[x] : B[x] arrow C[x]$ que sólo dependen de $x : A$.
+
+2. Para un término $f : B arrow A$ (es decir, un morfismo $f : B arrow A$ en $C(bold(M))$),
+   $f^star$ se define por substitución: $e[x] mapsto e[f(y)]$, $y : B$ para una expresión 
+   $e$.
+</Aside>
+</div>
+
+<div id="lema-3-2-2">
+<Aside type="note" title="Lema 3.2.2">
+Para cualquier tipo cerrado $A$, $P(bold(M))(A)$ es cartesiana cerrada.
+
+*Demostración* La demostración de este hecho es exactamente la prueba de que $C(bold(M))$
+es cartesiana cerrada. Sólo hay que saber que los objetos son términos cerrados y basta 
+repetir los argumentos con un parámetro $x : A$.
+</Aside>
+</div>
 
 </Aside>
 </div>
