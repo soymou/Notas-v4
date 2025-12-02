@@ -1,0 +1,380 @@
+---
+title: Teoría de tipos dependiente
+sidebar:
+  order: 2
+typstImports: 
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+import { Aside } from '@astrojs/starlight/components';
+
+La teoría de tipos dependiente es un conjunto de reglas de inferencia que se pueden 
+combinar para crear *derivaciones*. El objetivo de estas derivaciones es 
+frecuentemente construir un elemento de un cierto tipo. En cierto sentido, un tipo 
+no es más que una colección de objetos matemáticos y construir elementos de un cierto 
+tipo es el desafío matemático del día a día. y construir elementos de un cierto 
+tipo es el desafío matemático del día a día.
+
+## Juicios y contextos
+Un argumento matemático consiste de una sucesión de pasos, cada uno con una cantidad 
+finita de premisas para llegar a la siguiente etapa de la demostración o construcción.
+Estos pasos se pueden representar mediante **reglas de inferencia**, que se escriben 
+en la forma 
+$ (cal(H)_1 space    cal(H)_2 space dots space cal(H)_n)/(cal(C)) $ 
+Arriba de la línea horizontal hay una lista finita de juicios como las **premisas** y,
+debajo, un sólo juicio llamado la **conclusión**. El sistema de la teoría de tipos 
+está descrito por una serie de reglas de inferencias.
+
+Un ejemplo de regla de inferencia lo obtenemos con los tipos función:
+
+```typst
+#prooftree(
+  rule(
+    $Gamma tack.r f(a): B$,
+    $Gamma tack.r a: A$,
+    $Gamma tack.r f: A arrow.r B$
+  )
+) 
+  ```
+Esta regla afirma que en un contexto $Gamma$ podemos usar un elemento $a: A$ y una 
+función $f: A arrow.r B$ para obtener un elemento $f(a): B$. Cada una de las expresiones 
+
+- $Gamma tack.r a: A$
+- $Gamma tack.r f: A arrow.r B$
+- $Gamma tack.r f(a): B$
+
+son ejemplos de juicios.
+
+<div id="def-1-1-1">
+<Aside type="tip" title="Definición 1.1.1">
+Hay cuatro tipos de **juicios** en la teoría de tipos de Marrtin-Löf:
+
+1. $A$ es un **tipo** (bien formado) en un contexto $Gamma$. Expresamos este juicio 
+  como $ Gamma tack.r A     "type". $ 
+2. $A$ y $B$ son **tipos juiciosamente iguales** en un contexto $Gamma$. Expresamos 
+    este juicio como $ A equiv B     "type" $ 
+3. $a$ es un **elemento** de tipo $A$ en un contexto $Gamma$. Expresamos este juicio
+  como $ Gamma tack.r a: A. $ 
+4. $a$ y $b$ son **elementos juiciosamente iguales** de tipo $A$ en un contexto 
+  $Gamma$. Expresamos este juicio como $ Gamma tack.r a equiv b: A. $ 
+</Aside>
+</div>
+
+Observemos que cualquier juicio es de la forma $Gamma tack.r cal(J)$, donde 
+$Gamma$ es un contexto y $cal(J)$ es una *tesis de juicio* con una de las formas
+que mencionamos antes. El rol del contexto es declarar los **elementos hipotéticos** que 
+son asumidos junto con sus tipos. Los elementos hipotéticos también son llamados 
+**variables**.
+
+<div id="def-1-1-2">
+<Aside type="tip" title="Definición 1.1.2">
+Un **contexto** es una lista finita de **declaraciones de variables**
+$ x_1: A_1, x_2: A_2(x_1), dots, x_n: A_n (x_1, dots, x_(n-1)) $
+que satisface la condición de que para cada $1 lt.eq k lt.eq n$ podemos derivar el juicio
+$ x_1: A_1, dots, x_(k-1): A_(k-1)(x_1, dots, x_(k-2)) tack.r A_k (x_1, dots, x_(k-1))     "type" $ 
+usando las reglas de inferencia de la teoría de tipos.
+</Aside>
+</div>
+
+La condición en la definición [1.1.2](#def-1-1-2) de que cada elemento hipotético tiene un 
+tipo asignado, se verifica recursivamente. 
+
+## Familias de tipos
+<div id="def-1-2-1">
+<Aside type="tip" title="Definición 1.2.1">
+Consideremos un tipo $A$ en un contexto $Gamma$. Una **famlia**
+de tipos sobre $A$ en el contexto $Gamma$ es un tipo $B(x)$ en el contexto 
+$Gamma, x: A$. En otras palabras, en la situación en la que 
+$Gamma, x: A tack.r B(x)     "type"$, decimos que $B$ es una familia de tipos 
+sobre $A$ en el contexto $Gamma$. Alternativamente, decimos que $B(x)$ es un tipo
+indizado por $x: A$ en el contexto $Gamma$.
+</Aside>
+</div>
+
+Un ejemplo básico de familia de tipos ocurrirá cuando introduzcamos los *tipos identidad*.
+Se introducen como sigue:
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma, x: A tack.r a = x "type"$,
+    $Gamma tack.r a: A$
+  )
+)
+```
+Esta regla asegura que dado un elemento $a: A$ en un contexto $Gamma$, podemos formar
+el tipo $a = x$ en el contexto $Gamma, x: A$. El tipo $a = x$ en el contexto 
+$Gamma, x: A$ es un ejemplo de una familia de tipos sobre $A$ en el contexto 
+$Gamma$. 
+
+<div id="def-1-2-2">
+<Aside type="tip" title="Definición 1.2.2">
+Consideremos una familia de tipos $B$ sobre $A$ en un contexto $Gamma$. Una **sección** de la familia $B$ sobre $A$ en el contexto $Gamma$ es un elemento de tipo $B(x)$ en el contexto $Gamma, x: A$, es decir, en el juicio 
+$ Gamma, x: A tack.r b(x): B(x). $ 
+Decimos que $b$ es una sección de la familia $B$ sobre $A$ en el contexto $Gamma$.
+Alternativamente, decimos que $b(x)$ es un elemento de tipo $B(x)$ indizado por 
+$x: A$ en el contexto $Gamma$.
+</Aside>
+</div>
+
+## Reglas de inferencia
+Ahora estamos listos para presentar el sistema de reglas de inferencia que conforman la 
+teoría de tipos. Estas reglas son conocidas como **reglas estructurales** de la teoría de
+tipos. Hay seis conjuntos de reglas de inferencia:
+
+1. Reglas sobre la formación de contextos, tipos y sus elementos.
+2. Reglas que postulan que la igualdad juiciosa es una relación de equivalencia.
+3. Reglas de conversión de variables.
+4. Reglas de substitución.
+5. Reglas de debilitamiento.
+6. El elemento genérico.
+
+### Reglas sobre formación de contextos, tipos y sus elementos
+Las siguientes reglas se siguen de las suposiciones sobre contextos, tipos y sus elementos
+y pueden usarse libremente en las derivaciones:
+
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  align: center,
+  prooftree(
+    rule(
+      $Gamma tack.r A "type"$,
+      $Gamma, x: A tack.r B(x) "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r A equiv B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r B "type"$,
+      $Gamma tack.r A equiv B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r a: A$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r a: A$,
+      $Gamma tack.r a equiv b$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r b: A$,
+      $Gamma tack.r a equiv b$
+    )
+  )
+)
+```
+
+
+### La igualdad juiciosa es una regla de equivalencia
+Las reglas que postulan que la igualdad juiciosa en tipos y elementos es una relación 
+de equivalencia son las siguientes:
+
+
+```typst
+
+#table(
+  stroke: none,
+  columns: 3,
+  align: center,
+  prooftree(
+    rule(
+      $Gamma tack.r A equiv A "type"$,
+      $Gamma tack.r A "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r B equiv A "type"$,
+      $Gamma tack.r A equiv B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r A equiv C "type"$,
+      $Gamma tack.r A equiv B "type"$,
+      $Gamma tack.r B equiv C "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r a equiv a: A$,
+      $Gamma tack.r a: A$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r b equiv a: A$,
+      $Gamma tack.r a equiv b: A$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r a equiv c: A$,
+      $Gamma tack.r a equiv b: A$,
+      $Gamma tack.r b equiv c: A$
+    )
+  )
+)
+```
+
+### Reglas de conversión de variables
+Las **reglas de conversión de variables** son reglas que postulan que podemos convertir
+el tipo de una variable por un tipo juiciosamente igual.
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma, x: A', Delta tack.r B(x) "type"$,
+    $Gamma tack.r A equiv A' "type"$,
+    $Gamma, x: A, Delta tack.r B(x) "type"$
+  )
+)
+```
+En esta regla de conversión, el contexto $Gamma, x: A, Delta$ es cualquier extensión 
+del contexto $Gamma, x: A$.
+
+Similarmente, hay reglas de conversión de variables para la igualdad juiciosa de tipos, 
+para elementos y para igualdad juiciosa de elementos. Podemos enunciar todas en una 
+usando una **tesis de juicio genérica** $cal(J)$, que pueden ser cualquiera de las 
+definidas en la definición [1.1.1](#def-1-1-1):
+
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma, x: A', Delta tack.r cal(J)$,
+    $Gamma tack.r A equiv A' "type"$,
+    $Gamma, x: A, Delta tack.r cal(J)$
+  )
+)
+```
+
+Una regla análoga de **conversión de elementos** convierte el tipo de un elemento a un tipo
+juiciosamente igual.
+
+### Substitución
+Supongamos que tenemos un tipo 
+$ Gamma, x: A, y_1: B_1, dots, y_n: B_n tack.r C     "type" $ 
+y un elemento $a: A$ en el contexto $Gamma$. Entonces podemos substituir
+simultáneamente $a$ por todas las ocurrencias de $x$ en los tipos 
+$B_1, dots, B_n$ y $C$ para obtener 
+
+$ Gamma, y_1: B_1[a slash x], dots, y_n: B_n [a slash x] tack.r C[a slash x] "type". $ 
+
+Similarmente, podemos substituir $a$ por $x$ en un elemento $c: C$ para obtener un 
+elemento $c[a slash x]: C[a slash x]$. Así, la **regla de substitución** se enuncia para 
+una tesis de juicio genérica $cal(J)$:
+$ (Gamma tack.r a: A quad Gamma, x: A, Delta tack.r cal(J))/(Gamma, Delta[a slash x] tack.r cal(J)[a slash x])S. $ 
+
+Añadimos dos "reglas de congruencia" para la substitución, postulando que la substitución 
+por elementos juiciosamente iguales resulta en tipos y elementos juiciosamente iguales:
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  row-gutter: 1em,
+  prooftree(
+    rule(
+      $Gamma, Delta[a slash x] tack.r B[a slash x] equiv B[a' slash x] "type"$,
+      $Gamma tack.r a equiv a': A$,
+      $Gamma, x: A, Delta tack.r B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma, Delta[a slash x] tack.r b[a slash x] equiv b'[a slash x]: B[a slash x]$,
+      $Gamma tack.r a equiv a': A$, 
+      $Gamma, x: A, Delta tack.r b: B$
+    )
+  )
+)
+
+```
+
+<div id="def-1-3-1">
+<Aside type="tip" title="Definición 1.3.1">
+Cuando $B$ es una familia de tipos osbre $A$ en un contexto 
+$Gamma$ y si tenemos $a: A$, entonces también decimos que $B[a slash x]$ es la **fibra**
+de $B$ en $a$ y escribimos $B(a)$ para referirnos a esta fibra.
+Cuando $b$ es una sección de la familia $B$ sobre $A$ en el contexto $Gamma$, 
+llamamos al elemento $b[a slash x]$ el **valor** de $b$ en $a$ y escribimos $b(a)$.
+</Aside>
+</div>
+
+### Debilitamiento
+Si se nos da un tipo $A$ en un contexto $Gamma$, entonces cualquier juicio hecho 
+en un contexto más largo $Gamma, Delta$ también se puede hacer en el contexto 
+$Gamma, x: A, Delta$ para una nueva variable $x$. La **regla de debilitamiento**
+afirma que el debilitamiento por un tipo $A$ en un contexto preserva la buena formación 
+y la igualdad juiciosa de tipos y elementos.
+
+
+```typst
+#prooftree(
+  rule(
+    name: $W.$,
+    $Gamma, x: A, Delta tack.r cal(J)$,
+    $Gamma tack.r A "type"$,
+    $Gamma, Delta tack.r cal(J)$
+  )
+)
+```
+Este proceso de expandir el contexto por una variable de tipo $A$ se llama 
+**debilitamiento** por $A$.
+
+En la situación más simple, tenemos dos tipos $A$ y $B$ en un contexto $Gamma$.
+Entonces podemos debilitar a $B$ por $A$ como sigue:
+
+```typst
+#prooftree(
+  rule(
+    $Gamma, x: A tack.r B "type"$,
+    $Gamma tack.r A "type"$,
+    $Gamma tack.r B "type"$
+  )
+)
+
+```
+El tipo $B$ en el contexto $Gamma, x: A$ es llamado la **familia constante** $B$ o 
+la **familia trivial** $B$.
+
+### Los elementos genéricos
+Si tenemos un tipo $A$ en un contexto $Gamma$, podemos debilitar a $A$ por sí mismo 
+para obtener que $A$ es un tipo en el contexto $Gamma, x: A$. La regla del 
+**elemento genérico** afirma que cualquier elemento hipotético $x: A$ en el contexto 
+$Gamma, x: A$ es también un elemento de tipo $A$ en el contexto $Gamma, x: A$.
+
+```typst
+#prooftree(
+  rule(
+    name: $delta.$,
+    $Gamma, x: A tack.r x: A$,
+    $Gamma tack.r A "type"$
+  )
+)
+```
+
+Esta regla también es conocida como la **regla de la variable**, nos da una 
+*función identidad* sobre el tipo $A$ en el contexto $Gamma.$
+
+## Derivaciones
+Una **derivación** en la teoría de tipos es un árbol finito en el que cada nodo es una 
+regla de inferencia válida. 
+
+

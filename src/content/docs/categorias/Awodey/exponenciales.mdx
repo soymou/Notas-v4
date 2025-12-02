@@ -1,0 +1,527 @@
+---
+title: Exponenciales
+sidebar: 
+  order: 4
+
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<div id="definicion-6-1">
+<Aside type="tip" title="Definición 6.1">
+Sea $bold(C)$ una categoría con productos finitos. Un *exponencial* de los objetos 
+$B$ y $C$ consiste de un objeto 
+
+$ C^B $
+
+y una flecha 
+
+$ epsilon: C^B times B arrow C $
+
+tal que, para cada objeto $A$ y cada flecha 
+
+$ f: A times B arrow C $
+
+hay una única flecha 
+
+$ tilde(f) : A arrow C^B $
+
+tal que 
+
+$ epsilon compose (tilde(f) times 1_B) = f $
+
+como en el diagrama 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 2,
+  commutative-diagram(
+    node((0, 0), $A$),
+    node((1, 0), $C^B$),
+    arr($A$, $C^B$, $tilde(f)$)
+  ),
+  commutative-diagram(
+    node((0, 0), $A times B$),
+    node((1, 0), $C^B times B$),
+    node((1, 1), $C$),
+    arr($A times B$, $C^B times B$, $tilde(f) times 1_B$),
+    arr($C^B times B$, $C$, $epsilon$),
+    arr($A times B$, $C$, $f$)
+  )
+)
+```
+
+Aquí hay un poco de terminología:
+
+- $epsilon : C^B times B arrow C$ es llamada la *evaluación*.
+- $tilde(f): A arrow C^B$ es llamada la *transposición* (exponencial) de $f$.
+- Dada una flecha $g : A arrow C^B$, escribimos 
+    $ overline(g) : epsilon compose (g times 1_B) : A times B arrow C $
+    y también la llamamos la *transposición* de $g$.
+
+</Aside>
+</div>
+
+## Categorías cartesianas cerradas 
+
+<div id="definicion-6-2">
+<Aside type="tip" title="Definición 6.2">
+Una categoría es llamada *cartesiana cerrada* cuando tiene todos los productos finitos 
+y exponenciales.
+</Aside>
+</div>
+
+
+
+### Álgebras Booleanas
+Un *álgebra Booleana* es un conjunto parcialmente ordenado $B$ equipado con dos elementos 
+distinguidos $0$ y $1$, dos operaciones binarias $a or b$ de "join" y $a and b$ de "meet"
+y una operación unaria $not b$ de "complementación". Se requiere que satisfagan las 
+siguientes condiciones 
+
+```typst 
+#table(
+  stroke: none,
+  columns: 1,
+  align: center,
+  $0 lt.eq a$,
+  $a lt.eq 1$,
+  $a lt.eq c " y " b lt.eq c quad "si y sólo si" quad a or b lt.eq c$,
+  $c lt.eq a " y " c lt.eq b quad "si y sólo si" quad c lt.eq a and b$,
+  $a lt.eq not b quad "si y sólo si" quad a and b = 0$,
+  $not not a = a.$
+)
+```
+Un caso familiar de álgebra Booleana es $bold(2) = brace.l 0, 1 brace.r$, también pesado
+como los valores de verdad con las operaciones lógicas de disyunción, conjunción y negación
+como las operaciones Booleanas.
+
+### Álgebras de Heyting
+Cualquier álgebra Booleana $B$, pensada como una categoría de conjunto parcialmente 
+ordenado tiene productos finitos $1$ y $a and b$. También podemos definir la exponencial 
+en $B$ por 
+
+$ b^a = (not a or b) $
+
+que también escribimos como $a arrow.double b$. La flecha evaluación es 
+
+$ (a arrow.double b) and a lt.eq b $
+
+Este ejemplo sugiere generalizar la noción de álgebra Booleana a la de conjunto
+parcialmente ordenado cartesiano cerrado. Consideremos primero la noción más fuerte de 
+álgebra de Heyting
+
+<div id="definicion-68">
+<Aside type="tip" title="Definción 6.8">
+Un álgebra de Heyting es un conjunto parcialmente ordenado con 
+
+1. Meets finitos: $1$ y $p and q$.
+2. Joins finitos: $0$ y $p or q$.
+3. Exponenciales: para cada $a$ y $b$ un elemento $a arrow.double b$ tal que 
+    $ a and b lt.eq c quad "si y sólo si" quad a lt.eq b arrow.double c. $
+
+La condición dada sobre la exponencial $a arrow.double b$ es equivalente a la propiedad 
+universal en el caso de conjuntos parcialmente ordenados. 
+Veamos esto más a detalle:
+
+- Supongamos que para cada $a$ y $b$ hay un elemento $a arrow.double b$ tal que 
+    $ a and b lt.eq c quad "si y sólo si" quad a lt.eq b arrow.double c $
+    Notemos que, como $a arrow.double b lt.eq a arrow.double b$, entonces 
+    $(a arrow.double b) and a lt.eq b$. Esta va a ser nuestra flecha evaluación.
+    Ahora, sea $c$ un elemento cualquiera y supongamos que $c and a lt.eq b$, entonces 
+    $c lt.eq a arrow.double b$, de modo que $c and a lt.eq (a arrow.double b) and a$, pero 
+    $(a arrow.double b) and a lt.eq b$, de modo que obtenemos nuevamente $c and a lt.eq b$.
+    Así, tenemos que, en efecto, la condición implica que $a arrow.double b$ cumple la 
+    propiedad universal de la exponencial.
+- Supongamos que para cada $a$ y $b$, $a arrow.double b$ cumple la propiedad universal de 
+    la exponencial, es decir, tenemos un morfismo evaluación 
+    $(a arrow.double b) and a lt.eq b$ y siempre que $c and a lt.eq b$, tenemos que 
+    $c lt.eq a arrow.double b$. Lo único que necesitamos probar es que si 
+    $c lt.eq a arrow.double b$ entonces también $c and a lt.eq b$. Para esto basta notar 
+    que, como $c lt.eq a arrow.double b$ entnoces $c and a lt.eq (a arrow.double b) and a$,
+    de modo que $c and a lt.eq b$.
+</Aside>
+</div>
+
+Ahora, observemos que toda álgebra de Heyting es una *retícula distributiva*, es decir,
+para cada $a, b$ y $c$ se tiene que 
+
+$ (a or b) and c = (a and c) or (b and c) $
+
+En efecto, observemos que, para cada $z$ 
+
+```typst 
+$
+  (a or b) and c lt.eq z quad & "sii" quad a or b lt.eq c arrow.double z \
+                              & "sii" quad a lt.eq c arrow.double z " y " b lt.eq c arrow.double c \
+                              & "sii" quad a and c lt.eq z " y " b and c lt.eq z \
+                              & "sii" quad (a and c) or (b and c) lt.eq z
+$
+```
+
+Tomando $z = (a or b) and c$ y leyendo de arriba a abajo obtenemos una dirección y, Tomando
+$z = (a and c) or (b and c)$ y leyendo de abajo a arriba obtenemos la otra dirección.
+
+<div id="observacion-6-9">
+<Aside type="note" title="Observación 6.9">
+La distributividad anterior es un caso especial de un hecho general que sucede en 
+cualquier categoría con co-productos: los productos necesariamente distribuyen sobre los 
+co-productos.
+$ (A + B) times C tilde.equiv (A times C) + (B times C) $
+</Aside>
+</div>
+
+## Cálculo proposicional
+
+Demos un sistema de reglas para el cálculo proposicional intuicionista (CPI). Esto lo 
+haremos en términos de deducciones $p tack.r q$ entre fórmulas $p$ y $q$:
+
+1. $tack.r$ es reflexiva y transitiva.
+2. $p tack.r top$.
+3. $bot tack.r p$.
+4. $p tack.r q$ y $p tack.r r$ si y sólo si $p tack.r q and r$.
+5. $p tack.r r$ y $q tack.r r$ si y sólo si $p or q tack.r r$.
+6. $p and q tack.r r$ si y sólo si $p tack.r q arrow.double r$.
+
+Este es un sistema completo para PCI, equivalente a la presentación más usual. Para 
+comparar, novemos que tenemos una deducción de "evaluación" por reflexividad y 6:
+
+```typst 
+$ 
+  p & arrow.double q tack.r p arrow.double q \
+  (p arrow.double q) & and p tack.r q
+$
+```
+Así, tenemos la regla "modus ponens" por 4 y transitividad:
+
+```typst 
+$
+  top & tack.r p arrow.double q quad "y" quad top tack.r p \
+  top & tack.r (p arrow.double q) and p \
+  top & tack.r q
+$
+```
+También, por 4, hay "proyecciones":
+
+```typst 
+$
+  p and q & tack.r p and q \
+  p and q & tack.r p quad ("respectivamente " q)
+$
+```
+
+de lo que se sigue que que $p tack.l tack.r top and p$. Así, obtenemos uno de los axiomas 
+usuales para productos:
+
+```typst 
+$
+  p and q & tack.r p \
+  top and (p and q) & tack.r p \
+  top & tack.r (p and q) arrow.double p
+$
+```
+
+Ahora derivemos los axiomas usuales para $arrow.double$, a saber:
+
+1. $p arrow.double p$,
+2. $p arrow.double (q arrow.double p)$,
+3. $(p arrow.double (q arrow.double r)) arrow.double ((p arrow.double q) arrow.double (p arrow.double r))$.
+
+Los primeros dos son casi inmediatos:
+
+```typst 
+$
+  p & tack.r p \
+  top and p & tack.r p \
+  top tack.r p arrow.double p
+$
+```
+```typst 
+$
+  p and q & tack.r p \
+  p & tack.r q arrow.double p \
+  top and p & tack.r q arrow.double p \
+  top & tack.r p arrow.double (q arrow.double p)
+$
+```
+
+para el tercero, usamos el hecho de que $arrow.double$ distribuye sobe $and$ por la derecha
+
+$ a arrow.double (b and c) tack.l tack.r (a arrow.double b) and (a arrow.double c) $
+
+Esto es un caso especial de 
+
+$ (B times C)^A tilde.equiv B^A times C^A $
+
+También usamos el siguiente hecho 
+
+$ a tack.r b quad "implica" quad p arrow.double a tack.r p arrow.double b $
+
+Entonces tenemos 
+
+```typst 
+$
+  (q arrow.double r) and q & tack.r r \
+  p arrow.double ((q arrow.double r) and q) & tack.r p arrow.double r \
+  (p arrow.double (q arrow.double r)) and (p arrow.double q) & tack.r p arrow.double r \
+  (p arrow.double (q arrow.double r)) & tack.r (p arrow.double q) arrow.double (p arrow.double r) \
+  top & tack.r (p arrow.double (q arrow.double r)) arrow.double ((p arrow.double q) and (p arrow.double r)).
+$
+```
+El fragmento "positivo" del CPI, que involucra sólo las operaciones lógicas 
+
+$ top, and, arrow.double $
+
+corresponde a la noción de conjunto parcialmente ordenado cartesiano cerrado. Después 
+añadimos $bot$ y la disyunción $p or q$ en el lado lógico y joins finitos en el lado 
+algebraico para llegar a la correspondencia entre CPI y las álgebras de Heyting. 
+La correspondencia exacta está dada por construcciones mutuamente inversas entre 
+álgebras de Heyting y CPIs. 
+
+Dado un CPI $cal(L)$ consistente de fórmulas proposicionales $p, q, r, dots$ sobre un 
+conjunto de variables $x, y, z, dots$ junto con las reglas de inferencias que mencionamos 
+antes y, tal vez algunas fórmulas distinguidas $a, b, c, dots$ como axiomas, podemos 
+construir a partir de $cal(L)$ un álgebra de Heyting $"HA"(cal(L))$, llamada el álgebra 
+de *Lindenbaum-Tarski*, que consiste de clases de equivalencias $[p]$ de fórmulas $p$, 
+donde 
+
+$ [p] = [q] quad "si y sólo si" quad p tack.l tack.r q $
+
+El orden en $"HA"(cal(L))$ está dado por 
+
+$ [p] lt.eq [q] quad "si y sólo si" quad p tack.r q $
+
+Esta relación está bien definida sobre clases de equivalencia, en el sentido de que si 
+$p tack.r q$ y $[p] = [p']$ y $[q] = [q']$, entonces $p' tack.r q'$. Las operaciones en 
+$"HA"(cal(L))$ se introducen en la manera esperada 
+
+```typst 
+$
+  1 & = [top] \
+  0 & = [bot] \
+  [p] and [q] & = [p and q] \
+  [p] or [q] & = [p or q] \
+  [p] arrow.double [q] & = [p arrow.double q]
+$
+```
+
+De nuevo, podemos ver fácilmente que estas operaciones están bien definidas sobre clases 
+de equivalencia y que satisfacen las leyes de las álgebras de Heyting.
+
+<div id="lema-6-13">
+<Aside type="tip" title="Lema 6.13">
+
+Notemos que, como $[p] = [q]$ si y sólo si $p tack.l tack.r q$, el álgebra de Heyting 
+$"HA(cal(L))"$ tiene la propiedad de que una fórmula $p$ puede ser demostrada 
+$top tack.r p$ si y sólo si $[p] = 1$. 
+
+</Aside>
+</div>
+
+Ahora, definamos una *interpretación* $M$ de $cal(L)$ en un álgebra de Heyting $H$ como 
+una asignación de las variables proposicionales básicas $x, y, z, dots$ a los elementos 
+de $H$, que escribiremos como $[[x]], [[y]], [[z]], dots$. Una interpretación se extiende 
+a todas las fórmulas por recursión de forma evidente, es decir, 
+$[[p and q]] = [[p]] and [[q]]$, etc. Una interpretación es llamada un *modelo* de 
+$cal(L)$ si para cada teorema $top tack.r p$, se tiene que $[[p]] = 1$. Observemos que 
+hay una interpretación canónica de $cal(L)$ en $"HA"(cal(L))$ dada por $[[x]] = [x]$, se 
+puede mostrar por inducción que, para cada fórmula $p$, $[[p]] = [p]$. Ahora, 
+por el lema [6.13](#lema-6-13) se tiene que esta interpretación es de hecho un modelo de
+$cal(L)$ y es "genérica", en el sentido de que valida únicamente las fórmulas que se pueden
+probar. Por tanto, tenemos el siguiente teorema de completes para IPC.
+
+<div id="proposicion-6-14">
+<Aside type="tip" title="Proposición 6.14">
+El cálculo proposicional intuicionista es completo con respecto a los modelos en las 
+álgebras de Heyting. 
+
+*Demostración* Supongamos que una fórmula $p$ es verdadera en todos los modelos dentro de 
+todas las álgebras de Heyting. Entonces, en particular, lo es en $"HA"(cal(L))$. Así, 
+$1 = [[p]] = [p]$ en $"HA"(cal(L))$ y, por tanto, $top tack.r p$.
+</Aside>
+</div>
+
+En resumen, una instancia particular $cal(L)$ del CPI puede pensarse como una manera de 
+especificar y pensar sobre un álgebra de Heyting particular $"HA(cal(L))"$.
+
+## Igualdad definicional de CCCs
+
+La siguiente descripción de las CCCs es términos de operaciones y ecuaciones en una 
+categoría es útil.
+
+<div id="proposicion-6-15">
+<Aside type="tip" title="Proposicíon 6.15">
+Una categoría $bold(C)$ es una CCC si y sólo si tiene la siguiente estructura:
+
+- Un elemento distinguido $1$, tal que para cada objeto $C$ hay una flecha 
+  $ !_C : C arrow 1 $
+  de tal manera que para cada flecha $f : C arrow 1$, 
+  $ f = !_C. $
+
+- Para cada par de objetos $A$ y $B$, hay un objeto $A times B$ y flechas 
+  $ p_1 : A times B arrow A quad "y" quad p_2: A times B arrow B $
+  de tal forma que, para cualquier par de flechas $f : Z arrow A$ y $g : Z arrow B$, hay 
+  una flecha 
+  $ ( f, g ) : z arrow A times B $
+  tal que 
+  ```typst 
+  $
+    p_1 compose (f, g) = f \
+    p_2 compose (f, g) = g \
+    (p_1 compose h, p_2 compose h) = h quad "para cada" quad h: Z arrow A times B.
+  $
+  ```
+- Para cada par de objetos $A$ y $B$ hay un objeto $B^A$ y una flecha 
+  $ epsilon : B^A times A arrow B $
+  de tal manera que para cada flecha $f : Z times A arrow B$, hay una flecha 
+  $ tilde(f) : Z arrow B^A $
+  tal que 
+  $ epsilon compose (tilde(f) times 1_B) = f $
+  y 
+  $ tilde((epsilon compose (g times 1_A))) = g $
+  para cada $g : Z arrow B^A$. Aquí y, más en general, para cada $a : X arrow A$ y 
+  $b : Y arrow B$, escribimos 
+  $ a times b = (a compose p_1, b compose p_2) : X times Y arrow A times B. $
+
+</Aside>
+</div>
+
+## cálculo lambda 
+
+Vimos que las nociones de conjunto parcialmente ordenado cartesiano cerrado con joins 
+finitos (un álgebra de Heyting) y el cálculo proposicional intuicionista son 
+esencialmente lo mismo: 
+$ "HA" tilde "CPI" $
+Estas son dos maneras de describir la misma estructura donde la descripción lógica contiene
+datos superfluos en la elección de una presentación particular. 
+
+Ahora consideramos una correspondencia muy similar entre sistemas de la lógica y 
+categorías que involucran CCCs en general. En efecto, el ejemplo anterior era el caso 
+de conjuntos parcialmente ordenados del caso más general entre CCCs y $lambda$-cálculo:
+$ "CCC" tilde lambda-"cálculo". $
+
+Estas nociones son esencialmente equivalentes en un sentido que ahora esbozamos. Son dos 
+formas de representar la misma idea, la de colección de objetos y funciones con 
+operaciones de emparejamiento, proyección, aplicación y transposición (o "currying").
+
+Primero, recordemos la noción de $lambda$-cálculo tipado. Consiste de 
+
+- Tipos: $A times B$, $A arrow B$, $dots$ (y algunos tipos básicos).
+- Términos: $x, y, z, dots : A$ (variables para cada tipo $A$)
+  $a : A, b : B, dots $ (algunas constantes tipadas)
+  ```typst 
+  $
+    (a, b) : A times B quad (a : A, b : B) \
+    "fst"(c) : A       quad (c : A times B) \
+    "snd"(c) : B       quad (c : A times B) \
+    c a : B             quad (c : A times B, a : A) \
+    lambda x. b : A arrow B quad (x : A, b : B)
+  $
+  ```
+- Ecuaciones que incluyen, al menos todas las instancias de las siguientes:
+  ```typst 
+  $ 
+    "fst"((a,b)) = a \
+    "snd"((a,b)) = b \
+    ("fst"(c), "snd"(c)) = c \
+    (lambda x. b) a = b[a\/x] \
+    lambda x. c x = c quad ("no hay " x " en " c)
+  $
+  ```
+
+Dado un $lambda$-cálculo particular $cal(L)$, la categoría de tipos asociada 
+$bold(C)(cal(L))$ se define como sigue:
+
+- Objetos: los tipos, 
+- Flechas $A arrow B$: clases de equivalencia de términos cerrados $[c]: A arrow B$, 
+  identificados de acuerdo al renombramiento de variables ligadas y 
+  $ [a] = [b] quad "si y sólo si" quad cal(L) tack.r a = b, $
+- Identidades: $1_A = [lambda x. x]$ (donde $x : A$),
+- Composición: $[c] compose [b] = [lambda x. c (b x)]$.
+
+Esta es una categoría bien definida que tiene productos finitos. Es una cuestión simple 
+añadir un objeto terminal. Ahora usemos la caracterización que dimos de las CCCs para 
+mostrar que es cartesiana cerrada. Dados dos objetos $A$ y $B$ proponemos $B^A = A arrow B$
+y, como la flecha evaluación, tomamos la clase de equivalencia 
+
+$ epsilon = lambda z. "fst" (z) "snd"(z) : B^A times A arrow B quad (z : Z)$ 
+
+Entonces para cualquier flecha $f : Z times A arrow B$ tomamos como su transposición a 
+
+$ tilde(f) = lambda z. lambda x. f(z, x) : Z arrow B^A quad (z : Z, x : A). $
+
+Ahora
+
+```typst 
+$
+  epsilon compose (tilde(f) times 1_A) & = (lambda z. "fst"(z) "snd"(z)) compose [(lambda y. lambda x. f(y,x)) times lambda u. u] \
+  & = lambda v . (lambda z . "fst"(z) "snd" (z)) [(lambda y. lambda x. f(y,x)) times lambda u.u]v \
+  & = lambda v . (lambda z "fst" (z) "snd" (z)) [lambda w. ((lambda y. lambda x. f(y,x)) "fst"(w), (lambda u. u) "snd" (w))] v \
+  & = lambda v . (lambda z. "fst" (z) "snd" (z)) [(lambda x. f("fst" (v), x), "snd" (v))] \
+  & = lambda v. (lambda x. f("fst" (v), x)) "snd" (v) \
+  & = lambda v. f ("fst" (v), "snd" (v)) \
+  & = lambda v. f v \
+  & = f
+$
+```
+
+De manera similar, $tilde((epsilon compose (g times 1_A))) = g$.
+
+Llamemos a un conjunto de tipos básicos y términos, junto con un conjunto de ecuaciones 
+entre términos una *teoría* en el $lambda$-cálculo. Dada una teoría de este tipo $cal(L)$,
+la categoría cartesiana cerrada $bold(C)(cal(L))$ que se construye del $lambda$-cálculo 
+sobre $cal(L)$ es la CCC presentada por sus generadores y relaciones. 
+
+<div id="defincion-6-16">
+<Aside type="tip" title="Definición 6.16">
+Un *modelo* de $cal(L)$ en $bold(C)$ es una asignación de tipos y términos de $cal(L)$
+a objetos y flechas de $bold(C)$:
+Donde el tipo $X$ corresponde al objeto $[[X]]$ y la flecha $b : A arrow B$ corresponde 
+a $[[b]] : [[A]] arrow [[B]]$.
+Esta asignación se extiende a todos los tipos y términos de tal manera que las operaciones 
+del $lambda$-cálculo se corresponden con las de la CCC:
+$ [[A times B]] = [[A]] times [[B]]\\ [[(f,g)]] = ([[f]], [[g]])\\ "etc" $
+Finalmente, se requiere que todas las ecuaciones de $cal(L)$ se satisfagan, en el sentido
+de que 
+$ 
+  cal(L) tack.r [a] = [b] : A arrow B quad "implica" quad [[a]] = [[b]] : [[A]] arrow [[B] 
+$
+</Aside>
+</div>
+
+<div id="proposicion-6-17">
+<Aside type="tip" title="Proposición 6.17">
+Para cualquier teoría $cal(L)$ en el $lambda$-cálculo, se tiene: 
+1. Para cualesquiera términos $a$ y $b$, $cal(L) tack.r a = b$ si y sólo si pata todo 
+  modelo $M$ en CCCs, $[[a]]_M = [[b]]_M$.
+2. Para cualquier tipo $A$, hay una $t : A$ cerrada si y sólo si para todos los modelos 
+    $M$ en CCCs, hay una flecha $1 arrow [[A]]_M$.
+</Aside>
+</div>
+
+Esta proposición dice que el $lambda$-cálculo es *deductivamente consistente* y *completo*
+para modelos en CCCs. 
+
+Finalmente, observemos que las nociones de $lambda$-cálculo y CCC son esencialmente 
+equivalentes. Dada una CCC $bold(C)$, definimos $cal(L)(bold(C))$ como:
+
+- Tipos básicos: los objetos de $bold(C)$.
+- Términos básicos: $a : A arrow B$ para cada $a : A arrow B$ en $bold(C)$.
+- Ecuaciones: muchas ecuaciones identificando las operaciones del $lambda$-cálculo con la 
+  estructura correspondiente en $bold(C)$, por ejemplo:
+  ```typst 
+  $
+    lambda x. "fst"(x) = p_1 \
+    lambda x. "snd"(x) = p_2 \
+    lambda y. f(x, y) = tilde(f) (x) \
+    g (f (x)) = (g compose f) (x) \
+    lambda y. y = 1_A
+  $
+  ```
+
+  Esto es suficiente para asegurarnos de que hay un isomorfismo de categorías 
+
+  $ bold(C)(cal(L)(bold(C))) tilde.equiv bold(C). $

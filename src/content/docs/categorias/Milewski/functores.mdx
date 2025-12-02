@@ -1,0 +1,146 @@
+---
+title: Functores 
+sidebar:
+  order: 3
+---
+
+Dadas dos categorías $bold(C)$ y $bold(D)$, un functor mapea objetos de $bold(C)$ en 
+objetos de $bold(D)$ y morfismos de $bold(C)$ en morfismos de $bold(D)$.
+Si $f$ es un morfismo en $bold(C)$ que conecta un objeto $a$ a un objeto $b$,
+
+`f :: a -> b`
+
+la imagen de $f$ en $bold(D)$, $F space f$ conectará la imagen de $a$ con la imagen de $b$
+
+`F f :: F a -> F b`
+
+y también, si $h$ es la composición de $f$ con $g$ en $bold(C)$
+
+`h = g . f`
+
+entonces F mapea a $h$ a la composición de las imágenes de $f$ y $g$ en $bold(D)$:
+
+ `F h = F g . F f`
+
+Por último, los morfismos identidad de $bold(C)$ se deben mapear a los morfismos identidad 
+en $bold(D)$
+
+`F id_a = id_(F a)`
+
+
+
+## Functores en la programación
+
+Tenemos nuestra categoría de tipos y funciones. Podemos hablar de functores que mapean 
+esta categoría a sí misma, este tipo de functores son llamados endofunctores.
+
+### El functor `Maybe`
+
+La definición de `Maybe` es un mapeo  de un tipo `a` al tipo `Maybe a`:
+
+`data Maybe a = Nothing | Just a`
+
+Aquí hay un sutileza que hay que remarcar. Maybe no es un tipo, es un constructor de tipos.
+Le tenemos que dar un tipo como argumento, para volverlo un tipo. `Maybe` sin un argumento 
+representa una función entre tipos. Pero, ¿podemos hacer de `Maybe` un functor?
+Un functor no sólo mapea objetos, sino también morfismos. Para cualquier función de 
+`a` a `b`:
+
+`f :: a -> b`
+
+queremos producir una función de `Maybe a` a `Maybe b`. Para definir una función de este 
+estilo necesitamos considerar dos casos, que corresponden a los dos constructores de 
+`Maybe`. El caso `Nothing` es fácil, sólo regresamos `Nothing` y, si el argumento es 
+`Just`, aplicamos la función `f` su contenido, de modo que la imagen de `f` bajo 
+`Maybe` es la función:
+
+```code :language haskell :eval false 
+f' :: Maybe a -> Maybe b 
+f' Nothing = Nothing 
+f' (Just x) = Just (f x)
+```
+
+En Haskell, implementamos la parte de morfismos de un functor con una función de orden 
+mayor llamada `fmap`. En el caso de `Maybe` tiene el siguiente tipo:
+
+`fmap :: (a -> b) -> (Maybe a -> Maybe b)`
+
+Frecuentemente diremos que `fmap` eleva una función. La función elevada actúa sobre 
+valores de `Maybe`. 
+
+Así es como implementamos `fmap` para `Maybe`:
+
+```code :language haskell :eval false 
+fmap :: (a -> b) -> (Maybe a -> Maybe b)
+fmap _ Nothing = Nothing 
+fmap f (Just x) = Just (f x)
+```
+### Typeclasses
+Una typeclass define una familia de tipos que soportan una interfaz común. Por ejemplo, 
+la clase de objetos que soportan igualdad se define como sigue:
+
+```code :language haskell :eval false 
+class Eq a where 
+  (==) :: a -> a -> Bool
+```
+Esta definición dice que el tipo `a` es de la clase `Eq` si soporta el operador 
+`(==)` que toma dos argumentos de tipo `a` y regresa un `Bool`.
+
+Si queremos decirle a Haskell que un tipo particular es `Eq`, tenemos que declararlo como 
+una instancia de esta clase y proveer una implementación de `(==)`
+
+## El functor lista
+
+Cualquier tipo parametrizado por otro es un candidato para se un functor. Los 
+contenedores genéricos están parametrizados por el tipo de los elementos que guardan, 
+así que veamos un contenedor básico, la lista:
+
+`data List a = Nil | Cons a (List a)`
+
+Tenemos el constructor para tipos `List`, que es un mapeo de cualquier tipo al tipo 
+`List a`. Para mostrar que `List` es un functor, tenemos que definir el levantamiento 
+de funciones: Dada una función `a -> b`, definimos una función 
+`List a -> List b`:
+
+`fmap :: (a -> b) -> (List a -> List b)`
+
+Una función que actúa sobre una `List` debe considerar dos casos, que corresponden a los 
+dos constructores. El caso `Nil` es trivial, basta regresar `Nil`. El caso `Cons` es un 
+poco más delicado, pues involucra algo de recursión.
+
+`fmap f (Cons x t) = Cons ( x t) (fmap f t)`
+
+Juntándolo todo, tenemos la declaración de instancia para el functor `List`:
+
+```code :language haskell :eval false 
+instance Functor List where 
+  fmap _ Nil = Nil 
+  fmap f (Cons x t) = Cons (f x) (fmap f t)
+```
+
+## El functor Reader 
+
+En Haskell, un tipo función se construye usando el constructor `(->)` que toma dos tipos:
+el tipo argumento y el tipo resultante. Ya lo hemos visto en forma in-fija `a -> b`, pero 
+también se puede usar como prefijo cuando la envolvemos entre paréntesis:
+
+`(->) a b`
+
+Así como las funciones regulares, los tipos funciones de más de un argumento se pueden 
+aplicar parcialmente. Así, cuando damos sólo un tipo a la flecha, todavía espera otro,
+así es como `(->) a` es un constructor de tipos. Para mostrar que este constructor de 
+tipos es en realidad un functor, hay que mostrar que podemos levantar las funciones. Así, 
+buscamos definir 
+
+`fmap :: (b -> c) -> (a -> b) -> (a -> c)`
+
+Es decir, dada una función `f :: b -> c` y una función `g :: a -> b`, queremos construir 
+una función `a -> c`. No hace falta romperse la cabeza, sólo hay que componer. Así, 
+nuestra implementación de `fmap` es: 
+
+```code :language haskell :eval false 
+instance Functor (-> a) where 
+  fmap f g = f . g
+```
+
+Este functor es conocido como el functor Reader.

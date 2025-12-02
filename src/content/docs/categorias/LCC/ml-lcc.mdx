@@ -1,0 +1,151 @@
+---
+title: De MLL a LCC
+sidebar:
+  order: 4
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Dada una teoría ML $bold(M)$, definimos una categoría $C(bold(M))$ cuyos objetos son todos 
+los tipos cerrados de $bold(M)$ (tipos que no dependen de variables libres) y los 
+morfismos $A arrow B$ son los términos cerrados de tipo $A arrow B$ (De modo que 
+$f : A arrow B$ en $C(bold(M)$ significa que $f : A arrow B$ en $bold(M)$).
+
+<div id="proposicion-3-1">
+<Aside type="tip" title="Proposición 3.1">
+$C(bold(M))$ es cartesiana cerrada.
+
+*Demostración* Podemos verificar que $C(bold(M))$ es cartesiana cerrada con límites finitos 
+de forma directa. 
+
+**Axiomas de categorías**: 
+
+Para un objeto $A$, $id_A : A arrow A$ es $lambda (x : A).x$.
+Dada $f : A arrow B$, $g : B arrow C$, $g compose f : A arrow C$ es 
+$lambda (x : A). g(f(x))$.
+
+```typst 
+$
+f compose id_A & = f compose (lambda (x : A). x) = lambda (y: A). f((lambda (x: A).x)(y))\
+               & = lambda (y : A). f(y)\
+               & = f
+$
+```
+De manera similar, $id_B compose f = f$, $h compose (g compose f) = (h compose g) compose f.
+
+**Productos** 
+
+$1$ es el objeto terminal de $C(bold(M))$. Dado un objeto $A$, hay un morfismo $A arrow 1$,
+$lambda (x : A). star$.
+
+<div id="lema">
+<Aside type="note" title="Lema">
+Para cualquier tipo cerrado $A$, si $t$ es un término cerrado de tipo $A arrow 1$, entonces 
+$t = lambda (x : A). star$.
+
+*Demostración*
+```typst 
+$
+t &= lambda (x : A). t(x) \
+  &= lambda (x : A). star
+$
+```
+</Aside>
+</div>
+
+Para objetos $A$ y $B$, $A times B$ (en $C(bold(M))$) está dado por $A times B$ 
+(en $bold(M)$), el emparejamiento $(,)$ y las proyecciones $pi, pi'$ están dadas por 
+"sí mismas". Las ecuaciones requeridas se siguen fácilmente de ($Sigma$ red) y 
+($Sigma$ exp).
+
+**Pullbacks** 
+
+Dadas $t : A arrow B$ y $s : C arrow B$, el pullback $P$ de $s$ a lo largo 
+de $t$ 
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $P$),
+  node((0, 1), $A$),
+  node((1, 0), $C$),
+  node((1, 1), $B$),
+  arr($P$, $A$, $p$),
+  arr($P$, $C$, $q$),
+  arr($C$, $B$, $s$),
+  arr($A$, $B$, $t$)
+)
+```
+está dado por $Sigma_((x : A)) Sigma_((y : C)) I(t(x), s(x))$ (o, lo que es lo mismo, 
+$Sigma_((x : A)) Sigma_((y : C)) t(x) attach(=, br: B) s(y)$), con las proyecciones 
+evidentes a $A$ y $C$: $p$ es $pi$ y $q$ es $pi compose pi'$.
+
+Veamos que esto es cierto. Sean $f : X arrow A$ y $g : X arrow C$ tales que 
+$t compose f = s compose g$, notemos que hay un término 
+
+$ rho(x) : t(f(x)) attach(=, br: B) s(g(x)) $
+
+a saber, $r(t(f(x)))$. Definamos $h : X arrow P$ por 
+$lambda (x : X). (f(x), (g(x), rho(x)))$. Claramente $p compose h = f$ y $q compose h = g$ 
+y, usando la ($I$ regla) para ver que $rho(x)$ es el único término posible de tipo 
+$t(f(x)) attach(=, br: B) s(g(x))$, $h$ es única con esta propiedad.
+
+
+**Equalizadores**
+
+Dados $s, t : A arrow B$, el equalizador de $s$ y $t$ está dado por 
+$Sigma_((x : A)) s(x) attach(=, br: B) t(x)$, la inclusión está dada por la proyección 
+(que sea un monomorfismo se sigue de la $I$ regla).
+
+**Exponentes**
+
+$B^A$ definido como $A arrow B$ hace a $C(bold(M))$ cartesiana cerrada.
+
+Dada $t : A times C arrow B$, definimos 
+$hat(t) = lambda (y : C). lambda (x : A). t((x, y)) : C arrow B^A$. Dada 
+$s : C arrow B^A$, definimos 
+$tilde(s) = lambda (s: A times B) s(pi'(z)) (pi(z)) : A times C arrow B$. 
+Estas operaciones son inversas la una de la otra. Notemos que esta es la correspondencia
+usual, por ejemplo: $"ev": A times B ^A arrow B$ es simplemente 
+$lambda (z : A times B^A) pi'(z) (pi(z))$, de modo que $"ev"((a, f)) = f(a)$.
+
+</Aside>
+</div>
+
+<div id="teorema-3-2">
+<Aside type="tip" title="Teorema 3.2">
+$C(bold(M))$ es localmente cartesiana cerrada.
+
+*Demostración* Para ver que $C(bold(M))$ es localmente cartesiana cerrada, debemos 
+verificar que las categorías de rebanada $C(bold(M))\\/A$ son cartesianas cerradas o, 
+de forma equivalente, que $C(bold(M))$ es una hiper-doctrina. 
+
+<div id="definicion-3-2-1">
+<Aside type="note" title="Definición 3.2.1">
+$P(bold(M))$ es la categoría $C(bold(M))$-indizada definida por:
+
+1. Para un objeto $A$ de $C(bold(M))$, $P(bold(M))(A)$ es la categoría cuyos objetos son 
+   tipos $B[x]$ que sólo dependen de $x : A$ y cuyos morfismos son términos 
+   $t[x] : B[x] arrow C[x]$ que sólo dependen de $x : A$.
+
+2. Para un término $f : B arrow A$ (es decir, un morfismo $f : B arrow A$ en $C(bold(M))$),
+   $f^star$ se define por substitución: $e[x] mapsto e[f(y)]$, $y : B$ para una expresión 
+   $e$.
+</Aside>
+</div>
+
+<div id="lema-3-2-2">
+<Aside type="note" title="Lema 3.2.2">
+Para cualquier tipo cerrado $A$, $P(bold(M))(A)$ es cartesiana cerrada.
+
+*Demostración* La demostración de este hecho es exactamente la prueba de que $C(bold(M))$
+es cartesiana cerrada. Sólo hay que saber que los objetos son términos cerrados y basta 
+repetir los argumentos con un parámetro $x : A$.
+</Aside>
+</div>
+
+
+
+</Aside>
+</div>

@@ -1,0 +1,489 @@
+--- 
+title: Proposiciones y pruebas 
+sidebar: 
+  order: 3
+---
+
+## Proposiciones como tipos 
+Hay al menos dos maneras de pensar a las proposiciones como tipos. Para la primera, una 
+proposición $p$ representa un cierto tipo de dato, a saber, una especificación del tipo de 
+datos que constituye una prueba. Una prueba de $p$ es simplemente un objeto $t : p$ del 
+tipo correcto. Para la segunda, pensamos esto como un truco, si $p$ es falsa entonces 
+es un tipo vacío y si es verdadera, tiene un elemento $star$. Sea da el caso de que las 
+reglas de la aplicación de funciones y la abstracción nos permiten llevar las cuentas de 
+qué proposiciones están habitadas. Así, construir un elemento $t : P$ nos dice que $p$ 
+es verdadera. 
+
+Estas dos maneras de pensar las proposiciones como tipos difieren en una manera fundamental.
+Desde el punto de vista constructivo, las demostraciones son objetos matemáticos *denotados*
+por expresiones adecuadas en la teoría de tipos. Si lo pensamos como un mero truco, las 
+expresiones no cargan consigo nada interesante. 
+
+En cualquier caso, para expresar una afirmación matemática en la teoría de tipos, 
+necesitamos exhibir un término $p : "Prop"$. Para probar la afirmación, necesitamos exhibir 
+un término $t : p$.
+
+## Trabajando con las proposiciones como tipos 
+En el paradigma de las proposiciones como tipos, los teoremas que sólo involucran $arrow$ 
+pueden demostrarse usando lambda abstracción y aplicación. En Lean, el comando `theorem` 
+introduce un nuevo teorema 
+
+```code :language lean4 :eval true 
+variable {p q : Prop}
+
+theorem t1 : p \to q \to p := 
+  fun hp : p => fun hq : q => hp
+
+#check t1 
+```
+Comparemos esta demostración con la expresión `fun x : \alpha => fun y : \beta => x` de tipo 
+$alpha arrow beta arrow alpha$, donde $alpha$ y $beta$ son tipos de datos. Esto describe 
+la función que toma $x$ y $y$ de tipos $alpha$ y $beta$, respectivamente y regresa $x$.
+La demostración de $t 1$ tiene la misma forma, solo que $p$ y $q$ son de tipo `Prop` en 
+lugar de `Type`. Intuitivamente, nuestra demostración de $p arrow q arrow p$ asume que 
+$p$ y $q$ son verdaderas y usa la primer hipótesis para establecer la conclusión, p es 
+verdadera.
+
+Notemos que el comando `theorem` es realmente una versión de `def`.
+
+Como con las definiciones, el comando `#print` muestra la prueba de un teorema: 
+
+```code :language lean4 :eval true 
+variable {p q : Prop}
+
+theorem t1 : p \to q \to p := 
+  fun hp : p => fun hq : q => hp 
+
+#print t1
+```
+Notemos que las lambda abstracciones $h p : p$ y $h q : q$ pueden verse como suposiciones 
+temporales en la prueba de $t 1$. Lean también permite especificar el tipo del término final 
+$h p$ explícitamente con el enunciado `show`:
+
+```code :language lean4 :eval true 
+variable {p q : Prop}
+
+theorem t1 : p \to q \to p := 
+  fun hp : p => 
+  fun hq : q =>
+  show p from hp
+```
+Como con las definiciones, podemos mover las variables del lado izquierdo de los dos puntos:
+
+```code :language lean4 :eval true 
+variable {p q : Prop}
+
+theorem t1 (hp : p) (hq : q) : p := hp
+
+#print t1
+
+```
+Podemos usar $t 1$ como cualquier otra función: 
+
+```code :language lean4 :eval true 
+variable {p q : Prop}
+
+theorem t1 (hp : p) (hq : q) : p := hp
+
+axiom hp : p 
+
+theorem t2 : q \to p := t1 hp
+```
+
+La declaración `axiom` postula la existencia de un elemento de un tipo dado y puede 
+comprometer la consistencia lógica. Por ejemplo, podemos hacer: 
+
+```code :language lean4 :eval true 
+axiom unsound : False 
+
+theorem ex : 1 = 0 := 
+  False.elim unsound
+```
+
+Recordemos aquí que el principio de eliminación (inducción) para el tipo vacío 
+(es decir, `False`) nos dice que para cada familia de tipos $P$ indizada por 
+$x : emptyset$ (es decir, `False`), existe una función
+
+$ "ind" _emptyset : Pi_((x : emptyset)) P(x), $
+
+de modo que, si tomamos a $P$ como una familia constante $A$, obtenemos un elemento 
+
+$ "ex-falso" := "ind" _emptyset : emptyset arrow A.$
+
+Así, cuando escribimos `False.elim` en Lean, no estamos haciendo más que referirnos a la 
+función $"ind" _emptyset$. Para más información se puede consultar 
+[tipos inductivos](/tipos/rijke/inductivo#definicion-4-3-1)
+
+## Conjunción 
+La expresión `And.intro h1 h2` construye una prueba de `p \land q` usando pruebas `h1 : p`
+y `h2 : q`. Observemos que `And.intro` no es más que el principio de introducción para 
+el tipo producto no dependiente (o $Sigma$-tipo no dependiente).
+En pocas palabras, este principio nos dice que si tenemos tipos $A$ y $B$ y términos $a : A$ 
+y $b : B$, podemos introducir el elemento $(a, b) : A times B$. Se puede aprender más sobre 
+el tema aquí [tipos inductivos](/tipos/rijke/inductivo#definicion-4-6-1)
+
+En el siguiente ejemplo, usamos `And.intro` para crear una prueba de 
+$p arrow q arrow p and q$.
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (hp : p) (hq : q) : p \land q := And.intro hp hq
+
+#check fun (hp : p) (hq : q) => And.intro hp hq
+```
+
+El comando `example` se usa para enunciar un teorema sin darle nombre ni guardarlo 
+permanentemente en el contexto. Esencialmente, sólo verifica que el término dado tenga 
+el tipo adecuado.
+
+La expresión `And.left h` crea una prueba de $p$ a partir de una prueba $h: p and q$. 
+Similarmente, `And.right h` crea una prueba de $q$ a partir de una prueba $h : p and q$.
+Estas son conocidas como las reglas de eliminación izquierda y derecha, que no son más que 
+las funciones de proyección [tipos inductivos](/tipos/rijke/inductivo#definicion-4-6-2).
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \land q) : p := And.left h 
+example (h : p \land q) : q := And.right h
+```
+Ahora podemos probar $p and q arrow q and p$ con el siguiente término:
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \land q) : q \land p :=
+  And.intro (And.right h) (And.left h)
+```
+Notemos que la introducción y eliminación de la conjunción son muy similares a las 
+operaciones de emparejamiento y proyección de los productos cartesianos. En realidad son 
+lo mismo, sólo que la conjunción actúa únicamente sobre proposiciones y el producto 
+sobre tipos (no proposiciones). Esta distinción se hace cumplir en Lean.
+La similitud entre $and$ y $times$ es otra instancia del isomorfismo de Curry-Howard.
+La demostración que acabamos de construir es similar a la función que intercambia las 
+entradas de una pareja ordenada.
+
+Veremos más adelante que ciertos tipos en Lean son *estructuras*, es decir, su tipo está 
+definido con un único *constructor* canónico, que construye un elemento del tipo a partir 
+de una sucesión de argumentos adecuados. Para cada `p q : Prop`, `p \land q` es un ejemplo:
+la forma canónica de construir un elemento es aplicar `And.intro` a argumentos adecuados 
+`hp : p` y `hq : q`. Lean nos permite usar la notación de constructor anónimo 
+`\langle arg1, arg2, ... \rangle` en situaciones como estas, cuando el tipo relevante es 
+un tipo inductivo y se puede inferir del contexto. En particular, podemos escribir 
+`\langle hp, hq \rangle` en lugar de `And.intro hp hq`:
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+variable (hp : p) (hq : q)
+
+#check (\langle hp, hq \rangle : p \land q)
+```
+Lean nos da una herramienta sintáctica útil. Dada una expresión $e$ de un tipo inductivo 
+`Foo`, la notación `e.bar` es una abreviación para `Foo.bar e`. Esto da una forma conveniente
+de acceder a funciones sin abrir un espacio de nombres. Las siguientes expresiones 
+significan lo mismo: 
+
+```code :language lean4 :eval true 
+variable (xs : List Nat)
+
+#check List.length xs 
+
+#check xs.length
+```
+Como resultado, dada `h: p \land q`, podemos escribir `h.left` en lugar de `And.left h` y 
+`h.right` en lugar de `And.right h`. Así, nuestra prueba queda como: 
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \land q) : q \land p := 
+  \langle h.right, h.left \rangle
+```
+## Disyunción 
+
+La expresión `Or.intro_left q hp` crea una prueba de `p \lor q` a partir de una prueba de 
+`hp : p`. Similarmente, `Or.intro_right p hq` crea una prueba de `p \lor q` a partir de una 
+prueba de `hq : q`. Estas son las reglas de introducción izquierda y derecha.
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (hp : p) : p \lor q := Or.intro_left q hp 
+example (hq : q) : p \lor q := Or.intro_right p hq
+```
+
+La regla de eliminación para la disyunción es un poco más complicada. La idea es que podemos
+probar $r$ a partir de $p or q$ mostrando que $r$ se sigue de $p$ y $r$ se sigue de $q$, es 
+decir, es una prueba por casos. 
+Notemos que esto no es más que el principio de inducción para co-productos (no dependientes)
+que dice que, dada una familia de tipos $P$ indizada por $z : A + B$, existe un término 
+$ "ind"_+ : (Pi_((x : A)) P("inl"(x))) arrow (Pi_((y : B)) P("inr"(y)) arrow Pi_((z : A + B)) P(z)) $
+Si tomamos a $P$ como la familia constante $r$, a $A$ y $B$ como $p$ y $q$ y a `+` lo 
+escribimos como `\lor`, obtenemos un término 
+$ "ind"_+ : (p arrow r) arrow ((q arrow r) arrow (p \lor q arrow r)) $
+
+Si ahora llamamos $h p r$ y $h q r$ a las pruebas de $p arrow r$ y $q arrow r$, 
+respectivamente, entonces
+$ "ind" _+ (h p r, h q r) : p \lor q arrow r, $
+
+es decir, obtenemos una prueba de $p \lor q arrow r$ y, si $h p q$ es una prueba de $p or q$,
+entonces $"ind"_+ (h p r, h q r, h p q) : r$ es una prueba de $r$. Podemos ver más acerca de 
+esto [aquí](/tipos/rijke/inductivo#definicion-4-4-1).
+
+Volviendo a Lean, en la expresión `Or.elim hpq hpr hqr`, `Or.elim` toma tres argumentos, 
+`hpq: p \lor q`, `hpr: p \to r` y `hqr : q \to r` y produce un prueba de `r`. En el 
+siguiente ejemplo usamos `Or.elim` para probar que `p \lor q \to q \lor p`.
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \lor q) : q \lor p := 
+  let proofpr (hp : p) := Or.intro_right q hp 
+  let proofqr (hq : q) := Or.intro_left p hq 
+  show q \lor p from Or.elim h proofpr proofqr
+```
+O, escrito más anónimamente: 
+
+```code :language lean4 :eval true
+variable (p q : Prop)
+
+example (h : p \lor q) : q \lor p := 
+  Or.elim h 
+    (fun hp : p =>
+      show q \lor p from Or.intro_right q hp)
+    (fun hq : q => 
+      show q \lor p from Or.intro_left p hq)
+```
+En la mayoría de los casos, el primer argumento de `Or.intro_right` y `Or.intro_left` puede 
+ser inferido automáticamente por Lean. Así, lean da `Or.inr` y `Or.inl`. De esta forma, 
+podemos reescribir nuestra prueba como:
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \lor q) : q \lor p := 
+  let proofpr (hp : p) := Or.inr hp 
+  let proofqr (hq : q) := Or.inl hq 
+  show q \lor p from Or.elim h proofpr proofqr
+```
+O, de nuevo, de manera anónima 
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \lor q) : q \lor p := 
+  Or.elim h (fun hp : p => Or.inr hp) (fun hq : q => Or.inl hq)
+```
+Como `Or` tiene dos constructores, no podemos usar notación de constructor anónimo. Pero 
+sí podemos escribir `h.elim` en lugar de `Or.elim h`: 
+
+```code :language lean4 :eval true 
+variable (p q : Prop) 
+
+example (h : p \lor q) : q \lor p := 
+  h.elim (fun hp : p => Or.inr hp) (fun hq : q => Or.inl hq)
+```
+
+## Negación y falsedad 
+
+La negación $not p$ se define como $p arrow "False"$, de modo que obtenemos $not p$ 
+derivando una contradicción a partir de $p$. De forma similar, la expresión `hnp hp` 
+produce una demostración de `False` a partir de `hp : p` y `hnp : \lnot p`.
+Aquí hay un ejemplo: 
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (hpq : p \to q ) (hnq : \lnot q) : \lnot p := 
+  fun hp : p =>
+  show False from hnq (hpq hp)
+```
+`False` tiene una sola regla de eliminación, `False.elim`, que expresa que cualquier cosa 
+se sigue de una contradicción. Esta regla es llamada *ex falso* o el principio de explosión.
+Podemos leer más [aquí](/tipos/rijke/inductivo#definicion-4-3-1)
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (hp : p) (hnp : \lnot p) : q := False.elim (hnp hp) 
+```
+El hecho arbitrario `q`, que se sigue de la falsedad, es un argumento implícito en 
+`False.elim` y se infiere automáticamente. Este patrón de derivar un hecho arbitrario a 
+partir de hipótesis contradictorias es muy común y es representado por `absurd`.
+Por ejemplo: 
+
+```code :language lean4 :eval true 
+variable (p q r : Prop) 
+
+example (hnp : \lnot p) (hq : q) (hqp : q \to p) : r := 
+  absurd (hqp hq) hnp
+```
+Incidentalmente, así como `False` tiene una sola regla de eliminación, `True` tiene una 
+sola regla de introducción, `True.intro : True`. Es decir, `True` es simplemente verdadera 
+y tiene una prueba canónica, `Ture.intro`.
+
+## Equivalencia lógica 
+
+La expresión `Iff.intro h1 h2` produce una prueba de $p arrow.r.l q$ a partir de 
+$h1 : p arrow q$ y $h2 : q arrow p$. La expresión `Iff.mp h` (modus ponens) produce una
+prueba de $p arrow q$ a partir de $h : p arrow.r.l q$. Similarmente `Iff.mpr h` produce 
+una prueba de $q arrow p$ a partir de $h : p arrow.r.l q$. Aquí hay una prueba de 
+$p and q arrow.r.l q and p$:
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+theorem and_swap : p \land q \leftrightarrow q \land p := 
+  Iff.intro 
+    (fun h : p \land q =>
+      show q \land p from And.intro (And.right h) (And.left h))
+    (fun h : q \land p =>
+      show p \land q from And.intro (And.right h) (And.left h))
+
+#check and_swap p q 
+
+variable (h : p \land q)
+example : q \land p := Iff.mp (and_swap p q) h
+```
+Podemos usar la notación de constructor anónimo para construir una prueba de 
+$p arrow.r.l q$ a partir de las dos direcciones, también podemos usar la notación de `.`
+para `mp` y `mpr`.
+
+Notemos que la regla de introducción de $arrow.r.l$ no es más que la regla de introducción 
+de la conjunción y que `mp` y `mpr` son las reglas de eliminación izquierda y derecha.
+
+## Introduciendo metas auxiliares
+
+Otra construcción importante en Lean es `have`, que permite introducir metas auxiliares en 
+una prueba.
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \land q) : q \land p := 
+  have hp : p := h.left 
+  have hq : q := h.right 
+  show q \land p from And.intro hq hp
+
+```
+Internamente, la expresión `have h : p := s; t`produce el término `(fun (h : P) => t) s`.
+En otras palabras, `s` es una prueba de `p` y `t` es una prueba de la conclusión deseada 
+asumiendo `h : p` y las dos se combinan en una lambda abstracción y aplicación.
+
+Lean también soporta una forma estructurada de razonar en reversa a partir de una prueba, 
+que modela el "es suficiente probar que ..." de la matemática usual.
+
+
+```code :language lean4 :eval true 
+variable (p q : Prop)
+
+example (h : p \land q) : q \land p :=
+  have hp : p := h.left 
+  suffices hq : q from And.intro hq hp 
+  show q from And.right h
+```
+Escribir `suffices hq : q` nos deja con dos metas. Primero, debemos mostrar que es 
+suficiente mostrar `q`, probando la meta `q \land p` con la hipótesis adicional `hq : q`.
+Finalmente, debemos probar `q`.
+
+## Lógica clásica
+
+Las reglas de introducción y eliminación que hemos vistos son todas constructivas, es 
+decir, reflejan un entendimiento computacional de los conectivos lógicos basado en la 
+correspondencia de proposiciones como tipos. La lógica clásica añade a esto la ley 
+del tercio excluso, `p \lor \lnot p`. Para usar este principio, tenemos que abrir el 
+espacio de nombres `Classical`.
+
+```code :language lean4 :eval true 
+open Classical 
+
+variable (p : Prop)
+
+#check em p
+```
+intuitivamente, el "O" constructivo es muy fuerte: afirmar `p \lor q` implica saber cual 
+de los dos es el caso. Si `RH` representa la Hipótesis de Riemmann, un matemático clásico 
+está dispuesto a aceptar que `RH \lor \lnot RH`, a pesar de que no podemos afirmar 
+ninguno de los componentes. 
+
+Una consecuencia del tercio excluso es el principio de eliminación de la doble negación:
+
+```code :language lean4 :eval true 
+open Classical 
+
+theorem dne {p : Prop} (h : \lnot \lnot p) : p := 
+  Or.elim (em p)
+    (fun hp : p => hp)
+    (fun hnp : \lnot p => absurd hnp h)  
+```
+La doble negación permite probar una proposición `p` asumiendo `\lnot p` y derivando 
+`False`, pues esto es lo mismo que probar `\lnot \lnot p`. En otras palabras, la 
+eliminación de la doble negación permite llevar a cabo pruebas por contradicción, algo
+que en general, no es posible en la lógica constructiva. Como ejercicio, deberíamos 
+probar que se puede demostrar `em p` a partir del principio de eliminación de la doble 
+negación:
+
+La prueba es la siguiente, apoyándonos sobre una de las leyes de De Morgan:
+
+```code :language lean4 :eval true 
+
+axiom dn {p : Prop} : ¬ ¬ p → p
+
+def morgan {p q : Prop} : ¬ (p ∨ q) →  ¬ p ∧ ¬ q :=  
+  fun (hn : ¬ (p ∨ q)) => 
+    And.intro 
+      (fun (hp : p) => absurd (Or.intro_left q hp) hn)
+      (fun (hq : q) => absurd (Or.intro_right p hq) hn) 
+
+      
+def em {p : Prop} : p ∨ ¬ p := 
+  suffices hnn : ¬ ¬ (p ∨ ¬ p) from dn hnn 
+  show ¬ ¬ (p ∨ ¬ p) from 
+    fun hnpp : ¬ (p ∨ ¬ p) => 
+      have hnp : ¬ p := (morgan hnpp).left  
+      have hp : p := dn (morgan hnpp).right      
+      absurd hp hnp 
+
+```
+Los axiomas clásicos nos dan acceso a patrones de prueba que se pueden justificar apelando 
+a `em`. Por ejemplo, se pueden llevar a cabo las demostraciones por casos:
+
+```code :language lean4 :eval true 
+open Classical 
+
+variable (p : Prop)
+
+example (h : \lnot \lnot p) : p := 
+  byCases 
+    (fun h1 : p => h1)
+    (fun h1 : \lnot p => absurd h1 h)
+```
+
+O podemos llevar a cabo pruebas por contradicción:
+
+```code :language lean4 :eval true  
+open Classical 
+variable (p : Prop)
+
+exmaple (h : \lnot \lnot p) : p := 
+  byContradiction 
+    (fun h1 : \lnot p => 
+      show False from h h1)
+```
+Si no estamos acostumbrados a pensar de forma constructiva, puede que nos lleve un poco 
+  de tiempo detectar dónde se usa el razonamiento clásico. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,222 @@
+---
+title: Naturalidad
+sidebar: 
+  order: 5
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## Categorías de categorías 
+
+La categoría $bold("Cat")$ tiene co-productos finitos $bold(0)$, $bold(C) + bold(D)$ y 
+productos finitos $bold(1), bold(C) times bold(D)$. Es fácil ver que también tiene todos 
+los co-productos y productos pequeños, que se construyen de forma análoga. Así, podemos 
+mostrar que $bold("Cat")$ tiene todos los límites construyendo equalizadores. Así, sean 
+$bold(C)$ y $bold(D)$ dos categorías y $F, G : bold(C) arrow bold(D)$ dos functores 
+paralelos. Definamos la categoría $bold(E)$ y el functor $E$, 
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $bold(E)$),
+  node((0, 1), $bold(C)$),
+  node((0, 2), $bold(D)$),
+  arr($bold(E)$, $bold(C)$, $E$),
+  arr($bold(C)$, $bold(D)$, $F$, "two"),
+  arr($bold(C)$, $bold(D)$, $G$, "two", label-pos: right)
+)
+```
+como sigue: 
+
+$ bold(E)_0 = brace.l C in bold(C)_0 | F(C) = G(C)  brace.r $
+$ bold(E)_1 = brace.l f in bold(C)_1 | F(f) = G(f) brace.r $
+
+y sea $E : bold(E) arrow bold(C)$ la inclusión evidente. Este es un equalizador.
+
+La categoría $bold(E)$ es un ejemplo de *sub-categoría*, es decir, un monomorfismo en 
+$bold("Cat")$ (los equalizadores son monos). 
+
+<div id="definicion-7-1">
+<Aside type="tip" title="Definición 7.1">
+Un functor $F : bold(C) arrow bold(D)$ se dice que es 
+- *inyectivo sobre objetos* si la parte de objetos $F_0 : bold(C)_0 arrow bold(D)_0$ es 
+  inyectiva, es *suprayectiva sobre objetos* si $F_0$ es suprayectivo.
+- $F$ es *inyectivo (suprayectivo) sobre flechas* si la parte de las flechas $F_1$ lo es.
+- $F$ es *fiel* si para cada $A, B in bold(C)_0$, el mapa 
+  $ F_(A, B) : "Hom"_(bold(C)) (A, B) arrow "Hom"_(bold(D)) (F(A), F(B)) $
+  definido por $f mapsto F(f)$ es inyectivo.
+- $F$ es *pleno* si $F_(A, B)$ es siempre suprayectivo.
+</Aside>
+</div>
+
+## Transformaciones naturales
+
+Una transformación natural es un morfismo de functores. Esto es correcto: para dos 
+categorías $bold(C)$ y $bold(D)$, podemos pensar a los functores $bold(C) arrow bold(D)$
+como los objetos de una nueva categoría y las flechas entre estos objetos es lo que 
+llamaremos transformaciones naturales. 
+
+Comencemos considerando un cierto tipo de situación que ocurre muchas veces: observamos 
+que cierta construcción en una categoría $bold(C)$ y otra construcción están relacionadas 
+entre sí de una manera que es independiente de los objetos y flechas específicos. Es decir,
+la relación es entre las construcciones mismas. Para dar un ejemplo, supongamos que 
+$bold(C)$ tiene productos y consideremos, para objetos $A, B, C in bold(C)$,
+
+$ (A times B) times C  " y " A times (B times C). $
+
+Sin importar los objetos $A, B$ y $C$ son, tenemos un isomorfismo 
+
+$ h : (A times B) times C tilde(arrow) A times (B times C). $
+
+¿Qué significa que este isomorfismo no dependa de los objetos particulares $A$, $B$ y $C$?
+Una forma de explicarlo es la siguiente:
+
+Dada cualquiera $f : A arrow A'$, tenemos un cuadrado conmutativo 
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $(A times B) times C$),
+  node((0, 1), $A times (B times C)$),
+  node((1, 0), $(A' times B) times C$),
+  node((1, 1), $A' times (B times C)$),
+  arr($(A times B) times C$, $A times (B times C)$, $h_A$),
+  arr($(A times B) times C$, $(A' times B) times C$, ""),
+  arr($(A' times B) times C$, $A' times (B times C)$, $h_(A')$),
+  arr($A times (B times C)$, $A' times (B times C)$, "")
+)
+```
+
+Así que, lo que realmente tenemos es un isomorfismo entre construcciones 
+
+$ (- times B) times C quad "y" quad - times (B times C) $
+
+sin importar qué hay en el lugar del argumento. 
+
+Ahora, por construcción, nos referimos a un functor y por una 
+"relación entre construcciones" nos referimos a un *morfismo de functores* que es lo que 
+vamos a definir. En el ejemplo, hay un isomorfismo 
+
+$ (- times B) times C tilde.equiv - times (B times C) $
+
+de functores $bold(C) arrow bold(C)$. De hecho, podemos considerar los functores de 
+tres argumentos:
+
+$ F = (-_1 times -_2) times -_3 : bold(C)^3 arrow bold(C) $
+
+y 
+
+$ G = -_1 times (-_2 times -_3) : bold(C)^3 arrow bold(C) $
+
+y hay un isomorfismo análogo 
+
+$ F tilde.equiv G. $
+
+Pero un isomorfismo es un morfismo especial, así que definamos esa noción primero.
+
+<div id="definicion-7-6">
+<Aside type="tip" title="Definición 7.6">
+Para categorías $bold(C)$ y $bold(D)$ y functores 
+
+$ F, G : bold(C) arrow bold(D) $
+
+una *transformación natural* $theta : F arrow G$ es una familia de flechas en $bold(D)$
+
+$ (theta_C : F(C) arrow G(C))_(C in bold(C)_0) $
+
+tal que, para cada $f : C arrow C'$ en $bold(C)$, se tiene que 
+$theta_(C') compose F(f) = G(f) compose theta_C$, es decir, el siguiente cuadrado conmuta 
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $F(C)$),
+  node((0, 1), $G(C)$),
+  node((1, 0), $F(C')$),
+  node((1, 1), $G(C')$),
+  arr($F(C)$, $G(C)$, $theta_C$),
+  arr($F(C')$, $G(C')$, $theta_(C')$),
+  arr($F(C)$, $F(C')$, $F(f)$),
+  arr($G(C)$, $G(C')$, $G(f)$)
+)
+```
+Dada una trasformación natural $theta : F arrow G$, la $bold(D)$-flecha 
+$theta_C : F(C) arrow G(C)$ es llamada la *componente* de $theta$ en $C$. 
+</Aside>
+</div>
+
+<div id="definicion-7-9">
+<Aside type="tip" title="Definición 7.9">
+La *categoría de functores* $"Fun"(bold(C), bold(D))$ tiene 
+
+- Objetos: functores $F : bold(C) arrow bold(D)$,
+- Flechas: transformaciones naturales $theta : F arrow G$.
+
+Para cada objeto $F$, la transformación natural $1_F$ tiene componentes
+$ (1_F)_C = 1_(F(C)) : F(C) arrow F(C) $
+
+y la composición de transformaciones naturales $F arrow^(theta) G arrow^(phi) H$ tiene 
+componentes 
+
+$ (phi compose theta)_C = phi_C compose theta_C. $
+</Aside>
+</div>
+
+<div id="defincion-7-10">
+<Aside type="tip" title="Definición 7.10">
+Un *isomorfismo natural* es una transformación natural 
+
+$ theta : F arrow G $
+
+que es un isomorfismo en la categoría de functores $"Fun"(bold(C), bold(D))$.
+</Aside>
+</div>
+
+### Ejemplo 
+Consideremos la categoría 
+
+$ "Vect"(RR) $
+
+de espacios vectoriales y transformaciones lineales 
+
+$f : V arrow W. $
+
+Todo espacio vectorial tiene un *espacio dual*
+
+$ V^star = "Vect"(V, RR) $
+
+de transformaciones lineales hacia $RR$. Y toda transformación lineal 
+
+$ f : V arrow W $
+
+da lugar a una transformación lineal dual 
+
+$ f^star : W^star arrow V^star $
+
+definida por la pre-composición $f^star(A) = A compose f$ para $A : W arrow RR$. En 
+pocas palabras, $(-)^star = "Vect"(-, RR) : bold("Vect"^("op")) arrow bold("Vect")$ es el 
+functor *representable contra-variante* dotado de estructura de espacio vectorial.
+
+Hay una transformación lineal canónica de cada espacio vectorial en su doble dual 
+
+$ eta_V : V arrow V^(star star) $
+$ x mapsto ("ev"_x : V^star arrow RR) $ 
+
+donde $"ev"_x (A) = A(x)$ para cada $A : V arrow RR$. Este mapa es el componente de una 
+transformación natural 
+
+$ eta : 1_(bold("Vect")) arrow star star $
+
+pues el siguiente diagrama siempre conmuta 
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $V$),
+  node((0, 1), $V^(star star)$),
+  node((1, 0), $W$),
+  node((1, 1), $W^(star star)$),
+  arr($V$, $W$, $f$),
+  arr($V^(star star)$, $W^(star star)$, $f^(star star)$),
+  arr($V$, $V^(star star)$, $eta_V$),
+  arr($W$, $W^(star star)$, $eta_W$)
+)
+```

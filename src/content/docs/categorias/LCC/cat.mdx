@@ -1,0 +1,89 @@
+---
+title: Categorías 
+sidebar:
+  order: 3
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<div id="definicion-2-1">
+<Aside type="tip" title="Definición 2.1">
+Una categoría localmente cartesiana cerrada (LCC) $bold(C)$ es una categoría $bold(C)$ 
+con límites finitos, de tal forma que para cualquier objeto $A$ de $bold(C)$, la 
+categoría de rebanada $C \\/ A$ es cartesiana cerrada (tiene productos finitos y 
+exponenciales).
+</Aside>
+</div>
+
+<div id="defincion-2-2">
+<Aside type="tip" title="Definción 2.2">
+Para una categoría $bold(C)$ con límites finitos, una categoría $bold(C)$-indizada $bold(P)$
+consiste de:
+
+  1. Para cada objeto $A$ de $bold(C)$ una categoría $bold(P)(A)$,
+  2. Para cada morfismo $f : A arrow B$ de $bold(C)$ un functor 
+  $f^star : bold(P)(B) arrow bold(P)(A)$ sujeto a: 
+    1. $("id"_A)^star tilde.equiv "id"_(bold(P)(A))$.
+    2. $(g compose f)^star tilde.equiv f^star compose g^star$.
+</Aside>
+</div>
+
+<div id="definicion-2-3">
+<Aside type="tip" title="Definción 2.3">
+Una categoría $bold(C)$-indizada $bold(P)$ es una *hiper-doctrina* si 
+  1. Para cada objeto $A$ de $bold(C)$, $bold(P)(A)$ es cartesiana cerrada,
+  2. Para cada $f : A arrow B$ de $bold(C)$, $f^star$ preserva exponentes,
+  3. Para cada $f : A arrow B$ de $bold(C)$, $f^star$ tiene adjuntos 
+  $Sigma_f tack.l f^star tack.l Pi_f$,
+  4. $bold(P)$ satisface la condición de Beck: si 
+  ```typst 
+    #commutative-diagram(
+      node((0, 0), $D$),
+      node((0, 1), $C$),
+      node((1, 0), $A$),
+      node((1, 1), $B$),
+      arr($D$, $C$, $h$),
+      arr($A$, $B$, $f$),
+      arr($D$, $A$, $k$),
+      arr($C$, $B$, $g$)
+    ) 
+  ```
+  es un pullback en $bold(C)$, entonces para cada objeto $phi$ de $bold(P)(C)$, 
+  $Sigma_k h^star phi arrow f^star Sigma_g phi$ es un isomorfismo en $bold(P)(A)$.
+</Aside>
+</div>
+
+Toda categoría $bold(C)$ con límites finitos induce un categoría $bold(C)$-indizada (que 
+también denotamos $bold(C)$) dada por $bold(C)(A) = bold(C)\\/A$, $f^star$ se define como 
+el pullback. 
+
+<div id="teorema-2-4">
+<Aside type="tip" title="Teorema 2.4">
+Si $bold(C)$ tiene límites finitos, entonces $bold(C)$ es LCC si y sólo si, como categoría 
+$bold(C)$-indizada, $bold(C)$ es una hiper-doctrina.
+</Aside>
+</div>
+
+El punto es que para cada $A$, $bold(C)\\/ A$ es cartesiana cerrada si y sólo si para cada 
+$f$, $f^star$ tiene un adjunto derecho $Pi_f$. Para cada $bold(C)$ con límites finitos,
+cada $f^star$ de $bold(C)$ tiene un adjunto izquierdo $Sigma_f$ 
+(definido por la composición) y la condición de Beck para $bold(C)$ se cumple 
+(dice que la composición de dos diagramas de pullback es un diagrama de pullback).
+
+<div id="defincicion-2-5">
+<Aside type="tip" title="Definción 2.5">
+Dos categorías $bold(C)$-indizadas $bold(P)_1$ y $bold(P)$_2 son equivalentes, 
+$bold(P)_1 tilde.eq bold(P)_2$ si para cada $A$, hay una equivalencia 
+$bold(P)_1(A) tilde.eq bold(P)_2(A)$ y estas equivalencias conmutan con las $f^star$.
+</Aside>
+</div>
+
+<div id="observacion-2-6">
+<Aside type="note" title="Observación 2.6">
+Si $bold(P)_1 tilde.eq bold(P)_2$ como categorías $bold(C)$-indizadas y si $bold(P)_1$ es 
+una hiper-doctrina, entonces $bold(P)_2$ también lo es y, aún más, las equivalencias 
+$bold(P)_1 (A) tilde.eq bold(P)_2 (A)$ conmutan con las $Sigma_f$ y $Pi_f$.
+</Aside>
+</div>

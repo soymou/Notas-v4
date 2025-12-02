@@ -1,0 +1,91 @@
+---
+title: Categorías cartesianas cerradas
+sidebar: 
+  order: 2
+---
+
+Una *categoría* es un sistema deductivo en el que las siguientes ecuaciones entre pruebas
+se mantienen:
+
+- E1. $f 1_A = f, 1_B f = f, (h g) f = h (g f)$
+  para cada $f : A arrow B$, $g: B arrow C$ y $h : C arrow D$.
+
+Así, a partir de cualquier sistema deductivo, se pude obtener una categoría imponiendo 
+cierta relación de equivalencia entre las pruebas.
+
+Una *categoría cartesiana* es tanto una categoría como un cálculo conjuntivo que 
+satisface las siguientes ecuaciones adicionales:
+
+- E2. $f = circle_A$, para cada $f : A arrow top$
+- E3a. $pi_(A, B) angle.l f, g angle.r = f$
+- E3b. $pi'_(A, B) angle.l f, g angle.r = g$
+- E3c. $angle.l pi_(A, B) h, pi'_(A, B) h angle.r = h$
+
+para cada $f : C arrow A$, $g : C arrow B$ y $h : C arrow A and B$.
+
+E2 asegura que $top$ es un objeto terminal. Usualmente escribimos $top = 1$. 
+E3 asegura que $A and B$ es un producto de $A$ y $B$ con proyecciones $pi_(A, B)$ y 
+$pi'_(A, B)$, usaremos la notación $A and B equiv A times B$.
+
+Como consecuencia de E3, veamos que se cumple la *ley distributiva*:
+
+$ angle.l f, g angle.r h = angle.l f h, g h angle.r $
+
+para cada $f : C arrow A, g : C arrow B$ y $h : D arrow C$.
+
+Notemos que 
+
+```typst 
+$
+angle.l f, g angle.r h & = angle.l pi (angle.l f, g angle.r h), pi' (angle.l f, g angle.r h) angle.r \
+ & = angle.l (pi angle.l f, g angle.r) h, (pi' angle.l f, g angle.r) h angle.r \
+ & = angle.l f h, g h angle.r.
+$
+```
+
+También escribiremos $f times g = f and g = angle.l f pi_(A, C), g pi'_(A, C) angle.r$
+ cuando $f : A arrow B$ y $g : C arrow D$ y observemos que 
+$times : cal(A) times cal(A) arrow cal(A)$ es un functor. En efecto:
+
+```typst 
+$
+  1_A times 1_C & = angle.l 1_A pi_(A, C), 1_C pi'_(A, C) angle.r \
+  & = angle.l pi_(A, C), pi'_(A, C) angle.r \
+  & = angle.l pi_(A, C) 1_(A times C), pi'_(A, C) 1_(A times C) angle.r \
+  & = 1_(A times C)
+$
+```
+Y, por la ley distributiva, omitiendo subíndices:
+
+```typst 
+$
+(f times g) (f' times g') & = angle.l f pi, g pi' angle.r angle.l f' pi, g' pi' angle.r \
+& = angle.l f pi angle.l f' pi, g' pi' angle.r, g pi' angle.l f' pi, g' pi' angle.r angle.r\
+& = angle.l f f' pi, g g' pi' angle.r \
+& = f f' times g g'
+$
+```
+Una *categoría cartesiana cerrada* es una categoría cartesiana $cal(A)$ con la estrcutura
+adicional R4 que satisface las siguientes ecuaciones:
+
+- E4a. $epsilon_(A, B) angle.l h^star pi_(C, B), pi'_(C, B) angle.r = h$
+- E4b. $(epsilon_(A, B) angle.l k pi_(C, B), pi'_(C, B) angle.r)^star = k$
+
+para cada $h : C and B arrow A$ y $k : C arrow (B arrow.double A)$
+
+Así, una categoría cartesiana cerrada es un cálculo proposicional intuicionista positivo 
+que satisface las ecuaciones E1-E4. Así como escribimos $C and B equiv C times B$, también 
+escribimos $B arrow.double A equiv A^B$. Las ecuaciones E4 aseguran que el mapeo
+
+$ "Hom"(C times B, A) arrow^star "Hom" (C, A^B) $
+
+es una correspondencia uno-a-uno. De hecho, se tiene la siguiente propiedad universal para 
+la flecha $epsilon_(A, B) : A^B times B arrow A$:
+
+Dada una flecha $h : C times B arrow A$ hay una única flecha $h^star : C arrow A^B$ tal que 
+$ epsilon_(A, B) (h^star times 1_B) = h. $
+
+Si recordamos la noción de adjunción, nos daremos que $U_B = (-)^B: cal(A) arrow cal(A)$
+es adjunto derecho al functor $F_B = (-) times B : cal(A) arrow cal(A)$. Con 
+coadjunción $epsilon_B : F_B U_B arrow 1_cal(A)$ definida por 
+$epsilon_B (A) = epsilon_(A, B)$.

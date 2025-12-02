@@ -1,0 +1,88 @@
+---
+title: La teoría de tipos
+sidebar:
+  order: 2
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Un sistema ML (Martin Löf) permite la construcción de términos, tipo y expresiones de la 
+forma $t : T$ ($t$ es un término de tipo $T$), $s=t$, cuando se han derivado $s, t : T$ y 
+$S = T$. Identificamos las expresiones que difieren solamente en un renombramiento de las 
+variables ligadas. Si escribimos $e[x]$, entonces $x$ denota todas las ocurrencias libres 
+de $x$ en la expresión $e$ y $e[a]$ es el resultado de remplazar estas ocurrencias por 
+$a$, bajo el supuesto de que $a$ puede ser sustituida en $e$. 
+Si $x_1, dots, x_n$ es una sucesión de variables, decimos que $x_1, dots, x_n, e$
+satisfacen la *condición sobre las variables* (c.s.v) si para cada $i lt.eq n$, $x_i$
+no ocurre en el tipo de ninguna de las variables de $e$ más que en $x_k$ con $k gt i$.
+Si $x_1, dots, x_n$ contiene todas las variables que ocurren en $e$, decimos que las 
+variables están propiamente listadas en $e[x_1, dots, x_n]$ si $x_1, dots, x_n, e$ 
+satisface la c.s.v. Donde "ocurren" tiene el siguiente sentido:
+
+Si $x : X$ ocurre en $e$, entonces cualquier variable que ocurre en $X$ también ocurre en 
+$e$. Podemos escribir
+
+$ x_1 : X_1, x_2 : X_2[x_1], dots, x_n : X_n [x_1, dots, x_(n-1)], $
+
+si las variables están propiamente enlistadas en $e[x_1, dots, x_n]$.
+
+<div id="definicion-1-1">
+<Aside type="tip" title="Definición 1.1">
+Una teoría ML está dada por un lenguaje que incluye un conjunto de constantes de 
+funciones tipo-valuadas tipadas, un conjunto de constantes de funciones término-valuadas 
+tipadas y variables y constantes que siguen las siguientes reglas (por 
+"constantes de funciones tipadas" queremos decir que los argumentos tienen tipos 
+especificados y en el caso de las constantes de funciones término-valuadas, el valor tiene
+un tipo especificado. Asumiremos que los argumentos están propiamente enlistados).
+
+1. *Reglas de formación de tipos*. Los siguientes son tipos:
+  1. Si $F$ es una constante de función tipo-valuada y $a_1, dots, a_n$ son términos de los 
+  tipos apropiados, entonces $F(a_1, dots, a_n)$ es un tipo.
+  2. $1$ es un tipo.
+  3. Si $a, b : A$ entonces $I(a,b)$ es un tipo (también denotado $a attach(=, br: A) b$).
+  4. Si $A, B[x]$ son tipos, $x: A$, donde $x, B$ satisface la c.s.v, entonces 
+  $Pi_((x : A)) B[x]$ y $Sigma_((x : A)) B[x]$ son tipos. Si $x$ no ocurre en $B$, estos 
+  tipos se escriben como $A arrow B$ y $A times B$ respectivamente.
+
+2. *Reglas de formación de términos* Los siguientes son términos de los tipos indicados:
+  1. *vbl*. Para cada tipo $A$, hay variables $x : A$, una $x$ así se puede denotar como 
+  $x_A$ si el tipo de $x$ no es claro a partir del contexto.
+  2. *fcn*. Si $f$ es una constante de función término-valuada y $a_1, dots, a_n$ son 
+  términos de los tipos apropiados, entonces $f(a_1, dots, a_n)$ es un término del tipo 
+  apropiado. 
+  3. *$1$I*. $star : 1$.
+  4. *$Pi$I*. Si $t[x] : B[x]$, donde $x_A, t$ (y $x_A, B$) satisfacen la c.s.v, entonces 
+  $ lambda (x : A). t[x] : Pi_((x : A)) B[x] $.
+  5. *$Pi$E*. Si $f : Pi_((x : A)) B[x]$ y $a : A$, entonces $f(a) : B[a]$.
+  6. *$Sigma$I*. Si $a : A$ y $b : B[a]$, entonces $(a, b) : Sigma_((x : A)) B[x]$.
+  7. *$Sigma$E*. Si $c : Sigma_((x : A)) B[x]$, entonces $pi(c) : A$ y $pi'(c) : B[pi(c)]$.
+  8. *$=$I*. Si $a : A$, entonces $r(a) : I(a, a)$.
+  9. *$=$E*. Si $a, b : A$, $c : I(a, b)$, $d : C[a, a, r(a)]$, donde $C[x, y, z]$ es un 
+  tipo dependiente de $x, y : A$ y $z : I(x, y)$, entonces $sigma(d)[a, b, c] : C[a, b, c]$.
+
+3. *Reglas de igualdad* Tenemos las siguientes ecuaciones:
+  1. *feq*. Cualesquiera ecuaciones impuestas sobre constantes de funciones inducen las 
+  ecuaciones obvias.
+  2. *$1$ red*. Si $t : 1$, entonces $t = star$.
+  3. *$Pi$ red*. $(lambda (x : A). t[x])(a) = t[a]$.
+  4. *$Pi$ exp*. $f = lambda (x : A) f(x)$.
+  5. *$Sigma$ red*. $pi((a, b)) = a$, $pi'((a, b)) = b$.
+  6. *$Sigma$ exp*. $c = (pi(c), pi'(c))$.
+  7. *$=$ red*. $sigma(d)[a, a, r(a)] = d$.
+  8. *$=$ exp*. Si $f[a, b, c] : C[a, b, c]$, entonces $f = sigma(f[a, a, r(a)])[a, b, c]$.
+  9. *$I$ regla*. Si $a[x], b[x] : A$, $t[x]: I(a[x], b[x])$, entonces $a[x] = b[x]$ y 
+  $t[x] = r(a[x])$.
+
+En una teoría ML, podemos tener axiomas de la forma $S = T$ para tipos $S$ y $T$. Suponemos
+que los axiomas similares para los términos se dan mediante constantes de funciones del 
+$I$-tipo apropiado.
+
+Finalmente, tenemos las reglas usuales para $=$: para tipos o términos $a, b, c$:
+1. Si $a = b$ entonces $c[a] = c[b]$. Si $a = b$ entonces $b = a$.
+2. Si $a = b$ y $b = c$ entonces $a = c$. $a = a$.
+3. Si $c : a$ y $a = b$, entonces $c : b$. Si $a : c$ y $a = b$ entonces $b : c$.
+
+</Aside>
+</div>
+
+
+

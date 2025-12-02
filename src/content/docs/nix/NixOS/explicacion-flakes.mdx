@@ -1,0 +1,87 @@
+---
+title: flake.nix explicado
+sidebar: 
+  order: 4
+---
+
+Expliquemos el contenido del `flake.nix` que creamos.
+
+## 1. Flake inputs
+
+Primero, veamos el atributo `inputs`. Es este atributo el que define todas las dependencias 
+del flake. Estas dependencias se pasan como argumentos a la función `outputs`.
+
+```code :language nix :eval false 
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+  };
+  
+  outputs = { self, nixpgs, ... }@inputs: {
+     
+  };
+} 
+```
+
+Las dependencias en `inputs` tienen muchos tipos y definiciones. Puede se otro flake, 
+un repositorio de Git o un camino local. 
+
+Aquí sólo definimos una dependencia llamada `nixpkgs`, que es la manera más común para 
+dar referencias en un flake `github:owner/name/reference`. La `reference` puede ser 
+el nombre de un branch, un commit-id o un tag.
+
+Después de que se define `nixpgs` en `inputs`, podemos usarlo como parámetro en la función 
+`outputs`.
+
+## 2. Flake outputs 
+Ahora veamos a `outputs`. Es una función que toma las dependencias de `inputs` como
+parámetro y su valor de retorno es un conjunto de atributos, que representa los resultados 
+de la construcción del flake: 
+
+```code :language nix :eval false 
+{
+  description = "A simple NixOS flake";
+  
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05"; 
+  };
+
+  outputs = { self, nixpkgs, ... }@inputs : {
+    nixosConfiguration.my-nixos = nixpkgs.lib.nixosSystem {
+      modules = [
+        ./configuration.nix 
+      ]; 
+    }; 
+  };
+} 
+```
+
+Los flakes pueden tener muchos propósitos y tener diferentes tipos de `outputs`. 
+Cuando corremos `sudo nixos-rebuild switch` el comando busca el atributo 
+`nixosConfiguration.my-nixos` (donde `my-nixos` es el hostname del sistema actual) 
+en el conjunto de atributos que regresa la función `outputs` y usa la definición para 
+configurar el sistema.
+
+## 3. El parámetro especial `self` de la función `outputs`
+
+`self` es el valor de retorno de la función `outputs` del flake y el path al folder del 
+`flake`.
+
+## 4. Introducción a la función `nixpkgs.lib.nixosSystem`
+
+**Un flake puede depender de otros para usar las funciones que proveen**
+
+Por defecto, un flake busca un archivo `flake.nix` en el root del directorio para obtener 
+sus dependencias y evalúa de manera floja la función `outputs`, luego pasa el conjunto 
+de atributos que regresan estas funciones como un argumento a su propia función `outputs`.
+
+Más precisamente, la evaluación de cada función `outputs` de cada dependencia es floja. 
+Esto significa que la función `outputs` de un flake sólo se evalúa cuando se necesita.
+
+El conjunto de atributos que va después de `nixpkgs.lib.nixosSystem` es la función de un 
+sólo argumento que contiene todos los parámetros de la configuración:
+
+- `system`: un alias antiguo para `nixpgs.hostPlatform` que especifica la plataforma en 
+  la que corre el sistema. 
+- `modules`: Una lista de los módulos donde la configuración real del sistema se define.
+  

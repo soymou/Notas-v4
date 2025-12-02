@@ -1,0 +1,148 @@
+---
+title: Adjunciones
+sidebar: 
+  order: 7
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+
+## Definición preliminar
+
+Una *adjunción* entre categorías $bold(C)$ y $bold(D)$ consiste de functores
+
+$ F : bold(C) arrow bold(D) quad "y" quad U : bold(D) arrow bold(C) $
+
+y una transformación natural 
+
+$ eta : 1_bold(C) arrow U compose F $
+
+con la propiedad: 
+
+- (*) Para cada $C in bold(C)$, $D in bold(D)$ y $f : C arrow U(D)$ existe una única 
+  $g : F C arrow D$ tal que 
+  $ f = U(g) compose eta_C $
+  como se indica en 
+  ```typst 
+  #commutative-diagram(
+    node((0, 0), $F(C)$),
+    node((0, 1), $D$),
+    arr($F(C)$, $D$, $g$, "dotted"),
+
+    node((1, 0), $U(F(C))$),
+    node((1, 1), $U(D)$),
+    node((2, 0), $C$),
+    arr($C$, $U(F(C))$, $eta_C$),
+    arr($C$, $U(D)$, $f$, label-pos: right),
+    arr($U(F(C))$, $U(D)$, $U(g)$)
+  )
+  ```
+
+### Terminología y notación 
+- $F$ es llamado el *adjunto izquierdo*, $U$ el *adjunto derecho* y $eta$ la *unidad* de 
+  la adjunción. 
+- A veces escribimos $F tack.l U$ para "$F$ es adjunto izquierdo y $U$ adjunto derecho".
+- El enunciado (*) es la propiedad universal de la unidad $eta$.
+
+Supongamos que tenemos una adjunción 
+
+$ bold(C) arrow^F bold(D) quad "y" quad bold(D) arrow^U bold(C) $
+
+Entonces, si tomamos $C in bold(C)$ y $D in bold(D)$ y consideramos la operación 
+
+$ phi : "Hom"_bold(D) (F C, D) arrow "Hom"_bold(C) (C, U D) $
+
+dado por $phi(g) = U(g) compose eta_ C$. Vemos que, por la propiedad universal de $eta$, 
+cada $f : C arrow U D$ es $phi(g)$ para una $g$ única, de modo que $phi$ es un 
+isomorfismo
+
+$ "Hom"_bold(D) (F(C), D) tilde.equiv "Hom"_bold(C) (C, U(D)) $
+
+que se puede representar como una regla de dos sentidos
+
+```typst 
+#prooftree(
+  rule(
+    $C arrow.long U(D)$,
+    $F(C) arrow.long D$
+  )
+)
+```
+
+## Definición 
+
+Una adjunción consiste de dos functores 
+
+$ F : bold(C) arrow bold(D) quad "y" quad U : bold(D) arrow bold(C) $
+
+y un isomorfismo natural 
+
+$ phi : "Hom"_D (F C, D) tilde.equiv "Hom"_C (C, U D) : psi. $
+
+
+## Cuantificadores como adjunciones 
+
+Sea $cal(L)$ un lenguaje de primer orden. Para cualquier lista 
+$overline(x) = x_1, dots, x_n$ de variables distintas, formemos el conjunto de fórmulas con,
+a lo más, esas variables libres por 
+
+$ 
+"Form"(overline(x)) = brace.l phi(overline(x)) | phi(overline(x))" tiene a lo más" 
+  overline(x) "libre" brace.r 
+$
+
+Entonces, $"Form"(overline(x))$ es un pre-orden bajo la relación de deducción 
+
+$ phi(overline(x)) tack.r psi(overline(x)). $
+
+Ahora, sea $y$ una variable que no esté en la lista $overline(x)$ y notemos que tenemos la 
+operación trivial 
+
+$ * : "Form"(overline(x)) arrow "Form"(overline(x), y) $
+
+que lleva a cada $phi(overline(x))$ a sí mismo, esto es sólo una cuestión de observar 
+que si $phi(overline(x)) in "Form"(overline(x))$ entonces $y$ no puede ser libre en 
+$phi(overline(x))$. Por supuesto, $*$ es trivialmente un functor, pues 
+
+$ phi(overline(x)) tack.r psi(overline(x)) "en" "Form"(overline(x)) $
+
+implica trivialmente que 
+
+$ * phi(overline(x)) tack.r * psi(overline(x)) "en" "Form"(overline(x), y). $
+
+Ahora, como para cada $psi(overline(x), y) in "Form"(overline(x), y)$ no hay ninguna 
+$y$ libre en la fórmula $forall y. psi(overline(x), y)$, tenemos un mapeo
+
+$ forall y : "Form"(overline(x), y) arrow "Form"(overline(x)). $
+
+Afirmamos que este mapa es adjunto derecho a $*$, 
+
+$ * tack.l forall. $
+
+En efecto, se tiene la siguiente regla de inferencia 
+
+```typst 
+#prooftree(
+  rule(
+    $phi(overline(x)) tack.r forall y. psi(overline(x), y) quad "Form"(overline(x))$,
+    $* phi(overline(x)) tack.r psi(overline(x), y) quad "Form"(overline(x), y)$
+  )
+)
+```
+
+Es ahora natural preguntarnos sobre el cuantificador existencial. Notemos que se cumple 
+la siguiente regla en ambos sentidos 
+
+```typst 
+#prooftree(
+    rule(
+       $psi(overline(x), y) tack.r *phi(overline(x))$,
+       $exists y. psi(overline(x), y) tack.r phi(overline(x))$
+    )
+)
+```
+
+De modo que tenemos las adjunciontes 
+
+$ exists tack.l * tack.l forall. $
+

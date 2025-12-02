@@ -1,0 +1,444 @@
+---
+title: How to Use
+description: Guide for using executable code blocks and Typst rendering
+---
+
+import ExecutableCode from '../../components/ExecutableCode.astro';
+
+# How to Use
+
+This guide explains how to use executable code blocks and Typst rendering in your MDX notes.
+
+# Executable Code Blocks
+
+## Basic Syntax
+
+There are two ways to write executable code blocks:
+
+### Method 1: Using the Component Directly
+
+```jsx
+<ExecutableCode
+  language="python"
+  id="my-block"
+  code={`print("Hello, World!")`}
+/>
+```
+
+### Method 2: Using ```code Syntax (Simplified)
+
+You can also use a simpler fence syntax that gets automatically converted:
+
+````
+<ExecutableCode
+  language="python"
+  id="my-block"
+  code={`print("Hello, World!")`}
+/>
+````
+
+Then run `npm run convert-code-syntax` to convert it to the ExecutableCode component.
+
+### Required Props/Attributes
+
+- **`language`**: The programming language (`python`, `lean4`, or `rust`)
+- **`id`**: A unique identifier for the block (within the file)
+- **`code`**: The code to execute (wrapped in template literals)
+
+### Optional Props
+
+- **`session`**: Session name to share state between blocks
+- **`output`**: Manual output (if you don't want auto-execution)
+- **`showOutput`**: Set to `false` to hide the output section
+
+## Session Handling
+
+Use sessions to persist variables between code blocks.
+
+**Component syntax:**
+
+```jsx
+<ExecutableCode
+  language="python"
+  id="block-1"
+  session="my-session"
+  code={`x = 10
+y = 20`}
+/>
+
+<ExecutableCode
+  language="python"
+  id="block-2"
+  session="my-session"
+  code={`print(f"x + y = {x + y}")`}
+/>
+```
+
+**```code syntax:**
+
+````
+<ExecutableCode
+  language="python"
+  id="block-1"
+  session="my-session"
+  code={`x = 10
+y = 20`}
+/>
+
+<ExecutableCode
+  language="python"
+  id="block-2"
+  session="my-session"
+  code={`print(f"x + y = {x + y}")`}
+/>
+````
+
+All blocks with the same `session` name will share their state.
+
+## Supported Languages
+
+### Python
+
+**Component syntax:**
+```jsx
+<ExecutableCode
+  language="python"
+  id="python-example"
+  code={`def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+print(factorial(5))`}
+/>
+```
+
+**```code syntax:**
+````
+<ExecutableCode
+  language="python"
+  id="python-example"
+  code={`def factorial(n):
+    if n <= 1:
+        return 1
+    return n * factorial(n - 1)
+
+print(factorial(5))`}
+/>
+````
+
+### Lean4
+
+**Component syntax:**
+```jsx
+<ExecutableCode
+  language="lean4"
+  id="lean-example"
+  code={`def double (x : Nat) : Nat := x + x
+
+#eval double 21`}
+/>
+```
+
+**```code syntax:**
+````
+<ExecutableCode
+  language="lean4"
+  id="lean-example"
+  code={`def double (x : Nat) : Nat := x + x
+
+#eval double 21`}
+/>
+````
+
+## Workflow
+
+### If Using Component Syntax Directly
+
+1. **Write your MDX file** with ExecutableCode components
+2. **Import the component** at the top of your file:
+   ```jsx
+   import ExecutableCode from '../../../components/ExecutableCode.astro';
+   ```
+3. **Run the execution script**:
+   ```bash
+   npm run execute-code
+   ```
+4. **View your notes** with `npm run dev`
+
+### If Using ```code Syntax
+
+1. **Write your MDX file** using ````code` fences with attributes
+2. **Run the processing script**:
+   ```bash
+   npm run process-all
+   ```
+
+   This runs three scripts in sequence:
+   - Converts LaTeX in headings to Unicode
+   - Converts ````code` syntax to ExecutableCode components (adds import automatically)
+   - Executes all code blocks and generates outputs
+
+3. **View your notes** with `npm run dev`
+
+## Important Notes
+
+### Unique IDs
+
+IDs only need to be unique **within each file**. The system automatically prefixes IDs with the filename to prevent collisions:
+
+```
+dependiente.mdx:  id="example-1"  →  dependiente::example-1
+example.mdx:      id="example-1"  →  example::example-1
+```
+
+So you can use simple IDs like "1", "2", "example-1", etc. in each file without worrying about conflicts.
+
+### Import Statement
+
+Always add this import at the top of your MDX file (after the frontmatter):
+
+```jsx
+---
+title: Your Title
+---
+
+import ExecutableCode from '../../../components/ExecutableCode.astro';
+```
+
+Make sure there's a blank line after the frontmatter (`---`) and before the import.
+
+### Manual Output
+
+If you want to provide output manually without execution:
+
+```jsx
+<ExecutableCode
+  language="python"
+  code={`print("Hello")`}
+  output="Hello"
+/>
+```
+
+### Hiding Output
+
+To show only the code without output:
+
+```jsx
+<ExecutableCode
+  language="python"
+  id="setup"
+  code={`import numpy as np`}
+  showOutput={false}
+/>
+```
+
+## Scripts Reference
+
+- **`npm run convert-code-syntax`** - Convert code blocks to ExecutableCode components
+- **`npm run typst-to-unicode`** - Convert Typst math in headings to Unicode (e.g., `$NN$` → ℕ)
+- **`npm run execute-code`** - Execute all code blocks
+- **`npm run process-all`** - Run all scripts in sequence (code, unicode, execution)
+
+## Showcase Examples
+
+### Python: Fibonacci Sequence
+
+<ExecutableCode
+  language="python"
+  id="showcase-fibonacci"
+  code={`def fibonacci(n):
+    a, b = 0, 1
+    for _ in range(n):
+        print(a, end=' ')
+        a, b = b, a + b
+
+fibonacci(10)`}
+/>
+
+### Lean4: Type Theory
+
+<ExecutableCode
+  language="lean4"
+  id="showcase-lean"
+  code={`def compose {α β γ : Type} (g : β → γ) (f : α → β) : α → γ :=
+  fun x => g (f x)
+
+def double (x : Nat) : Nat := x + x
+def triple (x : Nat) : Nat := x + x + x
+
+#eval (compose triple double) 5`}
+/>
+
+### Rust: Pattern Matching
+
+<ExecutableCode
+  language="rust"
+  id="showcase-rust"
+  code={`fn main() {
+    let numbers = vec![1, 2, 3, 4, 5];
+
+    let sum: i32 = numbers.iter().sum();
+    let doubled: Vec<i32> = numbers.iter().map(|x| x * 2).collect();
+
+    println!("Sum: {}", sum);
+    println!("Doubled: {:?}", doubled);
+}`}
+/>
+
+### Python with Sessions: Data Processing
+
+<ExecutableCode
+  language="python"
+  id="showcase-data-1"
+  session="data-demo"
+  code={`import statistics
+
+data = [23, 45, 12, 67, 34, 89, 56]
+print(f"Original data: {data}")`}
+/>
+
+<ExecutableCode
+  language="python"
+  id="showcase-data-2"
+  session="data-demo"
+  code={`mean = statistics.mean(data)
+median = statistics.median(data)
+print(f"Mean: {mean:.2f}")
+print(f"Median: {median}")`}
+/>
+
+<ExecutableCode
+  language="python"
+  id="showcase-data-3"
+  session="data-demo"
+  code={`sorted_data = sorted(data)
+print(f"Sorted: {sorted_data}")
+print(f"Min: {min(data)}, Max: {max(data)}")`}
+/>
+
+## Tips
+
+1. Run `npm run execute-code` whenever you add or modify code blocks
+2. The outputs are cached in `src/code-outputs.json`
+3. Sessions are scoped per file and language
+4. Use descriptive IDs to make it easier to debug
+5. Supported languages: Python, Lean4, and Rust
+
+---
+
+# Typst Rendering
+
+Render Typst code blocks and inline math expressions with automatic SVG conversion.
+
+## Inline Math
+
+Use `$...$` for inline math and `$ ... $` (with spaces) for display math:
+
+**Inline math:** The natural numbers are denoted $NN$ and the integers $ZZ$.
+
+**Display math:** The quadratic formula is $ x = (-b plus.minus sqrt(b^2 - 4a c))/(2a) $
+
+## Code Blocks
+
+Use ` ```typst ` fenced code blocks to write full Typst code:
+
+```typst
+#import "@preview/cetz:0.2.2": canvas, draw
+
+#canvas({
+  draw.line((0, 0), (1, 1))
+  draw.circle((0.5, 0.5), radius: 0.3)
+})
+```
+
+### Disable Execution
+
+To show Typst code without executing it, use `eval=false`:
+
+```typst eval=false
+#import "@preview/curryst:0.5.1": rule, prooftree
+
+#prooftree(
+  rule(
+    $Gamma tack.r f(a): B$,
+    $Gamma tack.r a: A$,
+    $Gamma tack.r f: A arrow.r B$
+  )
+)
+```
+
+This will display the code with syntax highlighting but won't render it as SVG.
+
+### Frontmatter Imports
+
+To avoid repeating imports in every code block, add them to your page frontmatter:
+
+```yaml
+---
+title: My Page
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+  - '#import "@preview/cetz:0.2.2": canvas, draw'
+---
+```
+
+Now all Typst code blocks on that page will automatically have these imports available.
+
+**Note:** Frontmatter imports only apply to code blocks (` ```typst `), not to inline math expressions.
+
+## Examples
+
+### Commutative Diagram
+
+```typst
+#import "@preview/commute:0.3.0": node, arr, commutative-diagram
+
+#commutative-diagram(
+  node((0, 0), $A$),
+  node((0, 1), $B$),
+  node((1, 0), $C$),
+  arr((0, 0), (0, 1), $f$),
+  arr((0, 0), (1, 0), $g$),
+  arr((0, 1), (1, 0), $h$)
+)
+```
+
+### Proof Tree
+
+```typst
+#import "@preview/curryst:0.5.1": rule, prooftree
+
+#prooftree(
+  rule(
+    $Gamma tack.r f(a): B$,
+    $Gamma tack.r a: A$,
+    $Gamma tack.r f: A arrow.r B$
+  )
+)
+```
+
+### Chemical Formulas
+
+Chemical formula with subscripts: $H_2 O$ is water.
+
+Complex molecule: $C_6 H_(12) O_6$ is glucose.
+
+## Plugin Architecture
+
+The Typst integration uses two custom plugins:
+
+1. **`remark-typst.js`** - Processes markdown and identifies Typst code
+2. **`rehype-typst.js`** - Compiles Typst to SVG using `@myriaddreamin/typst-ts-node-compiler`
+
+These plugins are configured in `astro.config.mjs`:
+
+```js
+markdown: {
+  remarkPlugins: [remarkTypst],
+  rehypePlugins: [rehypeTypst],
+}
+```
+
+
+

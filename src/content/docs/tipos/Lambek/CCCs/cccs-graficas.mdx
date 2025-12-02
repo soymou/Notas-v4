@@ -1,0 +1,70 @@
+---
+title: Categorias cartesianas cerradas libres generadas por gráficas
+sidebar:
+  order: 3
+typstImports:
+  - '#import "@preview/commute:0.3.0": node, arr, commutative-diagram'
+---
+
+Dada una gráfica $cal(H)$, podemos construir el cálculo intuicionista positivo 
+$cal(D)(cal(H))$ y la categoría cartesiana cerrada $cal(F)(cal(H))$ *libremente generada*
+por $cal(H)$.
+
+Informalmente, $cal(D)(cal(H))$ es el cálculo intuicionista positivo más pequeño cuyas 
+fórmulas incluyen los vértices de $cal(H)$ y cuyas pruebas incluyen las flechas de 
+$cal(H)$. Más precisamente, las fórmulas y pruebas de $cal(D)(cal(H))$ se definen 
+inductivamente como sigue: todos los vértices de $cal(H)$ son fórmulas, $top (equiv 1)$ 
+es una fórmula, si $A$ y $B$ son fórmulas, también lo son $A and B (equiv A times B)$ y 
+$A arrow.double B (equiv B^A)$. Las flechas de $cal(H)$ y las flechas $1_A$, $circle_A$,
+$pi_(A, B)$, $pi'_(A, B)$ y $epsilon_(A, B)$ son pruebas, para cada par de fórmulas $A$
+y $B$ y las pruebas son cerradas bajo las reglas de inferencia (composición), 
+$angle.l -, - angle.r$ y $(-)^star$.
+
+Construimos a $cal(F)(cal(H))$ a partir de $cal(D)(cal(H))$ imponiendo todas las ecuaciones
+sobre las pruebas que se deben cumplir en una categoría cartesiana cerrada. Otra forma de 
+decir esto es que tomamos la relación de equivalencia más pequeña entre pruebas que 
+satisface las leyes de substitución apropiadas y respeta las ecuaciones de una categoría 
+cartesiana cerrada. Las clases de equivalencia entre pruebas son entonces las flechas de 
+$cal(F)(cal(H))$.
+
+Sea $bold("Grph")$ la categoría de gráficas, cuyos objetos son las gráficas y los morfismos
+$F: cal(H) arrow cal(Y)$ son pares de mapeos $F: "Objetos"(cal(H)) arrow "Objetos"(cal(Y))$
+y $F: "Flechas"(cal(H)) arrow "Flechas"(cal(Y))$ de tal manera que $f : X arrow X'$ implica
+$F(f) : F(X) arrow F(X')$.
+
+Sea $bold("Cart")$ la categoría de categorías cartesianas cerradas cuyos objetos son 
+categorías cartesianas cerradas y cuyas flechas son functores $F : cal(A) arrow cal(B)$
+que preservan la estructura cartesiana cerrada, es decir
+
+- $F(1) = 1$, $F(A times B) = F(A) times F(B)$
+- $F(A^B) = F(A)^F(B)$
+- $F(circle_A) = circle_(F(A))$, $F(pi_(A, B)) = pi_(F(A), F(B))$, etc.
+- $F(angle.l f, g angle.r) = angle.l F(f), F(g) angle.r$, etc 
+
+Sea $cal(U) : bold("Cart") arrow bold("Grph")$ el functor olvidadizo. A cualquier gráfica 
+$cal(H)$ le asociamos un morfismo de gráficas 
+$H_(cal(H)) : cal(H) arrow cal(U)(cal(F)(cal(H)))$ como sigue: $H_(cal(H))(X) = X$ y, si 
+$f : X arrow Y$ en $cal(H)$, entonces $H_(cal(H))(f) = f$ (la clase de equivalencia de $f$).
+Entonces tenemos la siguiente propiedad universal:
+
+Dada una categoría cartesiana cerrada $cal(A)$ y cualquier morfismo 
+$F : cal(H) arrow cal(U)(cal(A))$ de gráficas, hay una flecha única 
+$F': cal(F)(cal(H)) arrow cal(A)$ en $bold("Cart")$ tal que $cal(U)(F')H_(cal(H)) = F$.
+
+
+```typst 
+#commutative-diagram(
+  node((0, 0), $cal(U)cal(F)(cal(H))$),
+  node((0, 1), $cal(F)(cal(H))$),
+  node((1, 1), $cal(U)(cal(A))$),
+  node((2, 0), $cal(H)$),
+  node((1, 2), $cal(A)$),
+  arr($cal(U)cal(F)(cal(H))$, $cal(H)$, $H_(cal(H))$, label-pos: right),
+  arr($cal(U)cal(F)(cal(H))$, $cal(U)(cal(A))$, $cal(U)(F') = F'$),
+  arr($cal(H)$, $cal(U)(cal(A))$, $F$, label-pos: right),
+  arr($cal(F)(cal(H))$, $cal(A)$, $F'$, "dotted")
+)
+```
+La propiedad universal anterior significa que $cal(F)$ es un functor 
+$bold("Grph") arrow bold("Cart")$ que es adjunto izquierdo a $cal(U)$ con adjunción 
+$H_(( )) : id arrow cal(U) cal(F)$.

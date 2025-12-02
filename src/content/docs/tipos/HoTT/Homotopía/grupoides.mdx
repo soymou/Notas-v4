@@ -1,0 +1,89 @@
+---
+title: Los tipos son grupoides
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<div id="lema-2-1-1">
+<Aside type="tip" title="Lema 2.1.1">
+
+Para cada tipo $A$ y cada $x, y : A$ hay una función 
+
+$ (x = y) arrow (y = x) $
+
+denotada $p mapsto p^(-1)$, tal que $"refl"^(-1)_x equiv "refl" _x$ para cada $x : A$.
+Llamamos a $p^(-1)$ el inverso de $p$.
+
+*Demostración* Supongamos que $A : cal(U)$ está dado y sea 
+$D : Pi_((x, y : A)) (x = y) arrow cal(U)$ una familia de tipos definida por 
+$D(x, y, p) : equiv (y = x)$. En otras palabras, $D$ es una función que le asigna a cada 
+$x, y : A$ y $p : x = y$ un tipo, a saber, el tipo $y = x$. Entonces tenemos un elemento 
+
+$ d : equiv lambda x. "refl" _x : product_(x : A) D(x, x, "refl" _x). $
+
+Así, el principio de inducción para tipos identidad nos da un elemento 
+$"ind" _(attach(=, br: A)) (D, d, x, y, p) : (y = x)$ para cada $p : (x = y)$. Ahora 
+podemos definir la función buscada como 
+$lambda p. "ind" _(attach(=, br: A)) (D, d, x, y, p)$, es decir, ponemos 
+$p^(-1) : equiv "ind" _(attach(=, br: A)) (D, d, x, y, p)$ y, la regla de computación nos 
+da que $"refl"^(-1) _x equiv "refl" _x$.
+
+</Aside>
+</div>
+
+<div id="lema-2-1-2">
+<Aside type="tip" title="Lema 2.1.2">
+Para cada tipo $A$ y cada $x, y, z : A$ hay una función 
+
+$ (x = y) arrow (y = z) arrow (x = z), $
+
+escrita como $p mapsto q mapsto p dot q$, tal que $"refl" _x dot "refl" _x equiv "refl" _x$
+para cada $x : A$. Llamamos a $p dot q$ la **concatenación** o **composición** de $p$ y $q$.
+
+*Demostración* La función deseada tiene tipo 
+$Pi_((x, y, z : A)) (x = y) arrow (y = z) arrow (x = z)$. En su lugar, vamos a definir una
+función con el tipo equivalente 
+$Pi_(x, y : A) (x = y) arrow Pi_(z : A) (y = z) arrow (x = z)$, que nos permite aplicar 
+el principio de inducción de trayectorias dos veces. Sea 
+$D : Pi_((x, y : A)) (x = y) arrow cal(U)$ la familia de tipos 
+
+$ D(x, y, p) : equiv product_(x : A) product_(q : y = z) (x = z). $
+
+Observemos que $D(x, x, "refl" _x) equiv Pi_((z : A)) Pi_(q : x = z) (x = z)$. Así, para 
+aplicar el principio de inducción para tipos de identidad a esta $D$, necesitamos una 
+función de tipo 
+
+$ product_(x : A) D(x, x, "refl" _x) $
+
+es decir, de tipo 
+
+$ product_(x : A) product_(q : x = z) (x = z). $
+
+Ahora, sea $E : Pi_((x, z : A)) Pi_((q : x = z)) cal(U)$ la familia de tipos 
+$E(x, z, q) : equiv (x = z)$. Observemos que $E(x, x, "refl" _x) equiv (x = x)$. Así,
+tenemos la función 
+
+$ e(x) : equiv "refl" _x : E(x, x, "refl" _x). $
+
+Por el principio de inducción aplicado a $E$, obtenemos una función 
+
+$ d: product_(x, z : A) product_(q : x = z) E(x, z, q). $
+
+Pero $E(x, z, q) equiv (x = z)$, de modo que el tipo de $d$ es 
+$Pi_(x: A) D(x, x, "refl" _x)$. Luego, podemos usar esta función $d$ y aplicar el principio
+de inducción para tipos identidad a $D$, para obtener la función deseada de tipo 
+
+$ product_(x, y : A) (x = y) product_(z : A) (y = z) arrow (x = z) $
+
+y, por lo tanto, $Pi_((x, y, z : A)) (y = z) arrow (x = y) arrow (x = z)$. Las reglas 
+de computación nos dan $"refl" _x dot "refl" _x equiv "refl" _x$ para cada $x : A$.
+
+</Aside>
+</div>
+
+
+
+
+

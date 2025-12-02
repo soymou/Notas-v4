@@ -1,0 +1,249 @@
+---
+title: Conociendo a Lean
+sidebar: 
+  order: 1
+---
+
+## Evaluando expresiones
+
+Para pedirle a lean que evalúe una expresión, hay que escribir `#eval` primero, luego lean
+nos reportará el resultado.
+
+```code :language lean4 :eval true
+#eval 1 + 2
+```
+
+Lean sigue las leyes de precedencia y asociatividad para operadores aritméticos. Entonces 
+
+```code :language lean4 :eval true 
+#eval 1 + 2 * 5 
+```
+Mientras que la mayoría de notación matemática y lenguajes de programación usan paréntesis 
+para aplicar una función a sus argumentos, Lean simplemente escribe la función seguida 
+de sus argumentos 
+
+```code :language lean4 :eval true 
+#eval String.append "Hello " "Lean" 
+```
+
+Como Lean es un lenguaje funcional orientado a las expresiones, no hay enunciados
+condicionales, sino que hay expresiones condicionales 
+
+```code :language lean4 :eval true 
+#eval String.append "It is " (if 1 > 2 then "yes" else "no")
+ 
+```
+
+## Tipos
+
+Todo programa en Lean debe tener un tipo. En particular, toda expresión debe tener un tipo 
+antes de ser evaluada. Podemos proveer el tipo de una expresión con el operador dos puntos 
+
+```code :language lean4 :eval true 
+#eval (1 + 2 : Nat) 
+```
+
+Aquí **Nat** es el tipo de los números naturales, que son enteros sin signo de precisión 
+arbitraria.
+
+Para obtener el tipo de una expresión podemos usar `#check` en lugar de `#eval`.
+
+```code :language lean4 :eval true 
+#check (1 - 2 : Nat) 
+```
+
+## Funciones y definiciones
+
+En Lean, las definiciones se introducen usando la palabra clave **def** y el $:=$.
+
+```code :language lean4 :eval true :session funciones-uno 
+def lean : String := "Lean" 
+```
+Una vez que hemos definido un nombre, lo podemos usar 
+
+```code :language lean4 :eval true :session funciones-uno
+#eval String.append "Hola " lean
+```
+
+### Definiendo funciones 
+
+La forma más fácil de definir una función en Lean es poner los argumentos antes del tipo 
+de la definición separados por espacios.
+
+```code :language lean4 :eval true 
+def add1 (n : Nat) : Nat := n + 1
+
+#eval add1 7
+```
+
+Podemos definir funciones con varios argumentos
+
+```code :language lean4 :eval true 
+def maximum (n : Nat) (k : Nat) : Nat := 
+  if n < k then 
+    k 
+  else n
+
+#eval maximum 2 3
+```
+
+### Definiendo tipos 
+
+Si, por ejemplo `String` es muy largo, podemos definir 
+
+```code :language lean4 :eval true 
+def Str : Type := String
+
+def palabra : Str := "Hola"
+
+#check palabra
+```
+
+## Estructuras 
+
+Definir una estructura introduce un tipo completamente nuevo a Lean, que no se puede 
+reducir a cualquier otro tipo. Eso es útil porque distintas estructuras pueden representar 
+conceptos distintos a pesar de contener los mismo datos.
+
+El tipo de Lean para los números flotantes es llamado `Float`: 
+
+```code :language lean4 :eval true 
+#check 1.2
+
+#check -454.2123215
+
+#check 0.0
+```
+Si usamos punto decimal, Lean infiere el tipo `Float`, si no, necesitamos una anotación 
+de tipo.
+
+Un punto Cartesiano es una estructura con dos campos `Float`, llamados `x` y `y`. Esto 
+se declara con la palabra clave `structure`.
+
+```code :language lean4 :eval true :session point
+structure Point where 
+  x : Float 
+  y : Float
+```
+
+Después de esta declaración, `Point` es un nuevo tipo estructura. La manera típica de crear
+un valor de una estructura es proveer los valores para cada uno de sus campos entre llaves.
+
+```code :language lean4 :eval true :session point  
+def origin : Point := { x := 0.0, y := 0.0 } 
+```
+El resultado de hacer `#eval` al origen se ve muy similar a su definición 
+
+```code :language lean4 :eval true :session point  
+#eval origin 
+```
+Podemos extraer los campos de una estructura usando notación `.`.
+
+```code :language lean4 :eval true :session point 
+#eval origin.x
+
+#eval origin.y
+```
+Esto se puede usar para definir funciones que toman estructuras como argumentos. 
+
+```code :language lean4 :eval true :session point 
+def addPoints (a b : Point) : Point := 
+  { x := (a.x + b.x) , y := (a.y + b.y)}
+ 
+#eval addPoints { x := 1.5, y := 32 } { x := -8, y := 0.2 }
+
+def distance (a b : Point) : Float := 
+  Float.sqrt ( ((a.x - b.x) ^ 2.0) + ((a.y - b.y) ^ 2.0) )
+
+#eval distance { x := 1.0, y := 2.0 } { x := 5.0, y := -1.0 }
+```
+### Actualizando estructuras 
+
+Lean da una sintaxis conveniente para remplazar algunos campos en una estructura. Esto se 
+hace usando la palabra clave `with`.
+
+```code :language lean4 :eval true :session point  
+def zeroX (p : Point) : Point := 
+  { p with x := 0 }
+```
+### Detrás de bambalinas 
+
+Toda estructura tiene un constructor. Los constructores simplemente agrupan los datos 
+en una estructura. Por defecto, el constructor para una estructura `S` es llamado `S.mk`.
+
+```code :language lean4 :eval true :session point 
+#check Point.mk 1.5 2.8
+```
+Para sobreescribir el nombre de un constructor lo escribimos al principio de la estructura 
+seguido de dos dos puntos:
+
+```code :language lean4 :eval true :session point-2 
+structure Point where 
+  point :: 
+  x : Float 
+  y : Float
+```
+Además del constructor, una función de acceso se define para cada campo de la estructura.
+
+```code :language lean4 :eval true :session point-2 
+#check Point.x 
+
+#check Point.y
+```
+
+## Tipos de datos y patrones 
+
+Las estructuras permite agrupar datos en uno solo que representa un nuevo tipo. Los 
+tipos que agrupan una colección de valores son llamados *tipos producto*.
+
+Los tipos de datos que permiten elecciones son llamados *tipos suma* y los que incluyen 
+instancias de sí mismos son llamados *recursivos*. Los tipos *suma recursiva* son llamados 
+*inductivos*, pues podemos usar inducción matemática para probar cosas sobre ellos. 
+Cuando programamos, los tipos de datos inductivos se consumen mediante pattern matching 
+y funciones recursivas.
+
+Por ejemplo, `Bool` es inductivo 
+
+```code :language lean4 :eval false 
+inductive Bool where 
+  | false : Bool 
+  | true : bool
+```
+Esta definición tiene dos partes principales. En la primera línea se da el nombre del tipo 
+de dato, las siguientes líneas describen un constructor. A diferencia de las estructuras 
+(productos), los tipos inductivos pueden tener varios constructores.
+
+
+### Pattern matching 
+Un ejemplo de una función que usa pattern matching es la función `isZero`:
+
+```code :language lean4 :eval true 
+def isZero (n : Nat) : Bool := 
+  match n with 
+  | Nat.zero => true 
+  | Nat.succ k => false
+```
+A la expresión `match`  le damos el argumento `n` para destruirlo. Si `n` se construyó 
+usando `Nat.zero`, entonces se toma la primera rama del pattern match y el resultado es 
+`true`. Si `n` se construyó con `Nat.succ`, la segunda rama se toma y resulta en `false`.
+
+### Funciones recursivas 
+
+Las definiciones que se refieren al mismo nombre que se está definiendo son llamadas 
+*definiciones recursivas*. Los tipos de datos pueden ser recursivos, como `Nat`.
+
+Los tipos de datos recursivos se complementan bien con las funciones recursivas. Por 
+ejemplo 
+
+```code :language lean4 :eval true
+def even (n : Nat) : Bool := 
+  match n with 
+  | Nat.zero => true 
+  | Nat.succ k => not (even k)
+```
+Este patrón de pensamiento es típico para las funciones recursivas. Primero hay que 
+identificar que hacer con `Nat.zero` y luego determinar como transformar el resultado de 
+un `Nat` a su sucesor. Este patrón es llamado inducción estructural.
+
+
+

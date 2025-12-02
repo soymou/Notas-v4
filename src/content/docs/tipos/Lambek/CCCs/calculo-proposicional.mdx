@@ -1,0 +1,162 @@
+---
+title: Cálculo proposicional como sistema deductivo
+sidebar: 
+  order: 1
+typstImports: 
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+
+Recordemos que para los categóricos, una *gráfica* consiste de dos clases y mapas entre 
+ellos. Las flechas y los nodos. En lugar de escribir 
+
+$ "source"(f) = A quad "y" quad "target"(f) $
+
+uno suele escribir $f : A arrow B$ para una flecha entre $A$ y $B$. Investigaremos a las 
+gráficas con cierta estructura adicional que son de interés para la lógica.
+
+Un *sistema deductivo* es una gráfica con una flecha especificada
+
+- R1a. $1_A : A arrow A$
+
+y una operación binaria sobre flechas (composición)
+
+$ g compose f : A arrow C $
+
+donde $f : A arrow B$ y $g : B arrow C$.
+
+Los lógicos piensan a los objetos de un sistema deductivo como *fórmulas*, las flechas como 
+*pruebas* (o *deducciones*) y una operación sobre flechas como una *regla de inferencia*.
+
+Un sistema deductivo no se preocupa meramente de las deducciones lógicas sin nombre como 
+$A arrow B$, sino que importan las demostraciones de dichas deducciones. Al escribir 
+$f : A arrow B$ pensamos a $f$ como la razón por la cual se puede deducir $B$ a partir de 
+$A$.
+
+Un *cálculo conjuntivo* es un sistema deductivo que trata sobre la verdad y conjunción.
+Así, asumimos que nos es dada una fórmula $top$ (verdadero) y una operación binaria 
+$and$ (conjunción) para formar la conjunción $A and B$ de dos fórmulas dadas 
+$A$ y $B$. Más aún, especificamos las siguientes flechas y reglas de inferencia:
+
+- R2. $circle_A : A arrow top$,
+- R3a. $pi_(A, B) : A and B arrow A$,
+- R3b. $pi'_(A, B) : A and B arrow B$,
+- R3c. Si $f : C arrow A$ y $g : C arrow B$, entonces $angle.l f, g angle.r arrow A and B$.
+
+Aquí hay una prueba de la llamada regla de conmutatividad para la conjunción
+
+```typst 
+#prooftree(
+  rule(
+    $angle.l pi'_(A, B), pi_(A, B) angle.r : A and B arrow B and A$,
+    $pi'_(A, B) : A and B arrow B$,
+    $pi_(A, B): A and B arrow A$
+  )
+)
+```
+
+La presentación de esta prueba está dada en forma de árbol, aunque es instructiva, es 
+superflua. Es suficiente denotarla por $angle.l pi'_(A, B), pi_(A, B) angle.r$ o 
+$angle.l pi', pi angle.r$ cuando se sobrentienden los subíndices.
+
+Otro ejemplo es la prueba de la ley asociativa 
+$alpha_(A, B, C): (A and B) and C arrow A and (B and C)$, la cual está dada por:
+
+$ alpha_(A, B, C) equiv angle.l pi_(A, B) pi_(A and B, C), angle.l pi'_(A, B) pi_(A and B, C), pi'_(A and B, C) angle.r  angle.r $ 
+
+o simplemente, $alpha equiv angle.l pi pi, angle.l pi' pi, pi' angle.r angle.r$
+
+Si componemos operaciones sobre pruebas, podemos obtener reglas de inferencia "derivadas".
+Por ejemplo, consideremos la siguiente regla derivada:
+
+```typst 
+#prooftree(
+  rule(
+    $f and g : A and C arrow B and D$,
+    prooftree(
+      rule(
+        $A and C arrow B$,
+        $pi_(A, C) : A and C arrow A$,
+        $f : A arrow B$
+      )
+    ),
+    prooftree(
+      rule(
+        $A and C arrow D$,
+        $pi'_(A, C) : A and C arrow C$,
+        $g : C arrow D$
+      ) 
+    )
+  )
+)
+```
+
+La cual asegura que de pruebas de $f$ y $g$ se puede construir la prueba 
+
+$ f and g = angle.l f pi_(A, C), g pi'_(A, C) angle.r $
+
+Así, podemos simplemente escribir 
+
+```typst 
+#prooftree(
+  rule(
+    $f and g : A and C arrow B and D$,
+    $f : A arrow B$,
+    $g : C arrow D$
+  )
+)
+```
+Un *cálculo proposicional intuicionsita positivo* es un cálculo conjuntivo con una 
+operación binaria $arrow.double$ (si ... entonces ...). Así, si $A$ y $B$ son fórmulas,
+también lo son $top, A and B$ y $B arrow.double A$. También especificamos una nueva 
+flecha y regla de inferencia 
+
+- R4a. $epsilon_(A, B) : (B arrow.double A) and B arrow A$,
+- R4b. 
+  ```typst 
+  #prooftree(
+    rule(
+      $h^star : C arrow B arrow.double A$,
+      $h : C and B arrow A$
+    )
+  )
+  ```
+Notemos que de R4b., con la ayuda de R4a., podemos derivar 
+
+- R'4b. $eta_(C, B) : C arrow B arrow.double (C and B)$
+- R'4c. 
+  ```typst 
+  #prooftree(
+    rule(
+      $1_B arrow.double g  : B arrow.double D arrow B arrow.double A$,
+      $g : D arrow A$
+    )
+  )
+  ```
+Para derivar estas, hacemos 
+$ eta_(C, B) equiv (1_(C and B))^star, 1_B arrow.double g equiv (g epsilon_(D, B))^star. $
+
+Un cálculo proposicional intuicionista es más que sólo el positivo, también requiere de 
+la falsedad y la disyunción, es decir, una fórmula $bot$ (falso) y una operación binaria 
+$or$ (disyunción), con las siguientes flechas:
+
+- R5. $ square_A : bot arrow A $
+- R6a. $kappa_(A, B) : A arrow A or B$
+- R6b. $kappa'_(A, B) : B arrow A or B$
+- R6c. $zeta^(C)_(A, B) : (A arrow.double C) and (B arrow.double C) arrow (A or B) arrow.double C $
+
+La última flecha que mencionamos da lugar y se puede derivar a partir de la regla 
+
+- R'6c. 
+  ```typst 
+  #prooftree(
+    rule(
+      $[f, g] : A or B arrow C$,
+      $f : A arrow C$,
+      $g: B arrow C$
+    )
+  )
+  ```
+
+Si queremos el cálculo proposicional *clásico*, necesitamos también  
+
+$ (A arrow.double bot) arrow.double bot arrow A $

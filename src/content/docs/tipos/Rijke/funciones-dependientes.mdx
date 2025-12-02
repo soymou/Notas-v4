@@ -1,0 +1,365 @@
+---
+title: Funciones dependientes
+sidebar:
+  order: 4
+typstImports: 
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+import { Aside } from '@astrojs/starlight/components';
+
+Consideremos una sección $b$ sobre $A$ en un contexto $Gamma$, es decir, consideremos
+$ Gamma, x: A tack.r b(x): B(x). $
+Vemos que $b$ es una elección de un elemento de cada $B(x)$, el tipo de la salida
+depende de $x: A$. La asignación $x arrow.r.bar b(x)$ es, en este sentido, una
+*función dependiente*. El tipo de todas estas funciones es llamado
+**tipo función dependiente**, y lo escribimos como
+$ Pi_((x: A)) B(x). $
+Hay cuatro reglas principales para los $Pi$-tipos:
+
+1. La *regla de formación*, que nos dice como formar tipos función dependiente.
+2. La *regla de introducción*, que nos dice como introducir términos del tipo función
+  dependiente.
+3. La *regla de eliminación*, que nos dice como usar términos arbitrarios del tipo función
+  dependiente.
+4. Las *reglas de computación*, que nos dicen como interactúan las reglas de introducción
+  y de eliminación.
+
+En los casos de las reglas de formación, introducción y eliminación, también necesitamos
+reglas que afirmen que estas construcciones preservar la igualdad juiciosa. Estas reglas
+son llamadas **reglas de congruencia**.
+
+## La regla de Π-formación
+La regla de $Pi$-formación nos dice cómo se construyen los $Pi$-tipos. La idea es que
+$Pi_((x: A)) B(x)$ es un tipo **función dependiente**, para cada familia de tipos $B$
+sobre $A$, de modo que la regla de $Pi$-formación dice:
+
+```typst
+#prooftree(
+  rule(
+    name: $Pi.$,
+    $Gamma tack.r Pi_((x: A)) B(x) "type"$,
+    $Gamma, x: A tack.r B(x) "type"$
+  )
+)
+
+```
+Esta regla simplemente dice que para formar el tipo $Pi_((x: A)) B(x)$ en el contexto
+$Gamma$, debemos tener una familia de tipos $B$ sobre $A$ en el contexto $Gamma$.
+
+También requerimos que la regla de formación de tipos función dependiente preserva la
+igualdad juiciosa. Es decir, tenemos la **regla de congruencia** para $Pi$-tipos:
+
+```typst
+#prooftree(
+  rule(
+    name: $Pi"-eq."$,
+    $Gamma tack.r Pi_((x: A)) B(x) equiv Pi_((x: A')) B'(x) "type"$,
+    $Gamma tack.r A equiv A' "type"$,
+    $Gamma, x: A tack.r B(x) equiv B'(x) "type"$
+  )
+)
+```
+
+
+## La regla de Π-introducción
+La regla de introducción para funciones dependientes nos dice cómo podemos construir
+funciones dependientes del tipo $Pi_((x: A)) B(x)$. La idea es que una función
+dependiente $f: Pi_((x: A)) B(x)$ es una operación que lleva a  $x: A$ en
+$f(x): B(x)$. Así, la regla de introducción de tipos dependientes postula que para
+construir una función dependiente debemos construir un término $b(x): B(x)$ indizado
+por $x: A$ en un contexto $Gamma$:
+
+```typst
+#prooftree(
+  rule(
+    name: $lambda.$,
+    $Gamma tack.r lambda x. b(x) : Pi_((x: A)) B(x)$,
+    $Gamma, x: A tack.r b(x): B(x)$
+  )
+)
+```
+
+Esta regla de introducción para funciones dependientes también es llamada la
+**regla de $lambda$-abstracción** y decimos que la $lambda$-abstracción
+$lambda x. b(x)$ **liga** la variable $x$ en $b$.
+También requerimos que la $lambda$-abstracción preserve la igualdad juiciosa. Así que
+postulamos la **regla de congruencia** para la $lambda$-abstracción, que dice
+
+```typst
+#prooftree(
+  rule(
+    name: $lambda"-eq."$,
+    $Gamma tack.r lambda x. b(x) equiv lambda x. b'(x): Pi_((x: A)) B(x)$,
+    $Gamma, x: A tack.r b(x) equiv b'(x): B(x)$
+  )
+)
+```
+
+
+### La regla de Π-eliminación
+
+La regla de eliminación para tipos función dependiente nos da una manera de *usar*
+funciones dependientes. La forma de usar funciones dependientes es evaluarlas en un
+argumento del tipo del dominio. La regla de $Pi$-eliminación es también llamada la
+**regla de evaluación**:
+
+
+```typst
+#prooftree(
+  rule(
+    name: "ev.",
+    $Gamma, x: A tack.r f(x): B(x)$,
+    $Gamma tack.r f: Pi_((x: A)) B(x)$
+  )
+)
+```
+
+Esta regla afirma que, dada una función dependiente $f: Pi_((x: A)) B(x)$ en un contexto
+$Gamma$ obtenemos un término $f(x)$ de tipo $B(x)$ indizado por $x: A$ en un
+contexto $Gamma$. De nuevo, pedimos que la evaluación preserve la igualdad juiciosa:
+
+  ```typst
+#prooftree(
+  rule(
+    name: "ev-eq.",
+    $Gamma, x: A tack.r f(x) equiv f'(x): B(x)$,
+    $Gamma tack.r f equiv f': Pi_((x: A)) B(x)$
+  )
+)
+```
+
+### Las reglas de Π-computación
+
+Ahora postulamos las reglas que especifican el comportamiento de las funciones. Primero,
+tenemos una regla que afirma que una función de la forma $lambda x. b(x)$ se comporta
+como esperamos: cuando la evaluamos en $x: A$, obtenemos un valor $b(x): B(x)$. Esta
+regla es llamada la *regla-$beta$*.
+
+```typst
+#prooftree(
+  rule(
+    name: $beta.$,
+    $Gamma, x: A tack.r (lambda y. b(y))(x) equiv b(x): B(x)$,
+    $Gamma, x: A tack.r b(x): B(x)$
+  )
+)
+```
+
+También postulamos una regla que afirma que todos los elementos de un $Pi$-tipo son
+funciones dependientes. Esta es llamada la **$eta$-regla**
+
+```typst
+#prooftree(
+  rule(
+    name: $eta.$,
+    $Gamma tack.r lambda x. f(x) equiv f: Pi_((x: A)) B(x)$,
+    $Gamma tack.r f: Pi_((x: A)) B(x)$
+  )
+)
+```
+
+En otras palabras, las reglas de computación ($beta$ y $eta$) para tipos función
+dependiente postulan que la regla de $lambda$-abstracción y la regla de evaluación son
+mutuamente inversas.
+
+## Tipos función ordinarios
+
+Un caso especial de los $Pi$-tipos es cuando $A$ y $B$ son tipos en un contexto $Gamma$.
+En este caso podemos primero debilitar a $B$ por $A$ y luego aplicar la $Pi$-regla de
+formación para obtener el tipo $A arrow.r B$ de funciones *ordinarias* de $A$ a $B$, como lo
+muestra la siguiente derivación:
+
+```typst
+#prooftree(
+  rule(
+    name: $Pi.$,
+    $Gamma tack.r Pi_((x: A)) B "type"$,
+    rule(
+      name: $W$,
+      $Gamma, x: A tack.r B "type"$,
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r B "type"$
+    )
+  )
+)
+```
+
+Un término $f: Pi_(x: A) B$ es una función que toma un argumento $x: A$ y regresa
+$f(x): B$. Así, definimos el tipo $A arrow.r B$ de **funciones (ordinarias)** de $A$ a $B$ por
+$ A arrow.r B := Pi_(x: A) B. $
+Si $f: A arrow.r B$ es una función, entonces el tipo $A$ es llamado el **dominio** de $f$ y
+el tipo $B$ es llamado el **co-dominio** de $f$.
+
+A veces también escribiremos $B^A$ para el tipo $A arrow.r B$ (haciendo alusión a las
+categorías). Formalmente, hacemos estas definiciones añadiendo una línea extra a la
+derivación de antes:
+
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma tack.r A arrow.r B := Pi_((x: A)) B "type"$,
+    rule(
+      name: $Pi$,
+      $Gamma tack.r Pi_((x: A)) B "type"$,
+      rule(
+        name: "W",
+        $Gamma, x: A tack.r B "type"$,
+        $Gamma tack.r A "type"$,
+        $Gamma tack.r B "type"$
+      )
+    )
+  )
+)
+```
+
+
+<div id="observacion-2-2-1">
+<Aside type="note" title="Observación 2.2.1">
+Podemos hacer definiciones al final de una derivación si la conclusión es un cierto tipo
+en un contexto o si la conclusión es un cierto término de un tipo en un contexto.
+Supongamos, por ejemplo, que tenemos la derivación
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma tack.r a: A$,
+    $cal(D)$
+  )
+)
+```
+en la que la derivación $cal(D)$ hace uso de las premisas $cal(H)_1, dots, cal(H)_n$. Si queremos hacer una definición $c := a$, entonces podemos extender el
+árbol de derivación con:
+
+```typst
+#prooftree(
+  rule(
+    name: ".",
+    $Gamma tack.r c:= a: A$,
+    rule(
+      $Gamma tack.r a: A$,
+      $cal(D)$
+    )
+  )
+)
+```
+El efecto de una definición de este tipo es que hemos extendido la teoría de tipos con
+una nueva constante $c$, para la cual las siguientes reglas de inferencia son válidas
+
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  prooftree(
+    rule(
+      $Gamma tack.r c: A$,
+      $cal(H)_1$,
+      $cal(H)_2$,
+      $dots$,
+      $cal(H)_n$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r c equiv a: A$,
+      $cal(H)_1$,
+      $cal(H)_2$,
+      $dots$,
+      $cal(H)_n$
+    )
+  )
+)
+```
+
+En nuestro ejemplo de la definición del tipo función ordinario $A arrow.r B$, tenemos, por
+definición, las siguientes reglas de inferencia válidas
+
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  prooftree(
+    rule(
+      $Gamma tack.r A arrow.r B "type"$,
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      $Gamma tack.r A arrow.r B equiv Pi_((x: A)) B "type"$,
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r B "type"$
+    )
+  )
+)
+```
+
+</Aside>
+</div>
+
+<div id="observacion-2-2-2">
+<Aside type="note" title="Observación 2.2.2">
+Ahora podemos dar reglas para el tipo $A arrow.r B$:
+
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  prooftree(
+    rule(
+      name: $arrow.r$,
+      $Gamma tack.r A arrow.r B "type"$,
+      $Gamma tack.r A "type"$,
+      $Gamma tack.r B "type"$
+    )
+  ),
+  prooftree(
+    rule(
+      name: $lambda$,
+      $Gamma tack.r lambda x. b(x) : A arrow.r B$,
+      $Gamma tack.r B "type"$,
+      $Gamma, x: A tack.r b(x): B$
+    )
+  ),
+  prooftree(
+    rule(
+      name: "ev",
+      $Gamma, x: A tack.r f(x): B$,
+      $Gamma tack.r f: A arrow.r B$
+    )
+  ),
+  prooftree(
+    rule(
+      name: $beta$,
+      $Gamma, x: A tack.r (lambda y. b(y))(x) equiv b(x)$,
+      $Gamma tack.r B "type"$,
+      $Gamma, x: A tack.r b(x): B$
+    )
+  ),
+  prooftree(
+    rule(
+      name: $eta$,
+      $Gamma tack.r lambda x. f(x) equiv f: A arrow.r B$,
+      $Gamma tack.r f: A arrow.r B$
+    )
+  )
+)
+```
+
+</Aside>
+</div>
+
+Ahora podemos usar estas reglas para construir algunas funciones que nos son familiares
+como la función identidad $"id": A arrow.r A$ sobre un tipo arbitrario $A$ y la composición
+$g compose f: A arrow.r C$ para cualesquiera dos funciones $f$ y $g$ con dominios y co-dominios
+adecuados.
+
+<div id="definicion-2-2-3">
+<Aside type="tip" title="Definición 2.2.3">
+Para cualquier tipo $A$ en un contexto $Gamma$, definimos la **función identidad**
+$"id"_A: A arrow.r A$ usando el término genérico:
+</Aside>
+</div>

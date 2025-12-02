@@ -1,0 +1,76 @@
+---
+title: Habilitando NixOS con Flakes 
+sidebar: 
+  order: 3
+---
+
+Comparado con el método de configuración usual, los Flakes ofrecen mejor reproducibilidad.
+
+## Habilitando el soporte de flakes 
+
+Actualmente, los Flakes son experimentales y no se habilitan por defecto. Necesitamos 
+modificar `/etc/nixos/configuration.nix` para habilitarlos junto con la nueva herramienta
+CLI.
+
+```code :language nix :eval false 
+{ config, pkgs, ... }: 
+
+{
+  imports = [
+    ./hardware-configuration.nix 
+  ];
+  
+
+  # Habilitar flakes y la CLI 
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  environment.systemPackages = with pkgs; [
+    git 
+  ];
+
+}
+```
+Después de hacer estos cambios hay que correr `sudo nixos-rebuild switch` para que tomen 
+efecto.
+
+## Cambiando la configuración a flake.nix 
+Después de habilitar los Flakes, el comando `sudo nixos-rebuild switch` prioriza leer 
+el archivo `/etc/nixos/flake.nix` y, si no se encuentra, intentará usar 
+`/etc/nixos/configuration.nix`.
+
+Podemos empezar usando los templates oficiales. Primero veamos cuáles están disponibles 
+
+```bash 
+nix flake show templates
+```
+
+
+Entre ellos, se encuentra `templates#full` que demuestra todos los posibles usos. Podemos 
+ver su contenido 
+
+```bash 
+nix flake init -t templates#full 
+cat flake.nix
+```
+Aquí hay un ejemplo de su contenido 
+
+```code :language nix :eval false 
+{
+  description = "A simple NixOS flake";
+
+  inputs = {
+    # NixOS official package source, using the nixos-25.05 branch here
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+  };
+
+  outputs = { self, nixpkgs, ... }@inputs: {
+    # Please replace my-nixos with your hostname
+    nixosConfigurations.my-nixos = nixpkgs.lib.nixosSystem {
+      modules = [
+        # Import the previous configuration.nix we used,
+        # so the old configuration file still takes effect
+        ./configuration.nix
+      ];
+    };
+  };
+}
+```

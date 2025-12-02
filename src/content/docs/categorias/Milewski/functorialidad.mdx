@@ -1,0 +1,42 @@
+---
+title: Functorialidad
+sidebar:
+  order: 4
+---
+
+## Bi-functores
+
+Como los functores son morfismos en la categoría `Cat`, muchas de nuestras intuiciones 
+sobre morfismos aplican también a los functores. Por ejemplo, así como podemos tener 
+una función de dos argumentos, podemos tener un functor de dos argumentos o un 
+*bi-functor*. Sobre objetos, los bi-functores mapean cada par de objetos, uno de una 
+categoría $C$ y uno de una categoría $D$ a un objeto en una categoría $E$. Notemos 
+que esto es lo mismo que decir que es un mapeo de un *producto cartesiano* de 
+categorías $C times D$ a $E$. De manera similar a los objetos, los bi-functores deben 
+mapear pares de morfismos de $C$ y $D$ a morfismos de $E$.
+
+Si tenemos un mapeo de un par de categorías a una tercera categoría y demostramos que 
+es functorial en cada argumento, entonces el mapeo es automáticamente un bi-functor.
+
+Definamos un bi-functor en Haskell. En este caso, las tres categorías son la misma: la 
+categoría de los tipos de Haskell. Un bi-functor es un constructor de tipos que toma dos 
+argumentos de tipo. Aquí está la definición de la typeclass de bi-functor:
+
+```code :language haskell :eval false 
+class Bifunctor f where 
+  bimap :: (a -> c) -> (b -> d) -> f a b -> f c d 
+  bimap g h = first g . second h 
+  first :: (a -> c) -> f a b -> f c b 
+  first g = bimap g id 
+  second :: (b -> d) -> f a b -> f a d 
+  second = bimap id
+```
+La variable de tipo `f` representa el bi-functor. Podemos ver que en todas las type 
+signatures siempre se aplican a dos argumentos de tipos. El primer argumento de tipo 
+define `bimap`: un mapeo de dos funciones a la vez. El resultado es una función 
+levantada `(f a b -> f c d)`, que opera sobre tipos generados por el constructor del tipo 
+bi-functor. 
+
+## Bi-functores Producto y Co-producto 
+
+

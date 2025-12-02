@@ -1,0 +1,53 @@
+---
+title : Introducción a los Flakes 
+sidebar: 
+  order: 2
+---
+
+La característica experimental de los flakes es un avance mayor de Nix, introduce una 
+política para manejar dependencias entre expresiones de Nix, mejor la reproducibilidad, 
+componibilidad y el uso del ecosistema de Nix. Aunque es experimental es muy usada.
+
+Los Flakes introducen un archivo `flake.nix` para describir las dependencias entre 
+paquetes. Adicionalmente, nos da un archivo `flake.lock`, para bloquear las versiones de 
+las dependencias, asegurando la reproducibilidad.
+
+## La nueva CLI y la CLI clásica
+
+Nix introdujo dos características experimentales, `nix-command` y `flakes` en 2020.
+Estas características traen consigo una nueva interfaz de la línea de comandos, una 
+estructura estandarizada de definición de paquetes de Nix (conocida como flakes) y 
+características como `flake.lock`.
+
+Aquí enlistamos los conceptos de la CLI que ya no se necesitan en la nueva CLI y en los 
+flakes:
+
+1. `nix-channel`: `nix-channel` maneja las versiones de los inputs como `nixpkgs` a través 
+  de canales estable/inestable. Esto es lo que tradicionalmente provee `<nixpkgs>` en el 
+  lenguaje Nix.
+  1. En los Flakes, la funcionalidad de `nix-channel` es reemplazada pro el Flake registry 
+    (`nix-registry`). Cuando usamos `flake.nix`, las versiones de los inputs son manejadas 
+    directamente por el flake mismo.
+  2. Los flakes usan una sección `inputs` en `flake.nix` para manejar las versiones de 
+  nixpkgs y otros inputs en cada flake en lugar de usar el estado global.
+
+2. `nix-env`: `nix-env` es una herramienta clásica de la línea de comandos que se usa para 
+  manejar paquetes de software en el entorno del usuario.
+  1. Instala paquetes de las fuentes de datos añadidas por `nix-channel`, causando que 
+    las versiones de los paquetes estén influenciadas por el canal. Los paquetes instalados 
+    mediante `nix-env` nos se registran automáticamente en la configuración declarativa, 
+    lo que hace que sea difícil reproducirlos en otras máquinas. No se recomienda usar 
+    este comando directamente.
+  2. El comando correspondiente en la nueva CLI es `nix profiles`, pero tampoco es muy 
+    recomendado.
+3. `nix-shell`: `nix-shell` crea una shell temporal que es útil para pruebas y desarrollo.
+  1. La nueva CLI: esta herramienta se divide en tres sub-comandos: `nix develop`, 
+    `nix shell` y `nix run`. Hablaremos más tarde acerca de ellos.
+
+4. `nix-build` : `nix-build` construye los paquetes de Nix y coloca sus resultados en 
+  `/nix/store`, pero no los registra en la configuración declarativa.
+  1. Nueva CLI: `nix-build` es reemplazado por `nix build`.
+5. `nix-collect-garbage`: El comando de recolección de basura para limpiar objetos no 
+  usados en `/nix/store`.
+  1. Hay un comando similar en la nueva CLI, `nix store gc --debug`, pero no limpia 
+    las generaciones anteriores. Actualmente éste comando no tiene reemplazo.

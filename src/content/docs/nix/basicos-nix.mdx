@@ -1,0 +1,217 @@
+---
+title: Básicos del lenguaje Nix
+sidebar:
+  order: 3
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## ¿Cómo correr los ejemplos?
+
+### Evaluación interactiva
+
+Podemos usar el `nix repl` para evaluar expresiones de Nix de forma interactiva
+
+```code :language bash :eval false
+$ nix repl
+Welcome to Nix 2.13.3. Type :? for help.
+
+nix-repl> 1 + 2
+3
+```
+<Aside type="note">
+El lenguaje Nix usa lazy evaluation y `nix repl` sólo computa los valores cuando se
+necesitan.
+</Aside>
+
+### Evaluando archivos Nix
+
+Podemos usar `nix-instantiate --eval` para evaluar las expresiones en un 
+archivo Nix.
+
+```code :language bash :eval false
+$ echo 1 + 2 > file.nix
+$ nix-instantiate --eval file.nix
+3
+```
+<Aside text="note">
+`nix-instantiate --eval` intenta leer desde el archivo `default.nix` si no se le 
+especifica ninguno.
+</Aside>
+
+## Nombres y valores
+
+Los valores en el lenguaje Nix pueden ser tipos de datos primitivos, listas, conjuntos
+de atributos y funciones.
+
+Los `attribute sets` y las expresiones `let` son usados para asignar nombres a las 
+variables. Las asignaciones se denotan con un sólo signo de igual `=`.
+
+Siempre que encontramos un signo de igual en Nix:
+
+- Del lado izquierdo hay un nombre.
+- Del lado derecho hay un valor delimitado por `;`.
+
+### Attribute set `{ ... }`
+
+Un attribute set es una colección de parejas nombre-valor, donde los nombres deben 
+ser únicos.
+
+ ```code :language nix :eval false
+{
+  string = "hello";
+  integer = 1;
+  float = 3.1415;
+  bool = true;
+  null = null;
+  list = [1 "dos" false];
+  attribute-set = {
+    a = "hello";
+    b = 2;
+    c = 2.718;
+    d = false;
+  };
+}
+ ```
+#### Attribute set recursivo `rec { ... }`
+El prefijo `rec` en un attribute set permite acceder a los atributos dentro del mismo.}
+
+```code :language nix :eval false
+rec {
+  one = 1;
+  two = one + 1;
+  three = two + 1;
+}
+```
+### `let ... in ...`
+También conocido como "expresión `let`". Las expresiones `let` permiten asignarles
+nombres a los valores para usarlos repetidamente.
+
+<ExecutableCode
+  language="nix"
+  id="uno"
+  code={`let 
+  a = 1;
+in 
+
+a + a`}
+/>
+
+los nombres se pueden asignar en cualquier orden y las expresiones del lado derecho
+pueden referirse a otros nombres asignados.
+
+<ExecutableCode
+  language="nix"
+  id="dos"
+  code={`let 
+  b = a + 1;
+  a = 1;
+in
+
+a + b`}
+/>
+## Acceso a atributos
+
+Podemos acceder a los atributos en un conjunto mediante un `.` y el nombre del
+atributo.
+
+<ExecutableCode
+  language="nix"
+  id="tres"
+  code={`let
+  attrset = { x = 1; };
+in 
+  attrset.x`}
+/>
+
+La notación `.` puede usarse también para asignar valores
+
+```code :language nix :eval false
+{ a.b.c = 1; }
+```
+Es lo mismo que 
+
+```code :language nix :eval false
+{ a = { b = { c = 1; }; }; }
+```
+
+### `with ...; ...`
+
+La expresión `with` permite acceder a los atributos sin referenciar repetidamente 
+a su attribute set.
+
+<ExecutableCode
+  language="nix"
+  id="cuatro"
+  code={`let 
+    a = {
+      x = 1;
+      y = 2;
+      z = 3;
+    };
+in 
+with a; [ x y z ]`}
+/>
+
+
+La expresión 
+```code :language nix :eval false
+with a; [ x y z ]
+```
+es equivalente a 
+```code :language nix :eval false
+[ a.x a.y a.z ]
+```
+Las atributos que se hacen disponibles con `with` sólo están en el scope siguiendo
+al `;`.
+
+## `inherit ...`
+`inherit` es una abreviación para asignar el valor de un nombre de un alcance
+existente al mismo nombre en un alcance anidado. Es por conveniencia, para evitar
+repetir el mismo nombre múltiples veces.
+
+```code :language nix :eval false 
+let 
+  x = 1;
+  y = 2;
+in 
+{
+  inherit x y;
+}
+```
+
+El fragmento 
+```code :language nix :eval false
+inherit x y;
+```
+es equivalente a 
+```code :language nix :eval false
+x = x; y = y;
+```
+Es también posible hacer `inherit` no nombres de un attribute set específico con 
+paréntesis (`inherit (...) ...`)
+
+```code :language nix :eval false
+let
+  a = { x = 1; y = 2; };
+in 
+{
+  inherit (a) x y; 
+}
+```
+El fragmento 
+```code :language nix :eval false
+inherit (a) x y;
+```
+es equivalente a 
+
+```code :language nix :eval false
+x = a.x; y = a.y;
+```
+`inherit` también funciona dentro de expresiones `let`.
+
+```code :language nix :eval false
+let 
+  inherit ({ x = 1; y = 2; }) x y;
+in [x y]
+```

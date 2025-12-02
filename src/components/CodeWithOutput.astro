@@ -1,0 +1,85 @@
+---
+interface Props {
+  id?: string;
+  eval?: string;
+}
+
+const { id, eval: evalProp } = Astro.props;
+const shouldEval = evalProp !== 'false';
+
+// Load outputs from JSON if id is provided and eval is true
+let output = null;
+if (id && shouldEval) {
+  try {
+    // Get filename from Astro.url
+    const filename = Astro.url.pathname.split('/').filter(Boolean).pop() || 'index';
+    const prefixedId = `${filename}::${id}`;
+
+    const outputs = await import('../code-outputs.json');
+    output = outputs.default[prefixedId];
+  } catch (e) {
+    // File doesn't exist yet, that's okay
+  }
+}
+
+const cleanOutput = output ? output.replace(/^\n+|\n+$/g, '').trim() : null;
+
+// Import shiki for output highlighting
+import { codeToHtml } from 'shiki';
+const highlightedOutput = cleanOutput ? await codeToHtml(cleanOutput, {
+  lang: 'text',
+  theme: 'github-dark'
+}) : null;
+---
+
+<div class="code-with-output-wrapper">
+  <slot />
+
+  {shouldEval && cleanOutput && (
+    <div class="output-section">
+      <div class="output-header">
+        <span class="output-label">Output</span>
+      </div>
+      <div set:html={highlightedOutput} />
+    </div>
+  )}
+</div>
+
+<style>
+  .code-with-output-wrapper {
+    margin: 1.5rem 0;
+  }
+
+  .output-section {
+    margin-top: 1.5rem !important;
+    position: relative;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #24292e;
+    border: 1px solid var(--sl-color-gray-6, #2d3748);
+  }
+
+  .output-header {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: var(--sl-font, system-ui, sans-serif);
+    border-bottom: 2px solid var(--sl-color-gray-5, #4a5568);
+    background: #1e2227;
+    color: #8b949e;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .output-label {
+    font-size: 0.8125rem;
+  }
+
+  .output-section :global(pre) {
+    margin: 0 !important;
+    padding: 1rem 1.25rem !important;
+    background: #24292e !important;
+    border-radius: 0 !important;
+  }
+</style>

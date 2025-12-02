@@ -1,0 +1,238 @@
+---
+title: Números naturales
+sidebar:
+  order: 5
+typstImports: 
+  - '#import "@preview/curryst:0.5.1": rule, prooftree'
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## La especificación formal
+
+El tipo $NN$ de **números naturales** es el ejemplo arquetípico de un tipo inductivo.
+Las reglas que postulamos para el tipo de los números naturales vienen en cuatro conjuntos,
+al igual que las reglas para los $Pi$-tipos:
+
+1. La regla de formación, que afirma que el tipo $NN$ pude ser formado.
+2. Las reglas de introducción, que nos dan el elemento cero $0_NN$ y la función sucesor
+  $"succ"_NN$.
+3. La regla de eliminación. Esta regla es la versión de la teoría de tipos del principio 
+  de inducción para $NN$.
+4. Las reglas de computación, que afirman que cualquier aplicación de la regla de 
+  eliminación se comporta como debería sobre los constructores $0_NN$ y $"succ"_NN$ de $NN$.
+
+### La regla de formación de ℕ
+
+El tipo $NN$ se forma mediante la regla de **$NN$-formación**:
+
+```typst
+#prooftree(
+  rule(
+    name: $NN"-form"$,
+    $tack.r NN "type"$,
+    $space$
+  )
+)
+```
+
+En otras palabras, se postula que $NN$ es un tipo en el contexto vacío.
+
+### Las reglas de introducción de ℕ
+
+Las reglas de introducción para $NN$ lo equipan con un **elemento cero** y una 
+**función sucesor**:
+
+```typst
+#table(
+  stroke: none,
+  columns: 2,
+  prooftree(
+    rule(
+      $tack.r 0_NN: NN$
+    )
+  ),
+  prooftree(
+    rule(
+      $"succ"_NN: NN arrow.r NN$
+    )
+  )
+)
+```
+<div id="obsercacion-3-1-1">
+<Aside type="note" title="Observación 3.1.1">
+
+Todo elemento en la teoría de tipos viene equipado con su tipo. Así, es posible que en la 
+teoría de tipos todos los elementos tengan un *único* tipo. En general, es buena práctica 
+asegurarnos de que cada elemento tenga un nombre único. Por ejemplo, el elemento $0_NN$ 
+tiene tipo $NN$ y no tiene también el tipo $ZZ$.tipo $NN$ y no tiene también el tipoZZ$.
+</Aside>
+</div>
+
+### El principio de inducción de ℕ
+
+El principio de inducción clásico de los números naturales nos dice qué tenemos que hacer
+para mostrar que $forall_((n in NN)) P(n)$ se cumple, para un predicado $P$ sobre $NN$.
+Recordemos que un predicado $P$ sobre el conjunto $X$ es sólo una proposición $P(x)$
+sobre un $x in X$ asrbitrario. 
+En la teoría de tipos dependiente podemos pensar a una familia de tipos $P$ sobre $NN$
+como un predicado sobre $NN$. Así, el principio de inducción para $NN$ se postula 
+usando una famlia de tipos $P$ sobre $NN$:
+
+```typst
+#prooftree(
+  rule(
+    name: $NN"-ind"$ ,
+    $Gamma tack.r "ind"_NN (p_0, p_S): Pi_((n: NN)) P(n)$,
+    table(
+      stroke: none,
+      columns: 1,
+      align: left,
+      $Gamma,n: NN tack.r P(n) "type"$,
+      $Gamma tack.r p_0: P(0_NN)$,
+      $Gamma tack.r p_S: Pi_((n: NN)) P(n) arrow.r P("succ"_NN (n))$
+    )
+  )
+)
+```
+En otras palabras, el principio de inducción de $NN$ de la teoría de tipos nos deice qué 
+necesitamos para construir una función dependiente $Pi_((n: NN)) P(n)$.  
+Como en el principio de inducción clásico, tenemos que construir dos cosas dada una 
+familia de tipos $P$ sobre $NN$: en el **caso base** necesitamos construir un elemento 
+de tipo $p_0: P(0_NN)$ y, para el **paso inductivo** necesitamos construir una funcipon 
+de tipo $P(n) arrow.r P("succ"_NN (n))$ para cada $n: NN$.
+
+<div id="obsercacion-3-1-2">
+<Aside type="note" title="Observación 3.1.2">
+Podemos presentar el principio de inducción de forma distinta con la siguiente regla de 
+inferencia
+
+```typst
+#prooftree(
+  rule(
+    $Gamma  tack.r "ind"_NN: P(0_NN) arrow.r ((  Pi_((n: NN)) P(n) arrow.r P("succ"_NN(n))) arrow.r Pi_((n: NN)) P(n))$,
+    $Gamma, n: NN tack.r P(n) "type"$
+  )
+)
+```
+</Aside>
+</div>
+
+En otras palabras, para cualquier familia de tipos $P$ sobre $NN$ hay una función 
+$"ind"_NN$ que toma dos argumentos, uno para el caso base y otro para el paso inductivo y regresa una sección de $P$. Afirmamos que esta regla es *inter-derivable* 
+con la regla $NN"-ind"$ que dimos antes.
+$ Gamma, p_0: P(0_NN) ,p_S:Pi_((n: NN)) P(n) arrow.r P("succ"_NN (n)) $
+
+Por debilitamiento, obtenemos que 
+
+```typst
+#table(
+  stroke: none,
+  columns: 1,
+  $Gamma', n:NN tack.r P(n) "type"$,
+  $Gamma' tack.r p_0: P(0_NN)$,
+  $Gamma' tack.r p_S: Pi_((n:NN)) P(n) arrow.r P("succ"_NN (n))$
+)
+```
+
+Así, el principio de inducción de $NN$ nos da una función dependiente 
+$ Gamma' tack.r "ind"_NN (p_0, p_S) : Pi_((n: NN)) $ 
+
+Ahora, procedemos por $lambda$-abstracción dos veces para obtener una función
+$ "ind"_NN : P(0_NN) arrow.r (( Pi_((n: NN)) P(n) arrow.r P("succ"_NN (n))) arrow.r Pi_((n: NN)) P(n)) $
+
+en el contexto original $Gamma$. Esto muestra que podemos definir la función 
+$"ind"_NN$ a partir de la regla $NN"-ind"$. Recíprocamente, podemos derivar la regla
+$NN-"ind"$ a partir de la regla que presenta $"ind"_NN$ como una función. Concluimos
+que la regla "oficial" $NN"-ind"$ y la que presenta a $"ind"_NN$ como una función 
+son inter-derivables.
+
+### Las reglas de computación para ℕ
+
+Las reglas de computación para $NN$ postulan que la función dependiente 
+$ "ind"_NN (p_0, p_S): Pi_((n: NN)) P(n) $
+se comporta como se espera cuando se aplica a $0_NN$ o a un sucesor. Hay una 
+regla de computación para cada paso del principio de inducción, cubriendo el 
+caso base y el paso inductivo.
+
+La regla de computación para el caso base es
+
+```typst
+  #prooftree(
+    rule(
+      $Gamma tack.r "ind"_NN (p_0, p_S, 0_NN) equiv p_0 : P(0_NN)$,
+      table(
+        stroke: none,
+        columns: 1,
+        $Gamma, n: NN tack.r P(n) "type"$,
+        $Gamma tack.r p_0: P(0_NN)$,
+        $Gamma tack.r p_S : Pi_((n: NN)) P(n) arrow.r P("succ"_NN (n))$
+      )
+    )
+  )
+```
+
+La regla de computación para el paso inductivo tiene las mismas premisas que la del
+caso base:
+
+```typst
+  #prooftree(
+    rule(
+      $Gamma tack.r "ind"_NN (p_0, p_S, "succ"_NN (n)) equiv p_S(n, "ind"_NN (p_0, p_S, n)): P("succ"_NN (n))$,
+      table(
+        stroke: none,
+        columns: 1,
+        $Gamma, n: NN tack.r P(n) "type"$,
+        $Gamma tack.r p_0: P(0_NN)$,
+        $Gamma tack.r p_S : Pi_((n: NN)) P(n) arrow.r P("succ"_NN (n))$
+      )
+    )
+  )
+```
+
+## Adición en los números naturales
+
+El principio de inducción de la teoría de tipos de $NN$ se puede usar para hacer 
+todas las construcciones usuales en $NN$, y para derivar todas las propiedades que 
+nos son familiares. 
+
+<div id="definicion-3-2-1">
+<Aside type="tip" title="Definición 3.2.1">
+Definimos una función 
+$ "add"_NN: NN arrow.r (NN arrow.r NN) $
+que satisface 
+$ "add"_NN (m, 0_NN) equiv m $
+$ "add"_NN (m, "succ"_NN (n)) equiv "succ"_NN (m, n). $
+
+_Construcción._ Construiremos la operación binaria $"add"_NN: NN arrow.r (NN arrow.r NN)$ por inducción sobre la segunda variable. En otras palabras, construiremos un 
+elemento $ m: NN tack.r "add"_NN (m) : NN arrow.r NN. $
+
+</Aside>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

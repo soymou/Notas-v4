@@ -1,0 +1,80 @@
+---
+title: Diagramas de categorías
+sidebar: 
+  order: 6
+---
+import { Aside } from '@astrojs/starlight/components';
+
+## Categorías functoriales con conjuntos como valores
+
+Nos centraremos en categorías de functores especiales de la forma 
+
+$ bold("Sets")^bold(C) $
+
+donde la categoría $bold(C)$ es localemente pequeña.ñ Así, los objetos son functores conjunto 
+valuados 
+
+$ F, G : bold(C) arrow bold("Sets") $
+
+y las flechas son transformaciones naturales 
+
+$ alpha, beta : F arrow G. $
+
+## El encaje de Yoneda 
+
+Entre los objetos de $bold("Sets")^bold(C)$ hay algunos muy especiales, los funcores 
+(covariantes) representable, 
+
+$ "Hom"_bold(C) (C, -) : bold(C) arrow bold("Sets"). $
+
+Observemos que para cada $h : C arrow D$ en $bold(C)$, tenemos una transformación natural 
+
+$ "Hom"_bold(C) (h, -) : "Hom" _bold(C) (D, -) arrow "Hom" _bold(C) (C , -) $
+
+donde el componente en $C$ está definido por la pre-composición 
+
+$ (f : D arrow X) mapsto (f compose h : C arrow X). $
+
+De modo que tenemos un functor contravariante 
+
+$ k : bold(C)^"op" arrow bold("Sets")^bold(C) $
+
+definido por $k(C) = "Hom"_bold(C) (C, -)$. Por supuesto, este functor $k$ sólo es la 
+exponencial del bifunctor 
+
+$ "Hom"_bold(C) : bold(C)^"op" times bold(C) arrow bold("Sets") $
+
+Si transponemos $"Hom"_ bold(C)$ con respecto a su otro argumento, obtenemos un functor 
+covariante 
+
+$ y : bold(C) arrow "Sets"^(bold(C)^"op") $
+
+de $bold(C)$ a la categoría de functores contravariantes conjunto valuados, a veces llamados 
+pre-gavillas.
+
+
+<div id="definicion-8-1">
+<Aside type="note" title="Definición 8.1">
+El *encaje* de Yoneda es el functor $y : bold(C) arrow bold("Sets")^(bold(C)^"op")$ tomando 
+$C in bold(C)$ al functor contravariante representable 
+
+$ y C = "Hom"_bold(C) (-, C) : bold(C)^"op" arrow bold("Sets") $
+
+y tomando $f : C arrow D$ a la tranformación natural 
+
+$ y f = "Hom"_bold(C) (-, f) : "Hom" _bold(C) (-, C) arrow "Hom" _bold(C) (-, D). $
+</Aside>
+</div>
+
+## El lema de Yoneda 
+
+<div id="lema-8.2">
+<Aside type="tip" title="Lema 8.2 (Yoneda)">
+Sea $bold(C)$ localmente pequeña. Para cualquier objeto $C in bold(C)$ y functor 
+$F in bold("Sets")^(bold(C)^"op")$, hay un isomorfismo 
+
+$ "Hom"(y C, F) tilde.equiv F C $
+
+que es natural en $C$ y $F$.
+</Aside>
+</div>
